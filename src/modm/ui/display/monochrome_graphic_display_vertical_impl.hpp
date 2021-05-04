@@ -16,121 +16,88 @@
 #error "Don't include this file directly, use 'monochrome_graphic_display_vertical.hpp' instead!"
 #endif
 
-template<int16_t Width, int16_t Height>
+#include <algorithm>
+
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawHorizontalLine(glcd::Point start,
 																		  uint16_t length)
 {
-	if (start.y >= 0 and start.y < Height)
+	if (this->yOnScreen(start.y))
 	{
-		const int16_t y = start.y / 8;
-
-		// TODO Implement draw / clear pixels for monochrome displays
-		// if (draw mode)
-		// {
 		const uint8_t byte = 1 << (start.y % 8);
-		for (int_fast16_t x = start.x; x < static_cast<int16_t>(start.x + length); ++x)
-		{
-			if (x < Width) { this->buffer[x][y] |= byte; }
-		}
-		// } else
-		// {
-		// 	const uint8_t byte = ~(1 << (start.y % 8));
-		// 	for (int_fast16_t x = start.x; x < static_cast<int16_t>(start.x + length);
-		// ++x)
-		// 	{
-		// 		if (x < Width and y < Height) { this->buffer[x][y] &= byte; }
-		// 	}
-		// }
+		const size_t yb = start.y / 8;
+		const size_t x_max = std::min<size_t>(start.x + length, Width - 1);
+
+		for (size_t x = start.x; x < x_max; x++)
+			this->buffer[yb][x] |= byte;
 	}
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawVerticalLine(glcd::Point start,
 																		uint16_t length)
 {
-	if (start.x >= 0 and start.x < Width)
+	if (this->xOnScreen(start.x))
 	{
-		const int8_t end_y = start.y + length;
-		const uint8_t y_last = end_y / 8;
+		size_t yb = start.y / 8;
+		const size_t y_max = std::min<size_t>((start.y + length), Height);
+		const size_t yb_max = y_max / 8;
 
-		uint_fast8_t y = start.y / 8;
-		// Mask out start
-		uint_fast8_t byte = 0xFF << start.y % 8;
-		while (y != y_last)
+		uint8_t byte = 0xFF << start.y % 8; // Mask out start
+
+		while (yb != yb_max)
 		{
-			if (y < Height / 8)
-			{
-				this->buffer[start.x][y] |= byte;
-				byte = 0xFF;
-			}
-			y++;
+			this->buffer[yb][start.x] |= byte;
+			byte = 0xFF;
+			yb++;
 		}
-		// Mask out end
-		if (y < Height / 8)
-		{
-			byte &= 0xFF >> (8 - end_y % 8);
-			this->buffer[start.x][y] |= byte;
-		}
+
+		byte &= 0xFF >> (8 - y_max % 8); // Mask out end
+		this->buffer[yb][start.x] |= byte;
 	}
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawImageRaw(
 	glcd::Point start, uint16_t width, uint16_t height, modm::accessor::Flash<uint8_t> data)
 {
-	if ((start.y % 8) == 0)
+	if (!start.y % 8 && !height % 8)
 	{
-		uint16_t row = start.y / 8;
-		uint16_t rowCount = (height + 7) / 8;  // always round up
+		const size_t x_max = std::min<size_t>(start.x + width, Width - 1);
+		const size_t yb_max = std::min<size_t>(start.y / 8 + height, Height / 8 - 1);
+		size_t i = 0;
 
-		if ((height % 8) == 0)
-		{
-			for (uint_fast16_t i = 0; i < width; i++)
-			{
-				for (uint_fast16_t k = 0; k < rowCount; k++)
-				{
-					uint16_t x = start.x + i;
-					uint16_t y = k + row;
-
-					if (x < Width and y < Height)
-					{
-						this->buffer[x][y] = data[i + k * width];
-					}
-				}
-			}
-			return;
-		}
-	}
-
-	GraphicDisplay::drawImageRaw(start, width, height, data);
+		for (size_t x = start.x; x < x_max; x++)
+			for (size_t yb = start.y / 8; yb <= yb_max; yb++) this->buffer[yb][x] = data[i++];
+	} else
+		GraphicDisplay::drawImageRaw(start, width, height, data);
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::setPixel(int16_t x, int16_t y)
 {
-	if (x < Width and y < Height) { this->buffer[x][y / 8] |= (1 << y % 8); }
+	if (this->xOnScreen(x) and this->yOnScreen(y))
+		this->buffer[y / 8][x] |= (1 << y % 8);
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::clearPixel(int16_t x, int16_t y)
 {
-	if (x < Width and y < Height) { this->buffer[x][y / 8] &= ~(1 << y % 8); }
+	if (this->xOnScreen(x) and this->yOnScreen(y))
+		this->buffer[y / 8][x] &= ~(1 << y % 8);
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 bool
 modm::MonochromeGraphicDisplayVertical<Width, Height>::getPixel(int16_t x, int16_t y) const
 {
-	if (x < Width and y < Height)
-	{
-		return (this->buffer[x][y / 8] & (1 << y % 8));
-	} else
-	{
+	if (this->xOnScreen(x) and this->yOnScreen(y))
+		return (this->buffer[y / 8][x] & (1 << y % 8));
+	else
 		return false;
-	}
 }

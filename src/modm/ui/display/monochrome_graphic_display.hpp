@@ -36,7 +36,7 @@ namespace modm
  * \author	Thomas Sommer
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
+template<uint16_t Width, uint16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
 class MonochromeGraphicDisplay : public GraphicDisplay
 {
 	static_assert(Width > 0, "width must be greater than 0");
@@ -76,7 +76,28 @@ public:
 	clear() final;
 
 protected:
-	uint8_t buffer[BufferWidth][BufferHeight];
+	uint8_t buffer[BufferHeight][BufferWidth];
+
+	inline bool
+	xOnScreen(const int16_t x) const
+	{
+		return x >= 0 and x < int16_t(Width);
+	}
+	inline bool
+	yOnScreen(const int16_t y) const
+	{
+		return y >= 0 and y < int16_t(Height);
+	}
+	inline bool
+	xValidBuffer(const std::size_t x) const
+	{
+		return x >= 0 and x < BufferWidth;
+	}
+	inline bool
+	yValidBuffer(const std::size_t y) const
+	{
+		return y >= 0 and y < BufferHeight;
+	}
 };
 }  // namespace modm
 

@@ -34,7 +34,7 @@ namespace modm
  * \author	Fabian Greif
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 class MonochromeGraphicDisplayVertical
 	: public MonochromeGraphicDisplay<Width, Height, Width, Height / 8>
 {

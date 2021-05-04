@@ -14,26 +14,28 @@
 
 namespace modm
 {
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 MonochromeGraphicDisplayHorizontal<Width, Height>::setPixel(int16_t x, int16_t y)
 {
-	if ((x < Width) and (y < Height)) { buffer[y][x / 8] |= (1 << (x % 8)); }
+	if (this->xOnScreen(x) and this->yOnScreen(y))
+		this->buffer[x / 8][y] |= (1 << (x % 8));
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 MonochromeGraphicDisplayHorizontal<Width, Height>::clearPixel(int16_t x, int16_t y)
 {
-	if ((x < Width) and (y < Height)) { buffer[y][x / 8] &= ~(1 << (x % 8)); }
+	if (this->xOnScreen(x) and this->yOnScreen(y))
+		this->buffer[x / 8][y] &= ~(1 << (x % 8));
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 bool
-MonochromeGraphicDisplayHorizontal<Width, Height>::getPixel(int16_t x, int16_t y)
+MonochromeGraphicDisplayHorizontal<Width, Height>::getPixel(int16_t x, int16_t y) const
 {
-	if ((x < Width) and (y < Height))
-		return (buffer[y][x / 8] & (1 << (x % 8)));
+	if (this->xOnScreen(x) and this->yOnScreen(y))
+		return (this->buffer[x / 8][y] & (1 << (x % 8)));
 	else
 		return false;
 }
