@@ -84,6 +84,16 @@ modm::Ssd1306<I2cMaster, Height>::initializeMemoryMode()
 	RF_END();
 }
 
+template<class I2cMaster, uint8_t Height>
+void
+// modm::ResumableResult<void>
+modm::Ssd1306<I2cMaster, Height>::setClipping(glcd::Point start, int16_t width, int16_t height) {
+	(void)start;
+	(void)width;
+	(void)height;
+	// TODO see initializeMemoryMode() right above
+}
+
 // ----------------------------------------------------------------------------
 template<class I2cMaster, uint8_t Height>
 modm::ResumableResult<void>

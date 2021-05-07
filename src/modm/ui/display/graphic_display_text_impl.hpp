@@ -11,17 +11,20 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "graphic_display.hpp"
+#ifndef MODM_GRAPHIC_DISPLAY_HPP
+#error "Don't include this file directly, use 'graphic_display.hpp' instead!"
+#endif
 
-// ----------------------------------------------------------------------------
+template<uint16_t Width, uint16_t Height>
 uint8_t
-modm::GraphicDisplay::getFontHeight() const
+modm::GraphicDisplay<Width, Height>::getFontHeight() const
 {
-	return modm::GraphicDisplay::getFontHeight(&(this->font));
+	return getFontHeight(&(this->font));
 }
 
+template<uint16_t Width, uint16_t Height>
 uint8_t
-modm::GraphicDisplay::getFontHeight(const modm::accessor::Flash<uint8_t> *font)
+modm::GraphicDisplay<Width, Height>::getFontHeight(const modm::accessor::Flash<uint8_t> *font)
 {
 	if (!font->isValid())
 		return 0;
@@ -29,16 +32,16 @@ modm::GraphicDisplay::getFontHeight(const modm::accessor::Flash<uint8_t> *font)
 	return (*font)[3];
 }
 
-// ----------------------------------------------------------------------------
+template<uint16_t Width, uint16_t Height>
 uint16_t
-modm::GraphicDisplay::getStringWidth(const char* s) const
+modm::GraphicDisplay<Width, Height>::getStringWidth(const char* s) const
 {
-	return modm::GraphicDisplay::getStringWidth(s, &(this->font));
+	return getStringWidth(s, &(this->font));
 }
 
-
+template<uint16_t Width, uint16_t Height>
 uint16_t
-modm::GraphicDisplay::getStringWidth(const char* s, const modm::accessor::Flash<uint8_t> *font)
+modm::GraphicDisplay<Width, Height>::getStringWidth(const char* s, const modm::accessor::Flash<uint8_t> *font)
 {
 	if (!font->isValid())
 		return 0;
@@ -58,9 +61,9 @@ modm::GraphicDisplay::getStringWidth(const char* s, const modm::accessor::Flash<
 	return width;
 }
 
-// ----------------------------------------------------------------------------
+template<uint16_t Width, uint16_t Height>
 void
-modm::GraphicDisplay::write(char c)
+modm::GraphicDisplay<Width, Height>::write(char c)
 {
 	if (!this->font.isValid())
 		return;
@@ -102,9 +105,9 @@ modm::GraphicDisplay::write(char c)
 	// all characters below 128 have whitespace afterwards (number given
 	// by vspace).
 	if (character < 128) {
-		//glcd::Color oldColor = this->color;
+		//color::Rgb565 oldColor = this->color;
 
-		//this->setColor(glcd::Color::white());
+		//this->setColor(color::html::White);
 		for (uint_fast8_t i = 0; i < vspace; ++i) {
 			//this->drawVerticalLine(cursor, height);
 			cursor.setX(cursor.x + 1);
@@ -115,20 +118,22 @@ modm::GraphicDisplay::write(char c)
 	}
 }
 
-// ----------------------------------------------------------------------------
+template<uint16_t Width, uint16_t Height>
 void
-modm::GraphicDisplay::Writer::write(char c)
+modm::GraphicDisplay<Width, Height>::Writer::write(char c)
 {
 	this->parent->write(c);
 }
 
+template<uint16_t Width, uint16_t Height>
 void
-modm::GraphicDisplay::Writer::flush()
+modm::GraphicDisplay<Width, Height>::Writer::flush()
 {
 }
 
+template<uint16_t Width, uint16_t Height>
 bool
-modm::GraphicDisplay::Writer::read(char&)
+modm::GraphicDisplay<Width, Height>::Writer::read(char&)
 {
 	return false;
 }

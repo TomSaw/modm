@@ -21,7 +21,7 @@
 template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawHorizontalLine(glcd::Point start,
-																		  uint16_t length)
+																		  int16_t length)
 {
 	if (this->yOnScreen(start.y))
 	{
@@ -29,15 +29,14 @@ modm::MonochromeGraphicDisplayVertical<Width, Height>::drawHorizontalLine(glcd::
 		const size_t yb = start.y / 8;
 		const size_t x_max = std::min<size_t>(start.x + length, Width - 1);
 
-		for (size_t x = start.x; x < x_max; x++)
-			this->buffer[yb][x] |= byte;
+		for (size_t x = start.x; x < x_max; x++) this->buffer[yb][x] |= byte;
 	}
 }
 
 template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawVerticalLine(glcd::Point start,
-																		uint16_t length)
+																		int16_t length)
 {
 	if (this->xOnScreen(start.x))
 	{
@@ -45,7 +44,7 @@ modm::MonochromeGraphicDisplayVertical<Width, Height>::drawVerticalLine(glcd::Po
 		const size_t y_max = std::min<size_t>((start.y + length), Height);
 		const size_t yb_max = y_max / 8;
 
-		uint8_t byte = 0xFF << start.y % 8; // Mask out start
+		uint8_t byte = 0xFF << start.y % 8;  // Mask out start
 
 		while (yb != yb_max)
 		{
@@ -54,7 +53,7 @@ modm::MonochromeGraphicDisplayVertical<Width, Height>::drawVerticalLine(glcd::Po
 			yb++;
 		}
 
-		byte &= 0xFF >> (8 - y_max % 8); // Mask out end
+		byte &= 0xFF >> (8 - y_max % 8);  // Mask out end
 		this->buffer[yb][start.x] |= byte;
 	}
 }
@@ -64,7 +63,7 @@ void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawImageRaw(
 	glcd::Point start, uint16_t width, uint16_t height, modm::accessor::Flash<uint8_t> data)
 {
-	if (!start.y % 8 && !height % 8)
+	if (!start.y % 8 && !height % 8 && false)
 	{
 		const size_t x_max = std::min<size_t>(start.x + width, Width - 1);
 		const size_t yb_max = std::min<size_t>(start.y / 8 + height, Height / 8 - 1);
@@ -73,31 +72,30 @@ modm::MonochromeGraphicDisplayVertical<Width, Height>::drawImageRaw(
 		for (size_t x = start.x; x < x_max; x++)
 			for (size_t yb = start.y / 8; yb <= yb_max; yb++) this->buffer[yb][x] = data[i++];
 	} else
-		GraphicDisplay::drawImageRaw(start, width, height, data);
+	{
+		// OPTIMIZE There's a faster solution using a shift-based algo
+		// get inspired by this->drawVerticalLine()
+		GraphicDisplay<Width, Height>::drawImageRaw(start, width, height, data);
+	}
 }
 
 template<uint16_t Width, uint16_t Height>
 void
-modm::MonochromeGraphicDisplayVertical<Width, Height>::setPixel(int16_t x, int16_t y)
+modm::MonochromeGraphicDisplayVertical<Width, Height>::setPixelFast(glcd::Point pos)
 {
-	if (this->xOnScreen(x) and this->yOnScreen(y))
-		this->buffer[y / 8][x] |= (1 << y % 8);
+	this->buffer[pos.y / 8][pos.x] |= (1 << pos.y % 8);
 }
 
 template<uint16_t Width, uint16_t Height>
 void
-modm::MonochromeGraphicDisplayVertical<Width, Height>::clearPixel(int16_t x, int16_t y)
+modm::MonochromeGraphicDisplayVertical<Width, Height>::clearPixelFast(glcd::Point pos)
 {
-	if (this->xOnScreen(x) and this->yOnScreen(y))
-		this->buffer[y / 8][x] &= ~(1 << y % 8);
+	this->buffer[pos.y / 8][pos.x] &= ~(1 << pos.y % 8);
 }
 
 template<uint16_t Width, uint16_t Height>
 bool
-modm::MonochromeGraphicDisplayVertical<Width, Height>::getPixel(int16_t x, int16_t y) const
+modm::MonochromeGraphicDisplayVertical<Width, Height>::getPixelFast(glcd::Point pos) const
 {
-	if (this->xOnScreen(x) and this->yOnScreen(y))
-		return (this->buffer[y / 8][x] & (1 << y % 8));
-	else
-		return false;
+	return (this->buffer[pos.y / 8][pos.x] & (1 << pos.y % 8));
 }

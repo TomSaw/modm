@@ -76,6 +76,7 @@ public:
 			return !transfer_active;
 		}
 
+
 	private:
 		uint8_t transfer_type;
 		bool transfer_active;
@@ -170,6 +171,9 @@ public:
 	}
 
 protected:
+	void
+	setClipping(glcd::Point start, int16_t width, int16_t height) final;
+
 	modm::ResumableResult<bool>
 	writeCommands(std::size_t length);
 
