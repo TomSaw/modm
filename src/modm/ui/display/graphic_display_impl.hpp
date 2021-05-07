@@ -269,8 +269,6 @@ modm::GraphicDisplay<Width, Height>::drawImage(glcd::Point start,
 	drawImageRaw(start, width, height, modm::accessor::Flash<uint8_t>(image.getPointer() + 2));
 }
 
-
-#include <modm/debug/logger.hpp>
 /**
  * Convertion MonochromeBuffer -> AnyBuffer
  */
@@ -297,9 +295,6 @@ modm::GraphicDisplay<Width, Height>::drawImageRaw(glcd::Point start, uint16_t wi
 				glcd::Point pos{start.x + x, start.y + y + j};
 
 				// OPTIMIZE above code, so we don't need pointOnScreen(pos)-check
-				if(!pointOnScreen(pos)) {
-					MODM_LOG_ERROR << pos << modm::endl;
-				}
 				if (pointOnScreen(pos))
 				{
 					if (byte & 0x01)

@@ -46,6 +46,17 @@ modm::Ssd1306<I2cMaster, Height>::initialize()
 	commandBuffer[4] = HardwareConfigCommands::DisplayStartLine;
 	commandBuffer[4] |= 0;		// Range 0-63
 	transaction_success &= RF_CALL(writeCommands(5));
+
+	commandBuffer[0] = HardwareConfigCommands::ComPinsOrder;
+	commandBuffer[1] = Height == 64 ? 0x12 : 0x02;
+	commandBuffer[2] = FundamentalCommands::ContrastControl;
+	commandBuffer[3] = 0xCF;	// Strange non-linear beahaviour
+	commandBuffer[4] = TimingAndDrivingCommands::PreChargePeriod;
+	commandBuffer[5] = 1;		// [3:0] Phase 1 period
+	commandBuffer[5] |= 15 << 4;// [7:4] Phase 2 period
+	transaction_success &= RF_CALL(writeCommands(6));
+
+	commandBuffer[0] = TimingAndDrivingCommands::V_DeselectLevel;
 	commandBuffer[1] = 4 << 4;	// [7:4] See Datasheet
 	commandBuffer[2] = ScrollingCommands::DisableScroll;
 	commandBuffer[3] = FundamentalCommands::EntireDisplayResumeToRam;

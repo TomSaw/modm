@@ -76,7 +76,6 @@ public:
 			return !transfer_active;
 		}
 
-
 	private:
 		uint8_t transfer_type;
 		bool transfer_active;
