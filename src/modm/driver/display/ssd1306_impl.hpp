@@ -32,9 +32,9 @@ modm::Ssd1306<I2cMaster, Height>::initialize()
 	commandBuffer[2] = 8 << 4;	// Frequency (influences scrolling speed too)
 	commandBuffer[2] |= 0;		// Prescaler
 	commandBuffer[3] = HardwareConfigCommands::MultiplexRatio;
-	commandBuffer[4] = 63;
+	commandBuffer[4] = 63;		// Range 0-63
 	commandBuffer[5] = HardwareConfigCommands::DisplayOffset;
-	commandBuffer[6] = 0;
+	commandBuffer[6] = 0;		// Range 0-63
 	transaction_success &= RF_CALL(writeCommands(7));
 
 	RF_CALL(initializeMemoryMode());
@@ -44,20 +44,9 @@ modm::Ssd1306<I2cMaster, Height>::initialize()
 	commandBuffer[2] = HardwareConfigCommands::SegmentRemap127;
 	commandBuffer[3] = HardwareConfigCommands::ComOutputScanDirectionDecrement;
 	commandBuffer[4] = HardwareConfigCommands::DisplayStartLine;
-	commandBuffer[4] |= 0;
+	commandBuffer[4] |= 0;		// Range 0-63
 	transaction_success &= RF_CALL(writeCommands(5));
-
-	commandBuffer[0] = HardwareConfigCommands::ComPinsOrder;
-	commandBuffer[1] = Height == 64 ? 0x12 : 0x02;
-	commandBuffer[2] = FundamentalCommands::ContrastControl;
-	commandBuffer[3] = 0xCF;
-	commandBuffer[4] = TimingAndDrivingCommands::PreChargePeriod;
-	commandBuffer[5] = 1;			// [3:0] Phase 1 period
-	commandBuffer[5] |= 15 << 4;	// [7:4] Phase 2 period
-	transaction_success &= RF_CALL(writeCommands(6));
-
-	commandBuffer[0] = TimingAndDrivingCommands::V_DeselectLevel;
-	commandBuffer[1] = 4 << 4;
+	commandBuffer[1] = 4 << 4;	// [7:4] See Datasheet
 	commandBuffer[2] = ScrollingCommands::DisableScroll;
 	commandBuffer[3] = FundamentalCommands::EntireDisplayResumeToRam;
 	commandBuffer[4] = FundamentalCommands::NormalDisplay;
@@ -71,8 +60,8 @@ modm::Ssd1306<I2cMaster, Height>::initialize()
 
 /**
  * @brief	MemoryMode::HORIZONTAL and MemoryMode::VERTICAL
- * 			have the best performance cause we can transfer the whole
- * 			buffer at once.
+ * 			have the best performance cause the whole buffer
+ * 			is send in one transaction.
  */
 template<class I2cMaster, uint8_t Height>
 modm::ResumableResult<void>
