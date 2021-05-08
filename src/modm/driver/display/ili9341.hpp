@@ -265,7 +265,7 @@ protected:
 	{
 		BatchHandle h(*this);
 
-		this->setClipping(pos, 1, 1);
+		this->setClippingX(pos, 1, 1);
 		this->writeData(foregroundColor);
 	}
 
@@ -274,7 +274,7 @@ protected:
 	{
 		BatchHandle h(*this);
 
-		this->setClipping(pos, 1, 1);
+		this->setClippingX(pos, 1, 1);
 		this->writeData(backgroundColor);
 	}
 
@@ -293,7 +293,7 @@ protected:
 	drawVerticalLine(glcd::Point start, int16_t length) final;
 
 	void
-	setClipping(glcd::Point start, int16_t width, int16_t height) final;
+	setClipping(glcd::Point start, glcd::Point end) final;
 
 	glcd::Orientation orientation{glcd::Orientation::Landscape0};
 };

@@ -21,6 +21,8 @@
 #error "Don't include this file directly, use 'graphic_display.hpp' instead!"
 #endif
 
+#include <bit>
+
 #include "font/fixed_width_5x8.hpp"
 
 using namespace std;
@@ -269,41 +271,37 @@ modm::GraphicDisplay<Width, Height>::drawImage(glcd::Point start,
 	drawImageRaw(start, width, height, modm::accessor::Flash<uint8_t>(image.getPointer() + 2));
 }
 
+#include <modm/board.hpp>
+#include <modm/debug/logger.hpp>
+#include <modm/debug/logger/level.hpp>
 /**
  * Convertion MonochromeBuffer -> AnyBuffer
  */
 template<uint16_t Width, uint16_t Height>
 void
-modm::GraphicDisplay<Width, Height>::drawImageRaw(glcd::Point start, uint16_t width,
+modm::GraphicDisplay<Width, Height>::drawImageRaw(glcd::Point pos, uint16_t width,
 												  uint16_t height,
 												  modm::accessor::Flash<uint8_t> data)
 {
-	// TODO check if start is in ScreenArea
+	const glcd::Point screenMin{max<int16_t>(pos.x, 0), max<int16_t>(pos.y, 0)};
+	const glcd::Point screenMax{min<int16_t>(pos.x + width, Width - 1), min<int16_t>(pos.y + height, Height - 1)};
+	const glcd::Point dataMin{pos.x < 0 ? -pos.x : 0, pos.y < 0 ? -pos.y : 0};
 
-	size_t x_max = min(width, Width);
-	size_t yb_max = min(height, Height) / 8;
+	size_t i_start = dataMin.x + (dataMin.y / 8) * width;
+	const uint8_t j_start = std::rotl(Bit0, dataMin.y % 8);
 
-	for (size_t x = 0; x < x_max; x++)
-		for (size_t yb = 0; yb < yb_max; yb++)
+	for (int16_t x = screenMin.x; x < screenMax.x; x++)
+	{
+		uint8_t i = i_start++;
+		uint8_t j = j_start;
+		for (int16_t y = screenMin.y; y < screenMax.y; y++)
 		{
-			const int16_t y = yb * 8;
-
-			uint8_t byte = data[x + yb * width];
-
-			for (uint8_t j = 0; j < min<uint8_t>(height - y, 8); j++)
-			{
-				glcd::Point pos{start.x + x, start.y + y + j};
-
-				// OPTIMIZE above code, so we don't need pointOnScreen(pos)-check
-				if (pointOnScreen(pos))
-				{
-					if (byte & 0x01)
-						this->setPixelFast(pos);
-					else
-						this->clearPixelFast(pos);
-				}
-
-				byte >>= 1;
-			}
+			// TODO get the actual pixel from callback or generator so this
+			// nested loop can do any squary action, like drawing filled rect / clearing screen
+			this->setPixelFast({x, y}, data[i] & j);
+			j = std::rotl(j, 1);
+			// OPTIMIZE handle ovf-carry of `std::rotl` instead of `if (j == Bit0)`
+			if (j == Bit0) i += width;
 		}
+	}
 }

@@ -98,10 +98,10 @@ modm::Ssd1306<I2cMaster, Height>::initializeMemoryMode()
 template<class I2cMaster, uint8_t Height>
 void
 // modm::ResumableResult<void>
-modm::Ssd1306<I2cMaster, Height>::setClipping(glcd::Point start, int16_t width, int16_t height) {
+modm::Ssd1306<I2cMaster, Height>::setClipping(glcd::Point start, glcd::Point end)
+{
 	(void)start;
-	(void)width;
-	(void)height;
+	(void)end;
 	// TODO see initializeMemoryMode() right above
 }
 
@@ -158,8 +158,7 @@ modm::Ssd1306<I2cMaster, Height>::configureScroll(uint8_t origin, uint8_t size,
 {
 	RF_BEGIN();
 
-	if (!RF_CALL(disableScroll()))
-		RF_RETURN(false);
+	if (!RF_CALL(disableScroll())) RF_RETURN(false);
 
 	{
 		uint8_t beginY = (origin > 7) ? 7 : origin;

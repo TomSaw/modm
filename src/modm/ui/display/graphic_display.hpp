@@ -150,6 +150,17 @@ public:
 	};
 
 	/**
+	 * Set a pixel to foregroundColor or backgroundColor
+	 *
+	 * \param pos	2d-point to set the pixel
+	 */
+	void
+	setPixel(glcd::Point pos, bool pixel)
+	{
+		pixel ? setPixel(pos) : clearPixel();
+	};
+
+	/**
 	 * Set whole screen to backgroundColor
 	 */
 	virtual void
@@ -398,6 +409,12 @@ protected:
 	virtual void
 	clearPixelFast(glcd::Point pos) = 0;
 
+	inline void
+	setPixelFast(glcd::Point pos, bool pixel)
+	{
+		pixel ? setPixelFast(pos) : clearPixelFast(pos);
+	}
+
 	/// helper method for drawCircle() and drawEllipse()
 	void
 	drawCircle4(glcd::Point center, int16_t x, int16_t y);
@@ -409,7 +426,12 @@ protected:
 	drawVerticalLine(glcd::Point start, int16_t length);
 
 	virtual void
-	setClipping(glcd::Point start, int16_t width, int16_t height) = 0;
+	setClipping(glcd::Point start, glcd::Point end) = 0;
+
+	inline void
+	setClippingX(glcd::Point start, int16_t width, int16_t height) {
+		setClipping(start, start + glcd::Point(width, height));
+	}
 
 protected:
 	// Interface class for the IOStream

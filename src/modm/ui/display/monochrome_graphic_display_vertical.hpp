@@ -45,7 +45,7 @@ public:
 
 	// Faster version adapted for the RAM buffer
 	void
-	drawImageRaw(glcd::Point start, uint16_t width, uint16_t height,
+	drawImageRaw(glcd::Point pos, uint16_t width, uint16_t height,
 				 modm::accessor::Flash<uint8_t> data) final;
 
 protected:

@@ -171,7 +171,7 @@ public:
 
 protected:
 	void
-	setClipping(glcd::Point start, int16_t width, int16_t height) final;
+	setClipping(glcd::Point start, glcd::Point end) final;
 
 	modm::ResumableResult<bool>
 	writeCommands(std::size_t length);
