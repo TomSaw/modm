@@ -10,16 +10,17 @@
 #ifndef MODM_ILI9341_SPI_HPP
 #define MODM_ILI9341_SPI_HPP
 
-#include "ili9341.hpp"
 #include <modm/architecture/interface/spi_device.hpp>
 #include <modm/platform/spi/spi_base.hpp>
+
+#include "ili9341.hpp"
 
 namespace modm
 {
 
 /// @ingroup modm_driver_ili9341
 template<class SPI, class Cs, class Dc>
-class Ili9341SPIInterface: public ili9341, public modm::SpiDevice<SPI>
+class Ili9341SPIInterface : public ili9341, public modm::SpiDevice<SPI>
 {
 public:
 	Ili9341SPIInterface()
@@ -32,33 +33,45 @@ public:
 		Dc::setOutput();
 	}
 
-	__attribute__((noinline)) void
-	writeCommand(Command command)
+	inline void
+	writeCommand(Command command) const
 	{
-		Dc::reset(); // enable command
-		SPI::transferBlocking(i(command));
-		Dc::set(); // reset to data
+		Dc::reset();  // enable command
+		SPI::transferBlocking(uint8_t(command));
+		Dc::set();  // reset to data
 	}
-	__attribute__((noinline)) void
-	writeCommand(Command command, uint8_t const *args, std::size_t length)
+
+	inline void
+	writeCommand(Command command, const uint8_t *data, std::size_t length) const
 	{
-		Dc::reset(); // enable command
-		SPI::transferBlocking(i(command));
-		Dc::set(); // reset to data
-		if (length != 0)
-		{
-			SPI::transferBlocking(const_cast<unsigned char *>(args), nullptr, length);
-		}
+		writeCommand(command);
+		if (length != 0) { SPI::transferBlocking(data, nullptr, length); }
 	}
+
+	inline void
+	writeData(uint8_t data) const
+	{
+		SPI::transferBlocking(data);
+	}
+
+	inline void
+	writeData(color::Rgb565 rgb565) const
+	{
+		SPI::transferBlocking(rgb565.color >> 8);
+		SPI::transferBlocking(rgb565.color);
+	}
+
+	template<typename T>
 	void
-	writeData(uint8_t const *data, std::size_t length)
+	writeData(T data, size_t length) const
 	{
-		SPI::transferBlocking(const_cast<unsigned char *>(data), nullptr, length);
+		while (length--) writeData(data);
 	}
-	void
-	writeCommandValue8(Command command, uint8_t value)
+
+	inline void
+	writeData(const uint8_t *data, std::size_t length) const
 	{
-		writeCommand(command, &value, 1);
+		SPI::transferBlocking(data, nullptr, length);
 	}
 
 	void
@@ -67,13 +80,14 @@ public:
 		using modm::platform::SpiBase;
 		uint8_t b[4];
 
-		Dc::reset(); // enable command
+		Dc::reset();  // enable command
 		// SPI::Hal::setDataSize(SpiBase::DataSize::Bit9);
-		SPI::transferBlocking(i(command) << 1);
+		SPI::transferBlocking(uint8_t(command) << 1);
 		SPI::Hal::setDataSize(SpiBase::DataSize::Bit8);
-		Dc::set(); // reset to data
+		Dc::set();  // reset to data
 		SPI::transferBlocking(b /*nullptr*/, buffer, length);
 	}
+
 	uint8_t
 	readData(Command command)
 	{
@@ -84,27 +98,23 @@ public:
 public:
 	struct BatchHandle
 	{
-		Ili9341SPIInterface& i;
-		BatchHandle(Ili9341SPIInterface& iface)
-		: i(iface)
+		Ili9341SPIInterface &i;
+		BatchHandle(Ili9341SPIInterface &iface) : i(iface)
 		{
 			i.acquireMaster();
 			Cs::reset();
 		}
 		~BatchHandle()
 		{
-			if (i.releaseMaster())
-				Cs::set();
+			if (i.releaseMaster()) Cs::set();
 		}
 	};
 };
 
 /// @ingroup modm_driver_ili9341
-template <class SPI, class Cs, class Dc, class Reset, class Backlight, std::size_t BufferSize = 320>
-using Ili9341Spi = Ili9341<
-	Ili9341SPIInterface<SPI, Cs, Dc>,
-	Reset, Backlight, BufferSize>;
+template<class SPI, class Cs, class Dc, class Reset, class Backlight>
+using Ili9341Spi = Ili9341<Ili9341SPIInterface<SPI, Cs, Dc>, Reset, Backlight>;
 
-} // namespace modm
+}  // namespace modm
 
-#endif // MODM_ILI9341_SPI_HPP
+#endif  // MODM_ILI9341_SPI_HPP
