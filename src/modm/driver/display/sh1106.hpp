@@ -12,19 +12,19 @@
 #pragma once
 
 #include "ssd1306.hpp"
+
 namespace modm
 {
-/**
- * SH1106 is said to be 'compatible' with SSD1306. However
- * there's a relevant difference: SH1106 does only support
- * MemoryMode::PAGE. This requires a little more extensive
- * writeDisplay() routine.
- * We have to alternate between setting Page-address and
- * sending page-data instead of sending the whole buffer at once
- * like is for SSD1306 in MemoryMode::HORIZONTAL / MemoryMode::VERTICAL
- */
 
-/// @ingroup modm_driver_sh1106
+/**
+ * SH1106 is said to be 'compatible' with SSD1306. However there's a relevant
+ * difference: SH1106 does only support MemoryMode::PAGE. This requires a little
+ * more extensive writeDisplay() routine. We have to alternate between setting
+ * Page-address and sending page-data instead of sending the whole buffer at
+ * once like is for SSD1306 in MemoryMode::HORIZONTAL / MemoryMode::VERTICAL
+ *
+ * @ingroup modm_driver_sh1106
+ */
 template<class I2cMaster, uint8_t Height = 64>
 class Sh1106 : public Ssd1306<I2cMaster, Height>
 {
@@ -71,6 +71,5 @@ protected:
 private:
 	size_t page;
 };
-}  // namespace modm
 
-#endif  // MODM_SH1106_HPP
+}  // namespace modm

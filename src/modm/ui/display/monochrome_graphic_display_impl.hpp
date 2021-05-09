@@ -18,7 +18,7 @@
 #error "Don't include this file directly, use 'monochrome_graphic_display.hpp' instead!"
 #endif
 
-template<int16_t Width, int16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
+template<uint16_t Width, uint16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
 void
 modm::MonochromeGraphicDisplay<Width, Height, BufferWidth, BufferHeight>::clear()
 {

@@ -16,109 +16,158 @@
 #error "Don't include this file directly, use 'monochrome_graphic_display_vertical.hpp' instead!"
 #endif
 
-template<int16_t Width, int16_t Height>
+#include <algorithm>
+
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawHorizontalLine(glcd::Point start,
-																		  uint16_t length)
+																		  int16_t length)
 {
-	if (start.y >= 0 and start.y < Height)
+	if (this->yOnScreen(start.y))
 	{
-		const int16_t y = start.y / 8;
-
 		const uint8_t byte = 1 << (start.y % 8);
-		for (int_fast16_t x = start.x; x < static_cast<int16_t>(start.x + length); ++x)
-		{
-			if (x < Width) { this->buffer[y][x] |= byte; }
-		}
+		const size_t yb = start.y / 8;
+		const size_t x_max = std::min<size_t>(start.x + length, Width - 1);
+
+		for (size_t x = start.x; x < x_max; x++) this->buffer[yb][x] |= byte;
 	}
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawVerticalLine(glcd::Point start,
-																		uint16_t length)
+																		int16_t length)
 {
-	if (start.x >= 0 and start.x < Width)
+	if (this->xOnScreen(start.x))
 	{
-		const int8_t end_y = start.y + length;
-		const uint8_t y_last = end_y / 8;
+		size_t yb = start.y / 8;
+		const size_t y_max = std::min<size_t>((start.y + length), Height);
+		const size_t yb_max = y_max / 8;
 
-		uint_fast8_t y = start.y / 8;
-		// Mask out start
-		uint_fast8_t byte = 0xFF << start.y % 8;
-		while (y != y_last)
+		// TODO Preserve existing pixels on top
+		uint8_t byte = 0xFF << start.y % 8;  // Mask out start
+
+		while (yb != yb_max)
 		{
-			if (y < Height / 8)
-			{
-				this->buffer[y][start.x] |= byte;
-				byte = 0xFF;
-			}
-			y++;
+			this->buffer[yb][start.x] |= byte;
+			byte = 0xFF;
+			yb++;
 		}
-		// Mask out end
-		if (y < Height / 8)
-		{
-			byte &= 0xFF >> (8 - end_y % 8);
-			this->buffer[y][start.x] |= byte;
-		}
+
+		// TODO Preserve existing pixels on bottom
+		byte &= 0xFF >> (8 - y_max % 8);  // Mask out end
+
+		this->buffer[yb][start.x] |= byte;
 	}
 }
 
-template<int16_t Width, int16_t Height>
+#define MODM_LOG_DEBUG_VAR(var) MODM_LOG_DEBUG << #var << ":\t" << var << modm::endl
+// OPTIMIZE This whole thing could work faster if more than a byte is handled at once.
+// A whole column could be loaded, shiftet, masked and written in one cicle.
+template<uint16_t Width, uint16_t Height>
 void
 modm::MonochromeGraphicDisplayVertical<Width, Height>::drawImageRaw(
-	glcd::Point start, uint16_t width, uint16_t height, modm::accessor::Flash<uint8_t> data)
+	glcd::Point pos, uint16_t width, uint16_t height, modm::accessor::Flash<uint8_t> data)
 {
-	if ((start.y % 8) == 0)
-	{
-		uint16_t row = start.y / 8;
-		uint16_t rowCount = (height + 7) / 8;  // always round up
+	const glcd::Point screenMin{
+		max<int16_t>(pos.x, 0),
+		max<int16_t>(pos.y, 0) };
 
-		if ((height % 8) == 0)
+	const glcd::Point screenMax{
+		min<int16_t>(pos.x + width, Width - 1),
+		min<int16_t>(pos.y + height, Height - 1) };
+
+	const size_t yb_min = screenMin.y / 8;
+	size_t yb_max = (screenMax.y - 1) / 8;
+
+	// Rare case -> why render completely out of screen? Anyways, (yb < yb_max - 1) = true,
+	// thus could result in bad access on data so let's get out here
+	if (yb_min >= yb_max) return;
+	// if (yb_min == yb_max) return; // Should be enough
+
+	const glcd::Point dataMin{
+		pos.x < 0 ? -pos.x : 0,
+		pos.y < 0 ? -pos.y : 0
+	};
+
+	size_t i_start = dataMin.x + (dataMin.y / 8) * width;
+
+	if (!(pos.y % 8) and !(height % 8))
+	{
+		// data and buffer congruent in y-dir
+		// simple fast copy bytes from data to buffer
+		for (int16_t x = screenMin.x; x < screenMax.x; x++)
 		{
-			for (uint_fast16_t i = 0; i < width; i++)
+			size_t i = i_start++;
+			size_t yb = yb_min;
+			while (yb < yb_max)
 			{
-				for (uint_fast16_t k = 0; k < rowCount; k++)
-				{
-					uint16_t x = start.x + i;
-					uint16_t y = k + row;
-
-					if (x < Width and y < Height)
-					{
-						this->buffer[y][x] = data[i + k * width];
-					}
-				}
+				this->buffer[yb][x] = data[i];
+				i += width;
+				yb++;
 			}
-			return;
+			// TODO Preserve existing pixels on bottom
+			this->buffer[yb][x] = data[i];
 		}
-	}
-
-	GraphicDisplay::drawImageRaw(start, width, height, data);
-}
-
-template<int16_t Width, int16_t Height>
-void
-modm::MonochromeGraphicDisplayVertical<Width, Height>::setPixel(int16_t x, int16_t y)
-{
-	if (x < Width and y < Height) { this->buffer[y / 8][x] |= (1 << y % 8); }
-}
-
-template<int16_t Width, int16_t Height>
-void
-modm::MonochromeGraphicDisplayVertical<Width, Height>::clearPixel(int16_t x, int16_t y)
-{
-	if (x < Width and y < Height) { this->buffer[y / 8][x] &= ~(1 << y % 8); }
-}
-
-template<int16_t Width, int16_t Height>
-bool
-modm::MonochromeGraphicDisplayVertical<Width, Height>::getPixel(int16_t x, int16_t y) const
-{
-	if (x < Width and y < Height)
-	{
-		return (this->buffer[y / 8][x] & (1 << y % 8));
 	} else
 	{
-		return false;
+		// data and buffer shifted against each other in y-dir
+		// need to split data-bytes
+
+		const uint8_t lshift_upper = pos.y & 0b111;
+		const uint8_t rshift_lower = 8 - lshift_upper;
+		const bool need_top_piece = pos.y >= 0;
+		const bool need_bottom_piece = pos.y + height < Height;
+
+		// OPTIMIZE feels like this can be omitted somehow
+		if (!need_bottom_piece) yb_max++;
+
+		for (int16_t x = screenMin.x; x < screenMax.x; x++)
+		{
+			size_t i = i_start++;
+			size_t yb = yb_min;
+
+			// Preserve existing pixels on top
+			if (need_top_piece)
+			{
+				this->buffer[yb][x] &= 0xFF >> rshift_lower;
+				this->buffer[yb][x] |= data[i] << lshift_upper;
+				yb++;
+			}
+			while (yb < yb_max)
+			{
+				this->buffer[yb][x] = data[i] >> rshift_lower;
+				i += width;
+				this->buffer[yb][x] |= data[i] << lshift_upper;
+				yb++;
+			}
+			// Preserve existing pixels on bottom
+			if (need_bottom_piece)
+			{
+				this->buffer[yb][x] &= 0xFF << lshift_upper;
+				this->buffer[yb][x] |= data[i] >> rshift_lower;
+			}
+		}
 	}
+}
+
+template<uint16_t Width, uint16_t Height>
+void
+modm::MonochromeGraphicDisplayVertical<Width, Height>::setPixelFast(glcd::Point pos)
+{
+	this->buffer[pos.y / 8][pos.x] |= (1 << pos.y % 8);
+}
+
+template<uint16_t Width, uint16_t Height>
+void
+modm::MonochromeGraphicDisplayVertical<Width, Height>::clearPixelFast(glcd::Point pos)
+{
+	this->buffer[pos.y / 8][pos.x] &= ~(1 << pos.y % 8);
+}
+
+template<uint16_t Width, uint16_t Height>
+bool
+modm::MonochromeGraphicDisplayVertical<Width, Height>::getPixelFast(glcd::Point pos) const
+{
+	return (this->buffer[pos.y / 8][pos.x] & (1 << pos.y % 8));
 }

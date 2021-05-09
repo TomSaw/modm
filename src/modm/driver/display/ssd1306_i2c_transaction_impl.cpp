@@ -44,7 +44,8 @@ void
 modm::ssd1306::Ssd1306_I2cWriteTransaction::detaching(modm::I2c::DetachCause cause)
 {
 	I2cWriteTransaction::detaching(cause);
-	if (transfer_active or (cause != modm::I2c::DetachCause::NormalStop)) {
+	if (transfer_active or (cause != modm::I2c::DetachCause::NormalStop))
+	{
 		transfer_type = Transfer::COMMAND_BURST;
 		transfer_active = false;
 	}

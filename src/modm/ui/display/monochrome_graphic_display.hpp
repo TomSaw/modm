@@ -36,26 +36,14 @@ namespace modm
  * \author	Thomas Sommer
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
-class MonochromeGraphicDisplay : public GraphicDisplay
+template<uint16_t Width, uint16_t Height, std::size_t BufferWidth, std::size_t BufferHeight>
+class MonochromeGraphicDisplay : public GraphicDisplay<Width, Height>
 {
 	static_assert(Width > 0, "width must be greater than 0");
 	static_assert(Height > 0, "height must be greater than 0");
 
 public:
 	virtual ~MonochromeGraphicDisplay() = default;
-
-	inline uint16_t
-	getWidth() const final
-	{
-		return Width;
-	}
-
-	inline uint16_t
-	getHeight() const final
-	{
-		return Height;
-	}
 
 	inline std::size_t
 	getBufferWidth() const final
@@ -69,14 +57,33 @@ public:
 		return BufferHeight;
 	}
 
-	virtual bool
-	getPixel(int16_t x, int16_t y) const = 0;
+	bool
+	getPixel(glcd::Point pos) const {
+		if(this->pointOnScreen(pos))
+			return getPixelFast(pos);
+		else
+			return false;
+	};
 
 	void
 	clear() final;
 
 protected:
 	uint8_t buffer[BufferHeight][BufferWidth];
+
+	virtual bool
+	getPixelFast(glcd::Point pos) const = 0;
+
+	bool
+	xValidBuffer(std::size_t x) const
+	{
+		return x >= 0 and x < BufferWidth;
+	}
+	bool
+	yValidBuffer(std::size_t y) const
+	{
+		return y >= 0 and y < BufferHeight;
+	}
 };
 }  // namespace modm
 

@@ -14,27 +14,24 @@
 
 namespace modm
 {
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
-MonochromeGraphicDisplayHorizontal<Width, Height>::setPixel(int16_t x, int16_t y)
+MonochromeGraphicDisplayHorizontal<Width, Height>::setPixelFast(glcd::Point pos)
 {
-	if ((x < Width) and (y < Height)) { buffer[y][x / 8] |= (1 << (x % 8)); }
+	this->buffer[pos.x / 8][pos.y] |= (1 << (pos.x % 8));
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 void
-MonochromeGraphicDisplayHorizontal<Width, Height>::clearPixel(int16_t x, int16_t y)
+MonochromeGraphicDisplayHorizontal<Width, Height>::clearPixelFast(glcd::Point pos)
 {
-	if ((x < Width) and (y < Height)) { buffer[y][x / 8] &= ~(1 << (x % 8)); }
+	this->buffer[pos.x / 8][pos.y] &= ~(1 << (pos.x % 8));
 }
 
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 bool
-MonochromeGraphicDisplayHorizontal<Width, Height>::getPixel(int16_t x, int16_t y)
+MonochromeGraphicDisplayHorizontal<Width, Height>::getPixelFast(glcd::Point pos) const
 {
-	if ((x < Width) and (y < Height))
-		return (buffer[y][x / 8] & (1 << (x % 8)));
-	else
-		return false;
+	return (this->buffer[pos.x / 8][y] & (1 << (pos.x % 8)));
 }
 }  // namespace modm

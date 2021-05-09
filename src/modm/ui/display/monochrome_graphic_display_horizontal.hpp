@@ -31,7 +31,7 @@ namespace modm
  *
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 class MonochromeGraphicDisplayHorizontal
 	: public MonochromeGraphicDisplay<Width, Height, Width / 8, Height>
 {
@@ -43,13 +43,13 @@ public:
 
 protected:
 	void
-	setPixel(int16_t x, int16_t y) final;
+	setPixelFast(glcd::Point pos) final;
 
 	void
-	clearPixel(int16_t x, int16_t y) final;
+	clearPixelFast(glcd::Point pos) final;
 
 	bool
-	getPixel(int16_t x, int16_t y) const final;
+	getPixelFast(glcd::Point pos) const final;
 };
 }  // namespace modm
 

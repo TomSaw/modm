@@ -23,6 +23,7 @@
 #include <modm/io/iodevice.hpp>
 #include <modm/io/iostream.hpp>
 #include <modm/math/geometry.hpp>
+#include <modm/math/utils/concepts.hpp>
 
 #include "font.hpp"
 
@@ -33,8 +34,27 @@ namespace modm
 namespace glcd
 {
 
+// TODO as lbuild-option
+#define MODM_TOLERANT_POINT_CONSTRUCTORS
+
 /// @ingroup modm_ui_display
+#ifdef MODM_TOLERANT_POINT_CONSTRUCTORS
+class Point : public Vector<int16_t, 2>
+{
+public:
+	Point() = default;
+
+	// Allow arbitray arithmetic Types for Point-construction
+	// This prevents 'narrowing conversion' compiler-warnings
+	template<modm::arithmetic T, modm::arithmetic U>
+	Point(T x, U y) : Vector<int16_t, 2>(x, y){};
+
+	template<modm::arithmetic T>
+	Point(Vector<T, 2> vector) : Vector<int16_t, 2>(vector){};
+};
+#else
 using Point = Vector<int16_t, 2>;
+#endif
 
 enum Orientation : uint8_t
 {
@@ -62,6 +82,8 @@ enum Orientation : uint8_t
  * All modes relative to the current viewport. This would make
  * drawing a menu system easier.
  */
+
+template<uint16_t Width, uint16_t Height>
 class GraphicDisplay : public IOStream
 {
 public:
@@ -74,14 +96,20 @@ public:
 	/**
 	 * Number of pixel in horizontal direction.
 	 */
-	virtual uint16_t
-	getWidth() const = 0;
+	virtual inline uint16_t
+	getWidth() const
+	{
+		return Width;
+	}
 
 	/**
 	 * Number of pixel in vertical direction.
 	 */
 	virtual uint16_t
-	getHeight() const = 0;
+	getHeight() const
+	{
+		return Height;
+	};
 
 	// TODO Requires all inherited drivers work with resumable functions
 	// virtual modm::ResumableResult<bool>
@@ -102,42 +130,35 @@ public:
 	/**
 	 * Set a pixel to foregroundColor
 	 *
-	 * \param x		x-position
-	 * \param y		y-position
+	 * \param pos	2d-point to set the pixel
 	 */
-	virtual void
-	setPixel(int16_t x, int16_t y) = 0;
-
-	/**
-	 * Set a pixel to foregroundColor
-	 *
-	 * \param p		point
-	 */
-	inline void
-	setPixel(glcd::Point p)
+	void
+	setPixel(glcd::Point pos)
 	{
-		this->setPixel(p.x, p.y);
-	}
+		if (pointOnScreen(pos)) setPixelFast(pos);
+	};
 
 	/**
 	 * Set a pixel to backgroundColor
 	 *
-	 * \param x		x-position
-	 * \param y		y-position
+	 * \param pos	2d-point to set the pixel
 	 */
-	virtual void
-	clearPixel(int16_t x, int16_t y) = 0;
+	void
+	clearPixel(glcd::Point pos)
+	{
+		if (pointOnScreen(pos)) clearPixelFast(pos);
+	};
 
 	/**
-	 * Set a pixel to backgroundColor
+	 * Set a pixel to foregroundColor or backgroundColor
 	 *
-	 * \param p		point
+	 * \param pos	2d-point to set the pixel
 	 */
-	inline void
-	clearPixel(glcd::Point p)
+	void
+	setPixel(glcd::Point pos, bool pixel)
 	{
-		this->setPixel(p.x, p.y);
-	}
+		pixel ? setPixel(pos) : clearPixel();
+	};
 
 	/**
 	 * Set whole screen to backgroundColor
@@ -170,22 +191,8 @@ public:
 	 * \param start	first point
 	 * \param end	second point
 	 */
-	inline void
-	drawLine(glcd::Point start, glcd::Point end)
-	{
-		this->drawLine(start.x, start.y, end.x, end.y);
-	}
-
-	/**
-	 * Draw a line
-	 *
-	 * \param x1	Start x-position
-	 * \param y1	Start y-position
-	 * \param x2	End x-position
-	 * \param y3	End y-position
-	 */
 	void
-	drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+	drawLine(glcd::Point start, glcd::Point end);
 
 	/**
 	 * Draw a rectangle.
@@ -195,21 +202,7 @@ public:
 	 * \param height	Height of rectangle
 	 */
 	void
-	drawRectangle(glcd::Point start, uint16_t width, uint16_t height);
-
-	/**
-	 * Draw a rectangle.
-	 *
-	 * \param x 		Upper left corner x-position
-	 * \param y 		Upper left corner y-position
-	 * \param width		Width of rectangle
-	 * \param height	Height of rectangle
-	 */
-	inline void
-	drawRectangle(int16_t x, int16_t y, uint16_t width, uint16_t height)
-	{
-		drawRectangle(glcd::Point(x, y), width, height);
-	}
+	drawRectangle(glcd::Point start, int16_t width, int16_t height);
 
 	/**
 	 * Draw a filled rectangle.
@@ -219,21 +212,7 @@ public:
 	 * \param height	Height of rectangle
 	 */
 	void
-	fillRectangle(glcd::Point start, uint16_t width, uint16_t height);
-
-	/**
-	 * Draw a rectangle.
-	 *
-	 * \param x 		Upper left corner x-position
-	 * \param y 		Upper left corner y-position
-	 * \param width		Width of rectangle
-	 * \param height	Height of rectangle
-	 */
-	inline void
-	fillRectangle(int16_t x, int16_t y, uint16_t width, uint16_t height)
-	{
-		fillRectangle(glcd::Point(x, y), width, height);
-	}
+	fillRectangle(glcd::Point start, int16_t width, int16_t height);
 
 	/**
 	 * Draw a rectangle with rounded corners
@@ -244,7 +223,7 @@ public:
 	 * \param radius	Rounding radius
 	 */
 	void
-	drawRoundedRectangle(glcd::Point start, uint16_t width, uint16_t height, uint16_t radius);
+	drawRoundedRectangle(glcd::Point start, int16_t width, int16_t height, int16_t radius);
 
 	/**
 	 * Draw a filled rectangle with rounded corners
@@ -267,7 +246,7 @@ public:
 	 * \param radius	Radius of the circle
 	 */
 	void
-	drawCircle(glcd::Point center, uint16_t radius);
+	drawCircle(glcd::Point center, int16_t radius);
 
 	/**
 	 * Draw a filled circle.
@@ -276,7 +255,7 @@ public:
 	 * \param radius	Radius of the circle
 	 */
 	virtual void
-	fillCircle(glcd::Point center, uint16_t radius);
+	fillCircle(glcd::Point center, int16_t radius);
 
 	/**
 	 * Draw an ellipse.
@@ -326,18 +305,6 @@ public:
 	setCursor(glcd::Point position)
 	{
 		this->cursor = position;
-	}
-
-	/**
-	 * Set the cursor for text drawing.
-	 *
-	 * \param x		Cursor x-position
-	 * \param y		Cursor y-position
-	 */
-	inline void
-	setCursor(int16_t x, int16_t y)
-	{
-		this->cursor = glcd::Point(x, y);
 	}
 
 	/**
@@ -413,15 +380,58 @@ public:
 	write(char c);
 
 protected:
+	bool
+	xOnScreen(int16_t x) const
+	{
+		return x >= 0 and x < int16_t(Width);
+	}
+	bool
+	yOnScreen(int16_t y) const
+	{
+		return y >= 0 and y < int16_t(Height);
+	}
+
+	bool
+	pointOnScreen(glcd::Point pos) const
+	{
+		return xOnScreen(pos.x) and yOnScreen(pos.y);
+	}
+
+	/**
+	 * setPixel() without checking the scope
+	 */
+	virtual void
+	setPixelFast(glcd::Point pos) = 0;
+
+	/**
+	 * clearPixel() without checking the scope
+	 */
+	virtual void
+	clearPixelFast(glcd::Point pos) = 0;
+
+	inline void
+	setPixelFast(glcd::Point pos, bool pixel)
+	{
+		pixel ? setPixelFast(pos) : clearPixelFast(pos);
+	}
+
 	/// helper method for drawCircle() and drawEllipse()
 	void
 	drawCircle4(glcd::Point center, int16_t x, int16_t y);
 
 	virtual void
-	drawHorizontalLine(glcd::Point start, uint16_t length);
+	drawHorizontalLine(glcd::Point start, int16_t length);
 
 	virtual void
-	drawVerticalLine(glcd::Point start, uint16_t length);
+	drawVerticalLine(glcd::Point start, int16_t length);
+
+	virtual void
+	setClipping(glcd::Point start, glcd::Point end) = 0;
+
+	inline void
+	setClippingX(glcd::Point start, int16_t width, int16_t height) {
+		setClipping(start, start + glcd::Point(width, height));
+	}
 
 protected:
 	// Interface class for the IOStream
@@ -454,5 +464,9 @@ protected:
 	glcd::Point cursor;
 };
 }  // namespace modm
+
+#include "graphic_display_fill_impl.hpp"
+#include "graphic_display_impl.hpp"
+#include "graphic_display_text_impl.hpp"
 
 #endif  // MODM_GRAPHIC_DISPLAY_HPP

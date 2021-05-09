@@ -50,13 +50,13 @@ public:
 
 protected:
 	void
-	setPixel(int16_t x, int16_t y) final;
+	setPixel(glcd::Point pos) final;
 
 	void
-	clearPixel(int16_t x, int16_t y) final;
+	clearPixel(glcd::Point pos) final;
 
 	glcd::Color
-	getPixel(int16_t x, int16_t y) const final;
+	getPixel(glcd::Point pos) const final;
 
 private:
 	modm::ColorGraphicDisplay* display;

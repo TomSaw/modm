@@ -15,7 +15,7 @@
 
 template<class I2cMaster, uint8_t Height>
 modm::Ssd1306<I2cMaster, Height>::Ssd1306(uint8_t address)
-	: I2cDevice<I2cMaster, 2, ssd1306::Ssd1306_I2cWriteTransaction>(address)
+	: I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
 {}
 
 // ----------------------------------------------------------------------------
@@ -95,6 +95,16 @@ modm::Ssd1306<I2cMaster, Height>::initializeMemoryMode()
 	RF_END();
 }
 
+template<class I2cMaster, uint8_t Height>
+void
+// modm::ResumableResult<void>
+modm::Ssd1306<I2cMaster, Height>::setClipping(glcd::Point start, glcd::Point end)
+{
+	(void)start;
+	(void)end;
+	// TODO see initializeMemoryMode() right above
+}
+
 // ----------------------------------------------------------------------------
 template<class I2cMaster, uint8_t Height>
 modm::ResumableResult<void>
@@ -132,7 +142,8 @@ modm::Ssd1306<I2cMaster, Height>::setOrientation(glcd::Orientation orientation)
 	{
 		commandBuffer[0] = HardwareConfigCommands::SegmentRemap127;
 		commandBuffer[1] = HardwareConfigCommands::ComOutputScanDirectionDecrement;
-	} else if (orientation == glcd::Orientation::Landscape180)
+	}
+	else if (orientation == glcd::Orientation::Landscape180)
 	{
 		commandBuffer[0] = HardwareConfigCommands::SegmentRemap0;
 		commandBuffer[1] = HardwareConfigCommands::ComOutputScanDirectionIncrement;
@@ -148,8 +159,7 @@ modm::Ssd1306<I2cMaster, Height>::configureScroll(uint8_t origin, uint8_t size,
 {
 	RF_BEGIN();
 
-	if (!RF_CALL(disableScroll()))
-		RF_RETURN(false);
+	if (!RF_CALL(disableScroll())) RF_RETURN(false);
 
 	{
 		uint8_t beginY = (origin > 7) ? 7 : origin;

@@ -34,7 +34,7 @@ namespace modm
  * \author	Fabian Greif
  * \ingroup	modm_ui_display
  */
-template<int16_t Width, int16_t Height>
+template<uint16_t Width, uint16_t Height>
 class MonochromeGraphicDisplayVertical
 	: public MonochromeGraphicDisplay<Width, Height, Width, Height / 8>
 {
@@ -45,26 +45,26 @@ public:
 
 	// Faster version adapted for the RAM buffer
 	void
-	drawImageRaw(glcd::Point start, uint16_t width, uint16_t height,
+	drawImageRaw(glcd::Point pos, uint16_t width, uint16_t height,
 				 modm::accessor::Flash<uint8_t> data) final;
 
+protected:
 	void
-	setPixel(int16_t x, int16_t y) final;
+	setPixelFast(glcd::Point pos) final;
 
 	void
-	clearPixel(int16_t x, int16_t y) final;
+	clearPixelFast(glcd::Point pos) final;
 
 	bool
-	getPixel(int16_t x, int16_t y) const final;
-
-protected:
-	// Faster version adapted for the RAM buffer
-	void
-	drawHorizontalLine(glcd::Point start, uint16_t length) final;
+	getPixelFast(glcd::Point pos) const final;
 
 	// Faster version adapted for the RAM buffer
 	void
-	drawVerticalLine(glcd::Point start, uint16_t length) final;
+	drawHorizontalLine(glcd::Point start, int16_t length) final;
+
+	// Faster version adapted for the RAM buffer
+	void
+	drawVerticalLine(glcd::Point start, int16_t length) final;
 };
 }  // namespace modm
 
