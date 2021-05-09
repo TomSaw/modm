@@ -27,7 +27,7 @@ protected:
 
 	enum FundamentalCommands : uint8_t
 	{
-		ContrastControl = 0x81,  // Range 1-255
+		ContrastControl = 0x81,			// Range 1-255
 		EntireDisplayResumeToRam = 0xA4,
 		EntireDisplayIgnoreRam = 0xA5,
 		NormalDisplay = 0xA6,
@@ -38,12 +38,12 @@ protected:
 
 	enum AdressingCommands : uint8_t
 	{
-		MemoryMode = 0x20,  // enum MemoryMode
+		MemoryMode = 0x20,				// enum MemoryMode
 		// HORIZONTAL and VERTICAL addressing only
-		ColumnAddress = 0x21,  // Range 0-127
-		PageAddress = 0x22,    // Range 0-7
+		ColumnAddress = 0x21,			// Range 0-127
+		PageAddress = 0x22,				// Range 0-7
 		// PAGE addressing only
-		PageStartAddress = 0xB0,  // Range 0-7
+		PageStartAddress = 0xB0,		// Range 0-7
 		LowerColumnStartAddress = 0x00,
 		HigherColumnStartAddress = 0x10,
 	};
@@ -53,11 +53,11 @@ protected:
 		DisplayStartLine = 0x40,
 		SegmentRemap0 = 0xA0,
 		SegmentRemap127 = 0xA1,
-		MultiplexRatio = 0xA8,  // Range 16-64
+		MultiplexRatio = 0xA8,			// Range 16-64
 		ComOutputScanDirectionIncrement = 0xC0,
 		ComOutputScanDirectionDecrement = 0xC8,
-		DisplayOffset = 0xD3,  // Range 0-63
-		ComPinsOrder = 0xDA,   // enum ComPinsOrder
+		DisplayOffset = 0xD3,			// Range 0-63
+		ComPinsOrder = 0xDA,
 	};
 
 	enum ScrollingCommands : uint8_t
@@ -71,20 +71,20 @@ protected:
 		EnableScroll = 0x2F,
 	};
 
+	enum TimingAndDrivingCommands : uint8_t
+	{
+		ChargePump = 0x8D,				// enum ChargePump
+		DisplayClockDivideRatio = 0xD5,	// [7:4] Frequency [3:0] Prescaler
+		PreChargePeriod = 0xD9,
+		V_DeselectLevel = 0xDB,			// 0: ~0.65 x VCC, 1: 0.71 x VCC, 2: 0.77 x VCC, 3: 0.83 x VCC
+		Nop = 0xE3
+	};
+
 	enum MemoryMode : uint8_t
 	{
 		HORIZONTAL = 0,
 		VERTICAL = 1,
 		PAGE = 2
-	};
-
-	enum TimingAndDrivingCommands : uint8_t
-	{
-		ChargePump = 0x8D,               // enum ChargePump
-		DisplayClockDivideRatio = 0xD5,  // [7:4] Frequency [3:0] Prescaler
-		PreChargePeriod = 0xD9,
-		V_DeselectLevel = 0xDB,  // 0: ~0.65 x VCC, 1: 0.71 x VCC, 2: 0.77 x VCC, 3: 0.83 x VCC
-		Nop = 0xE3
 	};
 
 	enum ChargePump : uint8_t

@@ -41,7 +41,8 @@ public:
 		Frames256 = 0b011
 	};
 
-	enum class ScrollDirection : uint8_t
+	enum class
+	ScrollDirection : uint8_t
 	{
 		Right = HorizontalScrollRight,
 		Left = HorizontalScrollLeft,
@@ -49,7 +50,8 @@ public:
 		// LeftBottom = VerticalAndHorizontalScrollLeft,
 	};
 
-	enum class DisplayMode : uint8_t
+	enum class
+	DisplayMode : uint8_t
 	{
 		Normal = NormalDisplay,
 		Inverted = InvertedDisplay
@@ -120,11 +122,36 @@ public:
 	/// @return	`true` if the frame buffer is not being copied to the display
 	bool isWritable()
 	{ return this->transaction.isWriteable(); }
+
+	// MARK: - TASKS
+	/// initializes for 3V3 with charge-pump asynchronously
+	modm::ResumableResult<bool>
+	initialize();
+
+	// starts a frame transfer and waits for completion
+	virtual modm::ResumableResult<bool>
+	writeDisplay();
+
+	modm::ResumableResult<bool>
+	setDisplayMode(DisplayMode mode = DisplayMode::Normal)
 	{
+		commandBuffer[0] = mode;
 		return writeCommands(1);
 	}
 
 	modm::ResumableResult<bool>
+	setContrast(uint8_t contrast = 0xCE)
+	{
+		commandBuffer[0] = FundamentalCommands::ContrastControl;
+		commandBuffer[1] = contrast;
+		return writeCommands(2);
+	}
+
+	/**
+	 * \param orientation	glcd::Orientation::Landscape0 or glcd::Orientation::Landscape180
+	 */
+	modm::ResumableResult<bool>
+	setOrientation(glcd::Orientation orientation);
 
 	modm::ResumableResult<bool>
 	configureScroll(uint8_t origin, uint8_t size, ScrollDirection direction, ScrollStep steps);
@@ -146,7 +173,7 @@ public:
 protected:
 	void
 	setClipping(glcd::Point start, glcd::Point end) final;
-
+	
 	modm::ResumableResult<bool>
 	writeCommands(std::size_t length);
 
