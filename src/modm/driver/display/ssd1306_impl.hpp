@@ -15,7 +15,7 @@
 
 template<class I2cMaster, uint8_t Height>
 modm::Ssd1306<I2cMaster, Height>::Ssd1306(uint8_t address)
-	: I2cDevice<I2cMaster, 2, ssd1306::Ssd1306_I2cWriteTransaction>(address)
+	: I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
 {}
 
 // ----------------------------------------------------------------------------
@@ -142,7 +142,8 @@ modm::Ssd1306<I2cMaster, Height>::setOrientation(glcd::Orientation orientation)
 	{
 		commandBuffer[0] = HardwareConfigCommands::SegmentRemap127;
 		commandBuffer[1] = HardwareConfigCommands::ComOutputScanDirectionDecrement;
-	} else if (orientation == glcd::Orientation::Landscape180)
+	}
+	else if (orientation == glcd::Orientation::Landscape180)
 	{
 		commandBuffer[0] = HardwareConfigCommands::SegmentRemap0;
 		commandBuffer[1] = HardwareConfigCommands::ComOutputScanDirectionIncrement;

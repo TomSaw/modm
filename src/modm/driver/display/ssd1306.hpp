@@ -28,7 +28,8 @@ namespace modm
 struct ssd1306 : public ssd1306_register
 {
 public:
-	enum class ScrollStep : uint8_t
+	enum class
+	ScrollStep : uint8_t
 	{
 		Frames2 = 0b111,
 		Frames3 = 0b100,
@@ -55,6 +56,7 @@ public:
 	};
 
 public:
+	/// @cond
 	class Ssd1306_I2cWriteTransaction : public modm::I2cWriteTransaction
 	{
 	public:
@@ -72,9 +74,7 @@ public:
 
 		inline bool
 		isWritable()
-		{
-			return !transfer_active;
-		}
+		{ return !transfer_active; }
 
 	private:
 		uint8_t transfer_type;
@@ -89,12 +89,13 @@ public:
  * the frame rate to about 40Hz.
  *
  * @author	Niklas Hauser
+ * @author	Thomas Sommer
  * @ingroup	modm_driver_ssd1306
  */
 template<class I2cMaster, uint8_t Height = 64>
 class Ssd1306 : public ssd1306,
 				public MonochromeGraphicDisplayVertical<128, Height>,
-				public I2cDevice<I2cMaster, 2, ssd1306::Ssd1306_I2cWriteTransaction>
+				public I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>
 {
 	static_assert((Height == 64) or (Height == 32), "Display height must be either 32 or 64 pixel!");
 
@@ -102,55 +103,28 @@ public:
 	Ssd1306(uint8_t address = 0x3C);
 
 	/// Pings the display
-	bool inline pingBlocking() { return RF_CALL_BLOCKING(this->ping()); }
+	bool inline pingBlocking()
+	{ return RF_CALL_BLOCKING(this->ping()); }
 
 	/// initializes for 3V3 with charge-pump
-	bool inline initializeBlocking() { return RF_CALL_BLOCKING(initialize()); }
+	bool inline initializeBlocking()
+	{ return RF_CALL_BLOCKING(initialize()); }
 
 	/// Update the display with the content of the RAM buffer.
 	void
 	update() override
-	{
-		RF_CALL_BLOCKING(startWriteDisplay());
-	}
+	{ RF_CALL_BLOCKING(startWriteDisplay()); }
 
 	/// Use this method to synchronize writing to the displays buffer
 	/// to avoid tearing.
 	/// @return	`true` if the frame buffer is not being copied to the display
 	bool isWritable()
+	{ return this->transaction.isWriteable(); }
 	{
-		return this->transaction.writeable;
-	}
-
-	// MARK: - TASKS
-	/// initializes for 3V3 with charge-pump asynchronously
-	modm::ResumableResult<bool>
-	initialize();
-
-	// starts a frame transfer and waits for completion
-	virtual modm::ResumableResult<bool>
-	writeDisplay();
-
-	modm::ResumableResult<bool>
-	setDisplayMode(DisplayMode mode = DisplayMode::Normal)
-	{
-		commandBuffer[0] = mode;
 		return writeCommands(1);
 	}
 
 	modm::ResumableResult<bool>
-	setContrast(uint8_t contrast = 0xCE)
-	{
-		commandBuffer[0] = FundamentalCommands::ContrastControl;
-		commandBuffer[1] = contrast;
-		return writeCommands(2);
-	}
-
-	/**
-	 * \param orientation	glcd::Orientation::Landscape0 or glcd::Orientation::Landscape180
-	 */
-	modm::ResumableResult<bool>
-	setOrientation(glcd::Orientation orientation);
 
 	modm::ResumableResult<bool>
 	configureScroll(uint8_t origin, uint8_t size, ScrollDirection direction, ScrollStep steps);

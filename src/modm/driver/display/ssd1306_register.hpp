@@ -9,11 +9,11 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_SSD1306_REGISTER_HPP
-#define MODM_SSD1306_REGISTER_HPP
+#pragma once
 
 namespace modm
 {
+
 struct ssd1306_register
 {
 protected:
@@ -97,5 +97,3 @@ protected:
 };
 
 }  // namespace modm
-
-#endif  // MODM_SSD1306_REGISTER_HPP
