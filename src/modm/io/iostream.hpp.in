@@ -93,6 +93,7 @@ public:
 	{
 		mode = Mode::Ascii;
 		device->write('\n');
+		device->write('\r');
 		return *this;
 	}
 
