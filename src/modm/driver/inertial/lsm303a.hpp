@@ -15,7 +15,7 @@
 #include <modm/architecture/interface/register.hpp>
 #include <modm/processing/resumable.hpp>
 #include <modm/math/utils/endianness.hpp>
-#include "lis3_transport.hpp"
+#include "lis3_interface.hpp"
 
 namespace modm
 {
@@ -376,7 +376,7 @@ protected:
  * @author	Niklas Hauser
  */
 template < class I2cMaster >
-class Lsm303a : public lsm303a, public Lis3TransportI2c<I2cMaster>
+class Lsm303a : public lsm303a, public Lis3InterfaceI2c<I2cMaster>
 {
 public:
 	/// Constructor, requires a lsm303a::Data object.

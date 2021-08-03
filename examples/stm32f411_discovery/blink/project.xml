@@ -1,0 +1,9 @@
+<library>
+  <extends>modm:disco-f411ve</extends>
+  <options>
+    <option name="modm:build:build.path">../../../build/stm32f411_discovery/blink</option>
+  </options>
+  <modules>
+    <module>modm:build:scons</module>
+  </modules>
+</library>

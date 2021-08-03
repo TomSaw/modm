@@ -15,7 +15,7 @@
 #include <modm/architecture/interface/register.hpp>
 #include <modm/processing/resumable.hpp>
 #include <modm/math/utils/endianness.hpp>
-#include "lis3_transport.hpp"
+#include "lis3_interface.hpp"
 
 namespace modm
 {
@@ -505,8 +505,8 @@ protected:
 
 /**
  * @tparam	Transport	Either the I2C or SPI Transport Layer.
- * @see Lis3TransportI2c
- * @see Lis3TransportSpi
+ * @see Lis3InterfaceI2c
+ * @see Lis3InterfaceSpi
  *
  * @ingroup modm_driver_lis3dsh
  * @author	Niklas Hauser

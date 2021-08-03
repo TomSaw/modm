@@ -1,8 +1,5 @@
 /*
- * Copyright (c) 2013, Kevin Läufer
- * Copyright (c) 2015-2018, Niklas Hauser
- * Copyright (c) 2017, Sascha Schade
- * Copyright (c) 2018, Antal Szabó
+ * Copyright (c) 2021, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -17,7 +14,7 @@
 
 #include <modm/platform.hpp>
 #include <modm/architecture/interface/clock.hpp>
-#include <modm/driver/inertial/lis3dsh.hpp>
+// #include <modm/driver/inertial/lis3dsh.hpp>
 
 using namespace modm::platform;
 
@@ -26,12 +23,12 @@ namespace Board
 {
 	using namespace modm::literals;
 
-/// STM32F407 running at 168MHz generated from the external 8MHz crystal
+/// STM32F411 running at 100MHz generated from the external 8MHz crystal
 struct SystemClock {
-	static constexpr uint32_t Frequency = 168_MHz;
+	static constexpr uint32_t Frequency = 100_MHz;
 	static constexpr uint32_t Ahb = Frequency;
-	static constexpr uint32_t Apb1 = Frequency / 4;
-	static constexpr uint32_t Apb2 = Frequency / 2;
+	static constexpr uint32_t Apb1 = Frequency / 2;
+	static constexpr uint32_t Apb2 = Frequency;
 
 	static constexpr uint32_t Adc = Apb2;
 
@@ -82,21 +79,20 @@ struct SystemClock {
 	{
 		Rcc::enableExternalCrystal();	// 8MHz
 		const Rcc::PllFactors pllFactors{
-			.pllM = 4,		// 8MHz / M=4 -> 2MHz
-			.pllN = 168,	// 2MHz * N=168 -> 336MHz
-			.pllP = 2,		// 336MHz / P=2 -> 168MHz = F_cpu
-			.pllQ = 7		// 336MHz / Q=7 ->  48MHz = F_usb
+			.pllM = 8,		// 8MHz / M=8 -> 1MHz
+			.pllN = 400,	// 1MHz * N=400 -> 400MHz
+			.pllP = 4,		// 400MHz / P=4 -> 100MHz = F_cpu
 		};
 		Rcc::enablePll(Rcc::PllSource::ExternalCrystal, pllFactors);
-		// set flash latency for 168MHz
+		// set flash latency for 100MHz
 		Rcc::setFlashLatency<Frequency>();
 		// switch system clock to PLL output
 		Rcc::enableSystemClock(Rcc::SystemClockSource::Pll);
 		Rcc::setAhbPrescaler(Rcc::AhbPrescaler::Div1);
-		// APB1 has max. 42MHz
-		// APB2 has max. 84MHz
-		Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div4);
-		Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div2);
+		// APB1 has max. 50MHz
+		// APB2 has max. 100MHz
+		Rcc::setApb1Prescaler(Rcc::Apb1Prescaler::Div2);
+		Rcc::setApb2Prescaler(Rcc::Apb2Prescaler::Div1);
 		// update frequencies for busy-wait delay functions
 		Rcc::updateCoreFrequency<Frequency>();
 
@@ -109,15 +105,17 @@ using Button = GpioInputA0;
 using ClockOut = GpioOutputA8;
 using SystemClockOut = GpioOutputC9;
 
-using LedOrange = GpioOutputD13;	// User LED 3
 using LedGreen  = GpioOutputD12;	// User LED 4
+using LedOrange = GpioOutputD13;	// User LED 3
 using LedRed    = GpioOutputD14;	// User LED 5
 using LedBlue   = GpioOutputD15;	// User LED 6
+
+using LedUsb    = GpioOutputA9;
 
 using Leds = SoftwareGpioPort< LedGreen, LedBlue, LedRed, LedOrange >;
 
 
-namespace lis3
+/* namespace lis3
 {
 using Int = GpioInputE1;	// LIS302DL_INT2
 
@@ -127,8 +125,8 @@ using Mosi = GpioOutputA7;	// SPI1_MOSI
 using Miso = GpioInputA6;	// SPI1_MISO
 
 using SpiMaster = SpiMaster1;
-using Transport = modm::Lis3InterfaceSpi< SpiMaster, Cs >;
-}
+using Transport = modm::Lis3TransportSpi< SpiMaster, Cs >;
+} */
 
 
 namespace cs43
@@ -176,20 +174,28 @@ initialize()
 	SysTickTimer::initialize<SystemClock>();
 
 	Leds::setOutput(modm::Gpio::Low);
+	LedUsb::setOutput(modm::Gpio::Low);
 
 	Button::setInput();
+	Button::setInputTrigger(Gpio::InputTrigger::RisingEdge);
+	Button::enableExternalInterrupt();
+//	Button::enableExternalInterruptVector(12);
 }
 
-inline void
+/* inline void
 initializeLis3()
 {
 	lis3::Int::setInput();
+	lis3::Int::setInputTrigger(Gpio::InputTrigger::RisingEdge);
+	lis3::Int::enableExternalInterrupt();
+//	lis3::Int::enableExternalInterruptVector(12);
+
 	lis3::Cs::setOutput(modm::Gpio::High);
 
 	lis3::SpiMaster::connect<lis3::Sck::Sck, lis3::Mosi::Mosi, lis3::Miso::Miso>();
 	lis3::SpiMaster::initialize<SystemClock, 10_MHz>();
 	lis3::SpiMaster::setDataMode(lis3::SpiMaster::DataMode::Mode3);
-}
+} */
 
 /// not supported yet, due to missing I2S driver
 inline void

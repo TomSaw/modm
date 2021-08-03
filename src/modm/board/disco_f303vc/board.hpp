@@ -135,7 +135,7 @@ using Mosi = GpioOutputA7;	// SPI1_MOSI [L3GD20_SDA/SDI/SDO]
 using Miso = GpioInputA6;	// SPI1_MISO [L3GD20_SA0/SDO]
 
 using SpiMaster = SpiMaster1;
-using Transport = modm::Lis3TransportSpi< SpiMaster, Cs >;
+using Transport = modm::Lis3InterfaceSpi< SpiMaster, Cs >;
 using Gyroscope = modm::L3gd20< Transport >;
 }
 

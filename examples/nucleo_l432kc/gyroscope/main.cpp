@@ -29,7 +29,7 @@ struct UartSpi
 	using Master = UartSpiMaster1;
 };
 
-using Transport = modm::Lis3TransportSpi<UartSpi::Master, UartSpi::Cs>;
+using Transport = modm::Lis3InterfaceSpi<UartSpi::Master, UartSpi::Cs>;
 
 namespace
 {

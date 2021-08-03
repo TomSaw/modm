@@ -34,7 +34,7 @@ typedef GpioA5 Scl;
 typedef GpioA7 Sda;
 typedef BitBangI2cMaster<Scl, Sda> I2cMaster;
 
-typedef modm::Lis3TransportI2c< I2cMaster > Transport;
+typedef modm::Lis3InterfaceI2c< I2cMaster > Transport;
 #else
 typedef Board::lis3::Transport Transport;
 #endif

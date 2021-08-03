@@ -417,7 +417,7 @@ public:
     }
 private:
     // This accelerometer is connected via I2C.
-    modm::Lis3dsh< modm::Lis3TransportI2c< I2cMaster > > accelerometer;
+    modm::Lis3dsh< modm::Lis3InterfaceI2c< I2cMaster > > accelerometer;
     modm::PeriodicTimer timer = modm::PeriodicTimer(5); // 5ms periodic timer.
     modm::filter::MovingAverage<float, 25> averageX;
     modm::filter::MovingAverage<float, 25> averageY;

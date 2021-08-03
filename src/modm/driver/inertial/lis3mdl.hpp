@@ -16,7 +16,7 @@
 #include <modm/processing/resumable.hpp>
 #include <modm/math/utils/endianness.hpp>
 #include <modm/math/geometry/vector3.hpp>
-#include "lis3_transport.hpp"
+#include "lis3_interface.hpp"
 
 namespace modm
 {
@@ -211,7 +211,7 @@ protected:
  * \ingroup modm_driver_lis3mdl
  */
 template < class I2cMaster >
-class Lis3mdl : public lis3mdl, public Lis3TransportI2c<I2cMaster>
+class Lis3mdl : public lis3mdl, public Lis3InterfaceI2c<I2cMaster>
 {
 public:
 	/**
