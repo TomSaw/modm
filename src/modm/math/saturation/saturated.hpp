@@ -323,5 +323,4 @@ public:
 	template<typename>
 	friend class Saturated;
 };
-
 }  // namespace modm
