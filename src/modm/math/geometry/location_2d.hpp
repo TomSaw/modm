@@ -3,6 +3,8 @@
  * Copyright (c) 2009-2011, Fabian Greif
  * Copyright (c) 2012, Niklas Hauser
  * Copyright (c) 2012, Sascha Schade
+ * Copyright (c) 2013, Kevin Läufer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -12,10 +14,7 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_LOCATION_2D_HPP
-#define	MODM_LOCATION_2D_HPP
-
-#include <cmath>
+#pragma once
 
 #include <modm/io/iostream.hpp>
 
@@ -37,39 +36,60 @@ namespace modm
 	class Location2D
 	{
 	public:
-		Location2D();
+		Vector<T, 2> position;
+		float orientation = 0;
 
-		Location2D(const Vector<T, 2>& position, const float& orientation);
+		constexpr Location2D() = default;
+		constexpr Location2D(const Vector<T, 2>& position, const float& orientation)
+			: position(position), orientation(orientation) {}
 
-		Location2D(const T& x, const T& y, const float& orientation);
+		[[deprecated("Use 'setPosition({x, y}, orientation)' instead!")]]
+		constexpr Location2D(const T& x, const T& y, const float& orientation)
+			: position(x, y), orientation(orientation) {}
 
-		inline const Vector<T, 2>&
-		getPosition() const;
+		template<typename U>
+		constexpr Location2D(const Location2D<U> &l) : position(l.position), orientation(l.orientation) {}
 
-		inline const T&
-		getX() const;
+		// getters and setters
+		void setPosition(const Vector<T, 2>& position) { this->position = position; }
 
-		inline const T&
-		getY() const;
+		[[deprecated("Use 'setPosition({x, y}' instead!")]]
+		void setPosition(T x, T y) { this->position.x = x; this->position.y = y; }
+		void setOrientation(const float orientation) { this->orientation = orientation; }
 
-		void
-		setPosition(const Vector<T, 2>& point);
+		Vector<T, 2> getPosition() const { return position; }
+		inline float getOrientation() const { return orientation; }
+		T getX() const { return position.x; }
+		T getY() const { return position.y; }
 
-		void
-		setPosition(const T& x, const T& y);
-
-		inline float
-		getOrientation() const;
-
-		void
-		setOrientation(const float& phi);
+		bool operator== (const Location2D &other) const {
+			return (
+				position == other.position and
+				std::abs(orientation - other.orientation) < __FLT_EPSILON__
+			);
+		}
+		bool operator!= (const Location2D &other) const {
+			return (
+				position != other.position or
+				std::abs(orientation - other.orientation) > __FLT_EPSILON__
+			);
+		}
 
 		/// Add a position increment
-		void
-		move(const Location2D& diff);
+		void move(const Location2D& diff) {
+			Vector<T, 2> movement = diff.position;
+			movement.rotate(orientation);
 
-		void
-		move(const Vector<T, 2>& diff);
+			position.translate(movement);
+			orientation = Angle::normalize(orientation + diff.orientation);
+		}
+
+		void move(const Vector<T, 2>& diff) {
+			Vector<T, 2> movement(diff);
+			movement.rotate(orientation);
+
+			position.translate(movement);
+		}
 
 		/**
 		 * \brief	Add a increment only in x-direction
@@ -85,62 +105,38 @@ namespace modm
 		 * movement over time.
 		 * Because the y-component will always be zero, we created this
 		 * method, which avoids unnecessary computations for the y-component
-		 * and is therefore faster the the universal move-method.
+		 * and is therefore faster than the universal move-method.
 		 *
 		 * \param	x		movement in x-direction
 		 * \param	phi		rotation
 		 */
 		void
-		move(T x, float phi);
+		move(T x, float phi) {
+			Vector<T, 2> vector(Vector<float, 2>(x * std::cos(orientation), x * std::sin(orientation)));
+			position.translate(vector);
 
-		/// TODO
-		Vector<T, 2>
-		translated(const Vector<T, 2>& vector) const;
+			orientation = Angle::normalize(orientation + phi);
+		}
 
-		/// Convert between Location-objects with different base-types
-		template <typename U>
-		Location2D<U>
-		convert() const;
+		// TODO
+		Vector<T, 2> translated(const Vector<T, 2>& vector) const {
+			Vector<T, 2> result(vector);
+			result.rotate(orientation);
+			result.translate(position);
 
-		bool
-		operator == (const Location2D &other) const;
-
-		bool
-		operator != (const Location2D &other) const;
+			return result;
+		}
 
 	private:
 		template <typename U>
 		friend IOStream&
 		operator <<( IOStream&, const Location2D<U>&);
-
-		Vector<T, 2> position;
-		float orientation;
 	};
 
-	// ------------------------------------------------------------------------
-	// Global functions
-	// ------------------------------------------------------------------------
-	/**
-	 * \brief	Stream operator to \b modm::Location<T>
-	 *
-	 * \ingroup	modm_math_geometry
-	 */
 	template<typename T>
 	IOStream&
-	operator << (IOStream& os, const Location2D<T>& l);
-
-	// ------------------------------------------------------------------------
-	// Declaration of specialized methods
-	// ------------------------------------------------------------------------
-	/*template<>
-	bool
-	Location2D<float>::operator == (const Location2D &other) const;
-
-	template<>
-	bool
-	Location2D<double>::operator == (const Location2D &other) const;*/
+	operator<< (IOStream& os, const Location2D<T>& location) {
+		os << location.position << ", phi=" << location.orientation;
+		return os;
+	}
 }
-
-#include "location_2d_impl.hpp"
-
-#endif	// MODM_LOCATION_2D_HPP

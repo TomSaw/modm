@@ -134,8 +134,8 @@ Vector2Test::testOperators()
 	TEST_ASSERT_EQUALS((a * 3).getY(), 5*3);
 	TEST_ASSERT_EQUALS((3 * a).getX(), 3*7);
 	TEST_ASSERT_EQUALS((3 * a).getY(), 3*5);
-	TEST_ASSERT_EQUALS((b / 2).getX(), -18/2);
-	TEST_ASSERT_EQUALS((b / 2).getY(), 4);	// 3.5 -> rounded 4
+	TEST_ASSERT_EQUALS((b / 2.0).getX(), -18/2);
+	TEST_ASSERT_EQUALS((b / 2.0).getY(), 4);	// 3.5 -> rounded 4
 
 	-b;
 	TEST_ASSERT_EQUALS(b.getX(), -18);
@@ -322,7 +322,7 @@ Vector2Test::testConversion()
 	TEST_ASSERT_EQUALS(a.getX(), 12.763f);
 	TEST_ASSERT_EQUALS(a.getY(), -13.3123f);
 
-	modm::Vector2i b = a.convert<int16_t>();
+	modm::Vector2i b(a);
 
 	TEST_ASSERT_EQUALS(b.getX(), 13);
 	TEST_ASSERT_EQUALS(b.getY(), -13);
