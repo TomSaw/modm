@@ -17,7 +17,7 @@ concept GraphicDisplay = color::Color<typename D::ColorType>;
  *
  * @author 	Thomas Sommer
  */
-template<typename F>
+template<class F>
 concept ColorPattern = requires(F p)
 {
 	{ p.operator()(shape::Point()) } -> color::Color;  // -> std::convertible_to<color::Rgb888>;
