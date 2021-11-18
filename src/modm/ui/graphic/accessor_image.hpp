@@ -29,7 +29,7 @@ namespace modm::graphic
  * 					By consequently restricting the ImageAccessor to sequential access, intercompatibility
  * 					is guaranteed.
  */
-template<class C, template<typename> class>
+template<class, template<typename> class>
 class ImageAccessor;
 
 /**

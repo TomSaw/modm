@@ -28,7 +28,7 @@
 namespace modm::graphic
 {
 
-template<class C, shape::Size R>
+template<class, shape::Size>
 class BufferMemory;
 
 /**
