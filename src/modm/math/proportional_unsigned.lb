@@ -11,27 +11,24 @@
 # -----------------------------------------------------------------------------
 
 def init(module):
-    module.name = ":ui:color"
+    module.name = ":math:proportional_unsigned"
     module.description = """
-# Color
+# Proportional Unsigned
 
-Color containers and converters in various formats: RGB, HSV, Brightness, Rgb565
+Unsigned integer with arbitrary digits D and proportional scaling between
+instances with different digits. F.e. a ProportionalUnsigned<2> with the value
+0b11 converted to a to a ProportionalUnsigned<4> becomes the value 0b1111.
+
+It's the baseclass to color::Gray and thus to any other colors too but may have more applications.
 """
-
 
 def prepare(module, options):
     module.depends(
-		":math:utils",
-		":math:proportional_unsigned",
-		":math:saturation"
-	)
+        ":utils",
+        ":architecture:assert"
+    )
     return True
 
-
 def build(env):
-    env.outbasepath = "modm/src/modm/ui/color"
-
-    ignore = ["*pattern*"]
-    env.copy(".", ignore=env.ignore_paths(*ignore))
-
-    env.copy("../color.hpp")
+    env.outbasepath = "modm/src/modm/math"
+    env.copy("proportional_unsigned.hpp")
