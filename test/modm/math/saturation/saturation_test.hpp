@@ -19,14 +19,17 @@ class SaturationTest : public unittest::TestSuite
 {
 public:
 	void
-	testSigned8bit();
+	test_int8_t();
 
 	void
-	testUnsigned8bit();
+	test_uint8_t();
 
 	void
-	testSigned16bit();
+	test_int16_t();
 
 	void
-	testUnsigned16bit();
+	test_uint16_t();
+
+	void
+	test_uint8_t_ref();
 };
