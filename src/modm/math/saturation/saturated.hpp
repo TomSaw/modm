@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -30,7 +30,6 @@ namespace modm
  * @see		https://en.wikipedia.org/wiki/Saturation_arithmetic
  *
  * @author	Thomas Sommer
- *
  * @ingroup modm_math_saturated
  */
 
@@ -42,7 +41,7 @@ protected:
 	using TP = std::remove_reference_t<T>;
 	using TS = std::conditional_t<std::is_signed_v<T>, T, std::make_signed_t<modm::WideType<TP>>>;
 
-	T value = 0;
+	T value{0};
 private:
 	static constexpr TP min = std::numeric_limits<TP>::min();
 	static constexpr TP max = std::numeric_limits<TP>::max();
@@ -55,35 +54,37 @@ public:
 
 	template<typename U>
 	requires std::integral<std::remove_reference_t<U>>
-	constexpr Saturated(const U& v)
-	{ value = std::clamp< modm::fits_any_t<TP, U> >(v, min, max); }
+	constexpr Saturated(const U& value)
+	{ this->value = std::clamp< modm::fits_any_t<TP, U> >(value, min, max); }
 
 	template<typename U>
 	requires std::floating_point<std::remove_reference_t<U>>
-	constexpr Saturated(const U& v)
-	{ value = std::clamp<float>(v, min, max); }
+	constexpr Saturated(const U& value)
+	{ this->value = std::clamp<float>(value, min, max); }
 
 	template<typename U>
 	requires std::integral<std::remove_reference_t<U>>
 	constexpr Saturated(const Saturated<U>& other)
 	{ value = std::clamp< modm::fits_any_t<TP, U> >(other.value, min, max); }
 
-	TP
-	getValue() const
+	T getValue() const
 	{ return value; }
 
-	// Implicitely serve underlying type so you can f.e. pass Saturated to std::abs()
-	operator T&() { return value; }
-	operator T() const { return value; }
-
-	// comparison operators
-	constexpr auto
-	operator<=>(const Saturated<T>&) const = default;
+	// Cast to underlying type. No more comparison operators required.
+	// @see https://en.cppreference.com/w/cpp/language/cast_operator
+	operator T() const
+	{ return value; }
 
 	// operator=
 	void
 	operator=(const Saturated& other)
 	{ value = other.value; }
+
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	void
+	operator=(const U& other)
+	{ value = std::clamp< modm::fits_any_t<TP, U> >(other, min, max); }
 
 	template<typename U>
 	requires std::integral<std::remove_reference_t<U>>
@@ -110,26 +111,26 @@ public:
 	Saturated
 	operator++(int)
 	{
-		Saturated tmp(*this);
+		Saturated ret(*this);
 		if (value < max) value++;
-		return tmp;
+		return ret;
 	}
 
 	Saturated
 	operator--(int)
 	{
-		Saturated tmp(*this);
+		Saturated ret(*this);
 		if (value > min) value--;
-		return tmp;
+		return ret;
 	}
 
 	// operator+=, operator-=, operator*=
 	template<typename U>
 	requires std::unsigned_integral<std::remove_reference_t<U>>
 	Saturated&
-	operator+=(const Saturated<U>& other)
+	operator+=(const U& other)
 	{
-		if (__builtin_add_overflow(value, other.value, &value))
+		if (__builtin_add_overflow(value, other, &value))
 			value = max;
 
 		return *this;
@@ -138,13 +139,13 @@ public:
 	template<typename U>
 	requires std::signed_integral<std::remove_reference_t<U>>
 	Saturated&
-	operator+=(const Saturated<U>& other)
+	operator+=(const U& other)
 	{
-		if (other.value < 0) {
-			if (__builtin_sub_overflow(value, -other.value, &value))
+		if (other < 0) {
+			if (__builtin_sub_overflow(value, -other, &value))
 				value = min;
 		} else {
-			if (__builtin_add_overflow(value, other.value, &value))
+			if (__builtin_add_overflow(value, other, &value))
 				value = max;
 		}
 
@@ -152,11 +153,17 @@ public:
 	}
 
 	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated&
+	operator+=(const Saturated<U>& other)
+	{ return this->operator+=(other.value); }
+
+	template<typename U>
 	requires std::unsigned_integral<std::remove_reference_t<U>>
 	Saturated&
-	operator-=(const Saturated<U>& other)
+	operator-=(const U& other)
 	{
-		if (__builtin_sub_overflow(value, other.value, &value))
+		if (__builtin_sub_overflow(value, other, &value))
 			value = min;
 
 		return *this;
@@ -165,13 +172,13 @@ public:
 	template<typename U>
 	requires std::signed_integral<std::remove_reference_t<U>>
 	Saturated&
-	operator-=(const Saturated<U>& other)
+	operator-=(const U& other)
 	{
-		if (other.value < 0) {
-			if (__builtin_add_overflow(value, -other.value, &value))
+		if (other < 0) {
+			if (__builtin_add_overflow(value, -other, &value))
 				value = max;
 		} else {
-			if (__builtin_sub_overflow(value, other.value, &value))
+			if (__builtin_sub_overflow(value, other, &value))
 				value = min;
 		}
 
@@ -179,11 +186,17 @@ public:
 	}
 
 	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated&
+	operator-=(const Saturated<U>& other)
+	{ return this->operator-=(other.value); }
+
+	template<typename U>
 	requires std::unsigned_integral<std::remove_reference_t<U>>
 	Saturated&
-	operator*=(const Saturated<U>& other)
+	operator*=(const U& other)
 	{
-		if (__builtin_mul_overflow(value, other.value, &value))
+		if (__builtin_mul_overflow(value, other, &value))
 			value = max;
 
 		return *this;
@@ -192,126 +205,156 @@ public:
 	template<typename U>
 	requires std::signed_integral<std::remove_reference_t<U>>
 	Saturated&
+	operator*=(const U& other)
+	{
+		if (other < 0) {
+			if (__builtin_mul_overflow(value, -other, &value))
+				value = max;
+			value = -value;
+		} else {
+			if (__builtin_mul_overflow(value, other, &value))
+				value = max;
+		}
+
+		return *this;
+	}
+
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated&
 	operator*=(const Saturated<U>& other)
-	{
-		if (other.value < 0) {
-			if (__builtin_mul_overflow(value, -other.value, &value))
-				value = max;
-			value = -value;
-		} else {
-			if (__builtin_mul_overflow(value, other.value, &value))
-				value = max;
-		}
-
-		return *this;
-	}
-
-	// OPTIMIZE By whatever reason, for operator*= the compiler doesn't implicitly construct Saturated types.
-	// Overload plain types for now:
-	template<typename U>
-	requires std::unsigned_integral<std::remove_reference_t<U>>
-	Saturated&
-	operator*=(const U& v)
-	{
-		if (__builtin_mul_overflow(value, v, &value))
-			value = max;
-
-		return *this;
-	}
-
-	template<typename U>
-	requires std::signed_integral<std::remove_reference_t<U>>
-	Saturated&
-	operator*=(const U& v)
-	{
-		if (v < 0) {
-			if (__builtin_mul_overflow(value, -v, &value))
-				value = max;
-			value = -value;
-		} else {
-			if (__builtin_mul_overflow(value, v, &value))
-				value = max;
-		}
-
-		return *this;
-	}
+	{ return this->operator*=(other.value); }
 
 	// operator+, operator-, operator*
 	template<typename U>
 	requires std::unsigned_integral<std::remove_reference_t<U>>
 	TP
-	operator+(const Saturated<U>& other)
+	operator+(const U& other) const
 	{
-		Saturated<TP> tmp;
+		Saturated<TP> ret;
 
-		if (__builtin_add_overflow(value, other.value, &tmp.value))
-			tmp.value = max;
+		if (__builtin_add_overflow(value, other, &ret.value))
+			ret.value = max;
 
-		return tmp.value;
+		return ret;
 	}
 
 	template<typename U>
 	requires std::signed_integral<std::remove_reference_t<U>>
 	TP
-	operator+(const Saturated<U>& other)
+	operator+(const U& other) const
 	{
-		Saturated<TP> tmp;
+		Saturated<TP> ret;
 
-		if (other.value < 0) {
-			if (__builtin_sub_overflow(value, -other.value, &tmp.value))
-				tmp.value = min;
+		if (other < 0) {
+			if (__builtin_sub_overflow(value, -other, &ret.value))
+				ret.value = min;
 		} else {
-			if (__builtin_add_overflow(value, other.value, &tmp.value))
-				tmp.value = max;
+			if (__builtin_add_overflow(value, other, &ret.value))
+				ret.value = max;
 		}
 
-		return tmp.value;
+		return ret;
 	}
+
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator+(const Saturated<U>& other) const
+	{ return this->operator+(other.value); }
 
 	template<typename U>
 	requires std::unsigned_integral<std::remove_reference_t<U>>
-	TP
-	operator-(const Saturated<U>& other)
+	Saturated<TP>
+	operator-(const U& other) const
 	{
-		Saturated<TP> tmp;
+		Saturated<TP> ret;
 
-		if (__builtin_sub_overflow(value, other.value, &tmp.value))
-			tmp.value = min;
+		if (__builtin_sub_overflow(value, other, &ret.value))
+			ret.value = min;
 
-		return tmp.value;
+		return ret;
 	}
 
 	template<typename U>
 	requires std::signed_integral<std::remove_reference_t<U>>
-	TP
-	operator-(const Saturated<U>& other)
+	Saturated<TP>
+	operator-(const U& other) const
 	{
-		Saturated<TP> tmp;
+		Saturated<TP> ret;
 
-		if (other.value < 0) {
-			if (__builtin_add_overflow(value, -other.value, &tmp.value))
-				tmp.value = max;
+		if (other < 0) {
+			if (__builtin_add_overflow(value, -other, &ret.value))
+				ret.value = max;
 		} else {
-			if (__builtin_sub_overflow(value, other.value, &tmp.value))
-				tmp.value = min;
+			if (__builtin_sub_overflow(value, other, &ret.value))
+				ret.value = min;
 		}
 
-		return tmp.value;
+		return ret;
 	}
 
-	TP
-	operator*(const Saturated<T>& other)
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator-(const Saturated<U>& other) const
+	{ return this->operator-(other.value); }
+
+	template<typename U>
+	requires std::unsigned_integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator*(const U& other) const
 	{
-		Saturated<TP> tmp;
+		Saturated<TP> ret;
 
-		if (__builtin_mul_overflow(value, other.value, &tmp.value))
-			tmp.value = max;
+		if (__builtin_mul_overflow(value, other, &ret.value))
+			ret.value = max;
 
-		return tmp.value;
+		return ret;
 	}
+
+	template<typename U>
+	requires std::signed_integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator*(const U& other) const
+	{
+		Saturated<TP> ret;
+
+		if (other < 0) {
+			if (__builtin_mul_overflow(value, -other, &ret.value))
+				ret.value = max;
+			ret.value = -ret.value;
+		} else {
+			if (__builtin_mul_overflow(value, other, &ret.value))
+				ret.value = max;
+		}
+
+		return ret;
+	}
+
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator*(const Saturated<U>& other) const
+	{ return this->operator*(other.value); }
+
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator/(const U& other) const
+	{
+		return Saturated<TP>(value / other);
+	}
+
+	template<typename U>
+	requires std::integral<std::remove_reference_t<U>>
+	Saturated<TP>
+	operator/(const Saturated<U>& other) const
+	{ return this->operator/(other.value); }
+
 
 	TS
-	operator-()
+	operator-() const
  	{ return -TS(value); }
 
 	void
@@ -323,4 +366,5 @@ public:
 	template<typename>
 	friend class Saturated;
 };
+
 }  // namespace modm

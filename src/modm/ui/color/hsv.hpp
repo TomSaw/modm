@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -22,7 +22,7 @@
 namespace modm::color
 {
 /**
- * @brief			Color in HSV space. Each channel has it's own Memoryaddress.
+ * @brief			Color in HSV space. Each channel has a memoryaddress on its own.
  *
  * @tparam DH 		Digits for hue
  * @tparam DS 		Digits for saturation
@@ -32,11 +32,11 @@ namespace modm::color
  * @ingroup			modm_ui_color
  */
 template<int DH, int DS = DH, int DV = DH>
+requires (DH > 0) && (DS > 0) && (DV > 0)
 class HsvD
 {
 public:
-	// TODO HueType should wrap rather than saturate
-	using HueType = GrayD<DH>;
+	using HueType = ProportionalUnsigned<DH>;
 	using SaturationType = GrayD<DS>;
 	using ValueType = GrayD<DV>;
 
@@ -51,45 +51,63 @@ public:
 		: hue(other.hue), saturation(other.saturation), value(other.value)
 	{}
 
+	template<ColorGray C>
+	constexpr HsvD(const C &gray)
+		: hue(0), saturation(0), value(gray)
+	{}
+
 	template<ColorRgb C>
 	constexpr HsvD(const C& rgb);
 
-	template<ColorRgbStacked CS>
- 	constexpr HsvD(const CS& rgbstacked) : HsvD(RgbD<CS::DR, CS::DG, CS::DB>(rgbstacked)) {}
+	template<ColorRgbStacked C>
+ 	constexpr HsvD(const C& rgbstacked)
+	 	: HsvD(RgbD<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
+	{}
+
+	// getters and setters
+	const HueType getHue() const { return hue; }
+	const SaturationType getSaturation() const { return saturation; }
+	const ValueType getValue() const { return value; }
+
+	HueType& getHue() { return hue; }
+	SaturationType& getSaturation() { return saturation; }
+	ValueType& getValue() { return value; }
 
 	void setHue(HueType hue) { this->hue = hue;}
 	void setSaturation(SaturationType saturation) { this->saturation = saturation;}
 	void setValue(ValueType value) { this->value = value;}
 
-	HueType getHue() const { return hue; }
+	// TODO operator +=, -=, *=, /=
+	// @see: https://gamedev.stackexchange.com/questions/26525/how-do-you-blend-multiple-colors-in-hsv-polar-color-space
 
-	SaturationType getSaturation() const { return saturation; }
-	ValueType getValue() const { return value; }
+	// TODO operator +, -, *, /
 
-	constexpr bool
+	// Equality
+	bool
 	operator==(const HsvD& other) const = default;
 
-	// IMPLEMENT missing operators
-	// operator+=()
-	// operator-=()
-	// operator*=()
+	bool
+	operator>(const HsvD& other) const {
+		return value >= other.value;
+	};
 
-	void invert() {
-		hue.invert();
-	}
+	bool
+	operator<(const HsvD& other) const {
+		return value >= other.value;
+	};
 
-	// Output in human readable format
-	// Hue in deg, Sat in pct, Value in pct
-	void iostream_human_readable(IOStream& io) {
-		using CalcTypeHue = modm::WideType<typename HueType::ValueType>;
-		io << (CalcTypeHue(hue.getValue()) * 360 / hue.max) << "deg\t";
+	bool
+	operator>=(const HsvD& other) const {
+		return value >= other.value;
+	};
 
-		using CalcTypeSaturation = modm::WideType<typename SaturationType::ValueType>;
- 		io << (CalcTypeSaturation(saturation.getValue()) * 100 / saturation.max) << "%\t";
+	bool
+	operator<=(const HsvD& other) const {
+		return value <= other.value;
+	};
 
-		using CalcTypeValue = modm::WideType<typename ValueType::ValueType>;
-		io << (CalcTypeValue(value.getValue()) * 100 / value.max) << "%";
-	}
+	void invert()
+	{ hue.invert(); }
 
 private:
 	HueType hue{0};
@@ -102,14 +120,19 @@ private:
 	template<ColorHsv C>
 	friend IOStream&
 	operator<<(IOStream&, const C&);
+
+	// Human friendly output:
+	// Hue in deg, Sat in pct, Value in pct
+	template<ColorHsv C>
+	void ostream_human_friendly(IOStream& os, const C&);
 };
 
 template<std::unsigned_integral T>
 using HsvT = HsvD<std::numeric_limits<T>::digits>;
 
 /// @ingroup modm_ui_color
-using Hsv888 = HsvD<8>; // Alternative using Hsv888 = HsvT<uint8_t>;
-using Hsv161616 = HsvD<16>; // Alternative using Hsv888 = HsvT<uint16_t>;
+using Hsv888 = HsvT<uint8_t>;
+using Hsv161616 = HsvT<uint16_t>;
 
 #if __has_include(<modm/io/iostream.hpp>)
 #include <modm/io/iostream.hpp>
@@ -120,6 +143,17 @@ operator<<(IOStream& os, const C& hsv)
 {
 	os << hsv.getHue() << "\t" << hsv.getSaturation() << "\t" << hsv.getValue();
 	return os;
+}
+
+template<ColorHsv C>
+void ostream_human_friendly(IOStream& os, const C& hsv) {
+	using CalcTypeHue = modm::WideType<typename C::HueType::T>;
+	using CalcTypeSaturation = modm::WideType<typename C::SaturationType::T>;
+	using CalcTypeValue = modm::WideType<typename C::ValueType::T>;
+
+	os << (CalcTypeHue(hsv.getHue()) * 360 / hsv.getHue().max) << "deg\t";
+	os << (CalcTypeSaturation(hsv.getSaturation()) * 100 / hsv.getSaturation().max) << "%\t";
+	os << (CalcTypeValue(hsv.getValue()) * 100 / hsv.getValue().max) << "%";
 }
 #endif
 

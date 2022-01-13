@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2021-2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -66,4 +66,19 @@ struct fits_any {
 
 template <typename ... Ts>
 	using fits_any_t = typename fits_any<Ts...>::type;
+
+/**
+ * @brief  		Generates a bitmask with N bits set
+ *
+ * @tparam N 	Number of bits to set
+ */
+template<unsigned int N>
+struct bitmask {
+	using value_type = uint_t<N>::least;
+	static constexpr value_type value = std::pow(2, N) - 1;
+	constexpr operator value_type() const noexcept { return value; }
+};
+
+template<unsigned int N>
+using bitmask_t = typename bitmask<N>::value_type;
 }

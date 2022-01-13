@@ -4,7 +4,7 @@
  * Copyright (c) 2011-2012, 2014-2015, Niklas Hauser
  * Copyright (c) 2015, Sascha Schade
  * Copyright (c) 2020, Christopher Durand
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -14,8 +14,7 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef	MODM_MATH_UTILS_MISC_HPP
-#define	MODM_MATH_UTILS_MISC_HPP
+#pragma once
 
 #include <stdint.h>
 
@@ -67,7 +66,8 @@ pow(uint32_t base, uint8_t exponent)
  *
  * @param  a 	first object to compare
  * @param  b  	second object to compare
- * @param  cs  	More optional objects to compare
+ * @param  cs  	Further objects for comparison
+ *
  * @return   	The smallest object
  *
  * @see			https://stackoverflow.com/questions/23815138/implementing-variadic-min-max-functions
@@ -91,8 +91,9 @@ constexpr T vmin(T a, T b, Ts&&... cs)
  *
  * @param  a 	first object to compare
  * @param  b  	second object to compare
- * @param  cs  	More optional objects to compare
- * @return   	The greatest object
+ * @param  cs  	Further objects for comparison
+ *
+ * @return   	The biggest object
  *
  * @see			https://stackoverflow.com/questions/23815138/implementing-variadic-min-max-functions
  */
@@ -157,6 +158,4 @@ constexpr Float constexpr_fabs(Float number)
 
 /// @}
 
-}	// namespace modm
-
-#endif
+} // namespace modm

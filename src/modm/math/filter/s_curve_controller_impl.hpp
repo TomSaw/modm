@@ -20,6 +20,7 @@
 #endif
 
 
+#include <algorithm>
 #include <modm/math/utils.hpp>
 
 // ----------------------------------------------------------------------------
@@ -113,9 +114,9 @@ modm::SCurveController<T>::update(T error, const T& speed)
 		outputDecrement = std::sqrt(error * parameter.decreaseFactor * 2);
 	}
 
-	output = modm::min(outputIncrement, outputDecrement);
+	output = std::min(outputIncrement, outputDecrement);
 	// TODO smooth breaking if the speedMaximum has changed to a lower value
-	output = modm::min(output, parameter.speedMaximum);
+	output = std::min(output, parameter.speedMaximum);
 
 	if (output < parameter.speedMinimum) {
 		output = parameter.speedMinimum;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -19,13 +19,13 @@ class ColorTest : public unittest::TestSuite
 {
 public:
 	void
-	testGrayConstructors();
+	testGray();
 
 	void
-	testRgbConstructors();
+	testRgb();
 
 	void
-	testHsvConstructors();
+	testHsv();
 
 	void
 	testConvertion_8bit();

@@ -3,7 +3,7 @@
  * Copyright (c) 2010, Martin Rosekeit
  * Copyright (c) 2012-2013, Niklas Hauser
  * Copyright (c) 2013, David Hebbeker
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -31,9 +31,9 @@ constexpr modm::color::HsvD<DH, DS, DV>::HsvD(const C& rgb)
 
 	const CalcType maxValue = ValueType::max;
 
-	const CalcType red = CalcType(ValueType(rgb.getRed()).getValue()) / maxValue;
-	const CalcType green = CalcType(ValueType(rgb.getGreen()).getValue()) / maxValue;
-	const CalcType blue = CalcType(ValueType(rgb.getBlue()).getValue()) / maxValue;
+	const CalcType red = CalcType(ValueType(rgb.getRed())) / maxValue;
+	const CalcType green = CalcType(ValueType(rgb.getGreen())) / maxValue;
+	const CalcType blue = CalcType(ValueType(rgb.getBlue())) / maxValue;
 	const CalcType max = modm::vmax(red, green, blue);
 	const CalcType min = modm::vmin(red, green, blue);
 	const CalcType diff = max - min;

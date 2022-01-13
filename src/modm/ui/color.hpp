@@ -16,3 +16,5 @@
 
 #include "color/rgb_html.hpp"
 #include "color/rgb_stacked.hpp"
+
+#include "color/constexpr_operators.hpp"

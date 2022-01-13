@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -14,26 +14,32 @@
 #include <bit>
 
 /**
- * @brief			Concepts for colortypes and groups of colortypes.
- * 					Key applications:
- * 					- Color conversion constructors
- * 					- Specialisation of buffer manipulation algorithms
+ * @brief		Concepts for colortypes and groups of colortypes.
+ * 				Key applications:
+ * 				- Color conversion constructors
+ * 				- Specialisation of buffer manipulation algorithms
  *
- * @author			Thomas Sommer
- * @ingroup			modm_ui_color
+ * @author		Thomas Sommer
+ * @ingroup		modm_ui_color
  */
 namespace modm::color {
 
-template <int>
+
+// Forward declarations
+template <int D>
+requires (D > 0)
 class GrayD;
 
-template<int, int, int>
+template<int DR, int DG, int DB>
+requires (DR > 0) && (DG > 0) && (DB > 0)
 class RgbD;
 
-template<int, int, int>
+template<int DR, int DG, int DB>
+requires (DR > 0) && (DG > 0) && (DB > 0)
 class RgbStackedD;
 
-template <int, int, int>
+template <int DH, int DS, int DV>
+requires (DH > 0) && (DS > 0) && (DV > 0)
 class HsvD;
 
 /**
@@ -89,6 +95,7 @@ concept ColorPlanar = !ColorPalletized<C>;
  */
 template<class C>
 concept ColorMonochrome = std::is_same_v<C, GrayD<1>>;
-// concept ColorMonochrome = ColorGray<C> and C::Digits == 1; Alternative implementation as reference
+// Alternative implementation as reference
+// concept ColorMonochrome = ColorGray<C> and C::Digits == 1;
 
 }

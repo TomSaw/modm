@@ -3,7 +3,7 @@
  * Copyright (c) 2010, Martin Rosekeit
  * Copyright (c) 2012-2013, Niklas Hauser
  * Copyright (c) 2013, David Hebbeker
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -23,20 +23,20 @@ constexpr modm::color::RgbD<DR, DG, DB>::RgbD(const C& hsv)
 	// OPTIMIZE No need to calculate sharper than the output
 	// Develop CalcType from types of conversion target: RedType, GreenType and BlueType.
 	using CalcType = C::ValueType;
-	using ValueType = CalcType::ValueType;
+	using T = CalcType::T;
 
-	using WideType = modm::WideType<ValueType>;
+	using WideType = modm::WideType<T>;
 	using WideWideType = modm::WideType<WideType>;
-	static_assert(!std::is_same_v<WideType, WideWideType>, "C::ValueType too big");
+	static_assert(!std::is_same_v<WideType, WideWideType>, "C::T too big");
 
-	const ValueType hue = CalcType(hsv.getHue()).getValue();
-	const ValueType saturation = CalcType(hsv.getSaturation()).getValue();
-	const ValueType value = CalcType(hsv.getValue()).getValue();
+	const T hue = CalcType(hsv.getHue());
+	const T saturation = CalcType(hsv.getSaturation());
+	const T value = CalcType(hsv.getValue());
 
 	const WideType vs = value * saturation;
 	const WideType h6 = 6 * hue;
 
-	ValueType i = h6 >> CalcType::Digits;
+	T i = h6 >> CalcType::Digits;
 	WideType f = ((i | 1) << CalcType::Digits) - h6;
 	if (i & 1) f = -f;
 

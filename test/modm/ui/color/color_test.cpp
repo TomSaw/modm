@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -18,56 +18,71 @@
 using namespace modm;
 using namespace modm::color;
 
-void ColorTest::testGrayConstructors() {
+void ColorTest::testGray() {
 	Gray8 gray8(127);
-	Gray8 gray8_b(gray8);
-	TEST_ASSERT_EQUALS(gray8, gray8_b);
+	Gray8 gray8_B(gray8);
+	TEST_ASSERT_EQUALS(gray8, gray8_B);
 
 	Gray4 gray4(7);
+
 	gray4 += 3;
-	TEST_ASSERT_EQUALS(gray4.getValue(), 10);
+	TEST_ASSERT_EQUALS(gray4, 10U);
+
 	gray4 -= 1;
-	TEST_ASSERT_EQUALS(gray4.getValue(), 9);
-	gray4 -= 42; // under-saturation
-	TEST_ASSERT_EQUALS(gray4.getValue(), 0);
+	TEST_ASSERT_EQUALS(gray4, 9U);
+
+	gray4 -= 44; // under-saturation
+	TEST_ASSERT_EQUALS(gray4, 0U);
+
 	gray4 += 66; // over-saturation
-	TEST_ASSERT_EQUALS(gray4.getValue(), 0b00001111);
+	TEST_ASSERT_EQUALS(gray4, (unsigned int)(0b1111));
+
 	gray4 -= 3;
-	TEST_ASSERT_EQUALS(gray4.getValue(), 0b00001100);
+	TEST_ASSERT_EQUALS(gray4, (unsigned int)(0b1100));
 
-	// not supported
-	// gray4 -= -6; // another over-saturation
-	// TEST_ASSERT_EQUALS(gray4.getValue(), 0b00001111);
+	// IMPLEMENT -= -
+	// gray4 -= -2;
 
+	// IMPLEMENT += -
+	// gray4 += -3;
 
 	gray8 = gray4; // upscaling
-	TEST_ASSERT_EQUALS(gray8.getValue(), 0b11001100);
-	GrayD<13> gray13 = gray4; // more upscaling
-	TEST_ASSERT_EQUALS(gray13.getValue(), 0b0001100110011000); // last digit rounds down for odd D
+	TEST_ASSERT_EQUALS(gray8, (unsigned int)(0b11001100));
+
+	GrayD<13> gray13 = gray4; // further upscaling
+	TEST_ASSERT_EQUALS(gray13, (unsigned int)(0b0001100110011000)); // last digit rounds down for odd D
+
 	gray4 = gray13; // downscaling
-	TEST_ASSERT_EQUALS(gray4.getValue(), 0b00001100);
+	TEST_ASSERT_EQUALS(gray4, (unsigned int)(0b00001100));
 }
 
-void ColorTest::testRgbConstructors() {
-	Rgb888 rgb8(html::Orchid);
-	Rgb888 rgb8_b(rgb8);
-	TEST_ASSERT_EQUALS(rgb8, rgb8_b);
+void ColorTest::testRgb() {
+	Rgb888 rgb888_A(0, 100, 200);
+	Rgb888 rgb888_B(rgb888_A);
+	TEST_ASSERT_EQUALS(rgb888_A, rgb888_B);
 
-	Rgb161616 rgb16(rgb8);
+	Rgb161616 rgb16(rgb888_A);
 
-	Rgb888 rgb8_c(rgb16);
-	TEST_ASSERT_EQUALS(rgb8, rgb8_c);
+	Rgb888 rgb888_C(rgb16);
+	TEST_ASSERT_EQUALS(rgb888_A, rgb888_C);
+
+	Rgb888 rgb888_d(1, 2, 3);
+
+	rgb888_A += rgb888_d;
+	TEST_ASSERT_EQUALS(rgb888_A, Rgb888(1, 102, 203));
+
+	Rgb666 rgb666_A(1, 2, 3);
 }
 
-void ColorTest::testHsvConstructors() {
-	Hsv888 hsv8(html::Orchid);
-	Hsv888 hsv8_b(hsv8);
-	TEST_ASSERT_EQUALS(hsv8, hsv8_b);
+void ColorTest::testHsv() {
+	Hsv888 hsv888(html::Orchid);
+	Hsv888 hsv888_B(hsv888);
+	TEST_ASSERT_EQUALS(hsv888, hsv888_B);
 
-	Hsv161616 hsv16(hsv8);
+	Hsv161616 hsv161616(hsv888);
 
-	Hsv888 hsv8_c(hsv16);
-	TEST_ASSERT_EQUALS(hsv8, hsv8_c);
+	Hsv888 hsv888_C(hsv161616);
+	TEST_ASSERT_EQUALS(hsv888, hsv888_C);
 }
 
 void ColorTest::testConvertion_8bit()
@@ -80,34 +95,33 @@ void ColorTest::testConvertion_8bit()
 	TEST_ASSERT_EQUALS(hsv.getValue(), 128);
 
 	Gray8 gray(rgb);
-	TEST_ASSERT_EQUALS(gray.getValue(), 118);
+	TEST_ASSERT_EQUALS(gray, 118);
 }
-
 
 void ColorTest::testConvertion_16bit()
 {
-	Rgb888 rgb8(html::Orchid);
-	Hsv888 hsv8(rgb8);
-	Hsv161616 hsv16(hsv8);
+	Rgb888 rgb888(html::Orchid);
+	Hsv888 hsv888(rgb888);
+	Hsv161616 hsv161616(hsv888);
 
-	Rgb161616 rgb16(rgb8);
-	Hsv161616 hsv16_b(rgb16);
+	Rgb161616 rgb16(rgb888);
+	Hsv161616 hsv161616_B(rgb16);
 
 	// Test, if rgb->hsv conversion produces the same result for 8 and 16bits
 	// FIXME test fails
-	// TEST_ASSERT_EQUALS(hsv16, hsv16_b);
+	// TEST_ASSERT_EQUALS(hsv161616, hsv161616_B);
 }
 
 void ColorTest::testRgbHsvPingPongConvertion_8bit()
 {
-	Rgb888 rgb8(html::Orchid);
-	Hsv888 hsv8(rgb8);
-	Rgb888 rgb8_b(hsv8);
+	Rgb888 rgb888(html::Orchid);
+	Hsv888 hsv888(rgb888);
+	Rgb888 rgb888_B(hsv888);
 
 	// Convertion may distort - allow some tolerance.
-	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb8.getRed().getValue(), rgb8_b.getRed().getValue(), 1_pct));
-	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb8.getGreen().getValue(), rgb8_b.getGreen().getValue(), 1_pct));
-	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb8.getBlue().getValue(), rgb8_b.getBlue().getValue(), 1_pct));
+	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb888.getRed(), rgb888_B.getRed(), 1_pct));
+	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb888.getGreen(), rgb888_B.getGreen(), 1_pct));
+	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb888.getBlue(), rgb888_B.getBlue(), 1_pct));
 }
 
 void ColorTest::testRgbHsvPingPongConvertion_16bit()
@@ -115,10 +129,10 @@ void ColorTest::testRgbHsvPingPongConvertion_16bit()
 	// Rgb->Hsv->Rgb, both 16 bit
 	Rgb161616 rgb16(html::Orchid);
 	Hsv161616 hsv16(rgb16);
-	Rgb161616 rgb16_b(hsv16);
+	Rgb161616 rgb16_B(hsv16);
 
 	// Convertion may distort - allow some tolerance.
-	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb16.getRed().getValue(), rgb16_b.getRed().getValue(), 1_pct));
-	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb16.getGreen().getValue(), rgb16_b.getGreen().getValue(), 1_pct));
-	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb16.getBlue().getValue(), rgb16_b.getBlue().getValue(), 1_pct));
+	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb16.getRed(), rgb16_B.getRed(), 1_pct));
+	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb16.getGreen(), rgb16_B.getGreen(), 1_pct));
+	TEST_ASSERT_TRUE(modm::Tolerance::isValueInTolerance(rgb16.getBlue(), rgb16_B.getBlue(), 1_pct));
 }
