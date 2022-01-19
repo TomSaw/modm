@@ -54,13 +54,13 @@ namespace modm
 		void setPosition(const Vector<T, 2>& position) { this->position = position; }
 
 		[[deprecated("Use 'setPosition({x, y}' instead!")]]
-		void setPosition(T x, T y) { this->position.x = x; this->position.y = y; }
+		void setPosition(T x, T y) { this->position.x() = x; this->position.y() = y; }
 		void setOrientation(const float orientation) { this->orientation = orientation; }
 
 		Vector<T, 2> getPosition() const { return position; }
 		inline float getOrientation() const { return orientation; }
-		T getX() const { return position.x; }
-		T getY() const { return position.y; }
+		T getX() const { return position.x(); }
+		T getY() const { return position.y(); }
 
 		bool operator== (const Location2D &other) const {
 			return (

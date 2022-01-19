@@ -79,7 +79,7 @@ modm::Line2D<T>::getDistanceTo(const Vector<T, 2>& point) const
 	FloatType d = c1 / c2;
 
 	// calculate the closest point
-	Vector<T, 2> closestPoint = this->point + d * this->directionVector;
+	Vector<T, 2> closestPoint = this->point + this->directionVector * d;
 
 	// return the length of the vector from the closest point on the line
 	// to the given point

@@ -17,22 +17,22 @@ void
 Vector1Test::testConstructor()
 {
 	modm::Vector1i a;
-	TEST_ASSERT_EQUALS(a.x, 0);
+	TEST_ASSERT_EQUALS(a.x(), 0);
 
 	modm::Vector1i b(20);
-	TEST_ASSERT_EQUALS(b.x, 20);
+	TEST_ASSERT_EQUALS(b.x(), 20);
 
-	a.x = 100;
-	TEST_ASSERT_EQUALS(a.x, 100);
+	a.x() = 100;
+	TEST_ASSERT_EQUALS(a.x(), 100);
 
 	modm::Vector1i c(a);
-	TEST_ASSERT_EQUALS(c.x, 100);
+	TEST_ASSERT_EQUALS(c.x(), 100);
 
 	int16_t array[1] = {-4};
 	modm::Matrix<int16_t, 1, 1> m(array);
 
 	modm::Vector1i d(m);
-	TEST_ASSERT_EQUALS(d.x, -4);
+	TEST_ASSERT_EQUALS(d.x(), -4);
 }
 
 void
@@ -45,10 +45,10 @@ Vector1Test::testAssign()
 	modm::Vector1i b;
 
 	b = a;
-	TEST_ASSERT_EQUALS(b.x, 42);
+	TEST_ASSERT_EQUALS(b.x(), 42);
 
 	b = m;
-	TEST_ASSERT_EQUALS(b.x, -42);
+	TEST_ASSERT_EQUALS(b.x(), -42);
 }
 
 void
@@ -97,31 +97,31 @@ Vector1Test::testOperators()
 	modm::Vector1i a(7);
 	modm::Vector1i b(-18);
 
-	TEST_ASSERT_EQUALS((a + b).x, 7-18);
-	TEST_ASSERT_EQUALS((a - b).x, 7-(-18));
+	TEST_ASSERT_EQUALS((a + b).x(), 7-18);
+	TEST_ASSERT_EQUALS((a - b).x(), 7-(-18));
 	TEST_ASSERT_EQUALS((a * b), -7*18);
-	TEST_ASSERT_EQUALS((a * 3).x, 7*3);
-	TEST_ASSERT_EQUALS((3 * a).x, 3*7);
-	TEST_ASSERT_EQUALS((b / 2).x, -18/2);
+	TEST_ASSERT_EQUALS((a * 3).x(), 7*3);
+	TEST_ASSERT_EQUALS((3 * a).x(), 3*7);
+	TEST_ASSERT_EQUALS((b / 2).x(), -18/2);
 
 	-b;
-	TEST_ASSERT_EQUALS(b.x, -18);
+	TEST_ASSERT_EQUALS(b.x(), -18);
 	b = -b;
-	TEST_ASSERT_EQUALS(b.x, 18);
+	TEST_ASSERT_EQUALS(b.x(), 18);
 	a += b;
-	TEST_ASSERT_EQUALS(a.x, 7+18);
+	TEST_ASSERT_EQUALS(a.x(), 7+18);
 	a -= b;
-	TEST_ASSERT_EQUALS(a.x, 7+18-18);
+	TEST_ASSERT_EQUALS(a.x(), 7+18-18);
 	a *= 2;
-	TEST_ASSERT_EQUALS(a.x, 7*2);
+	TEST_ASSERT_EQUALS(a.x(), 7*2);
 	b /= 2;
-	TEST_ASSERT_EQUALS(b.x, 18/2);
+	TEST_ASSERT_EQUALS(b.x(), 18/2);
 
 	// test division of floats
 	modm::Vector1f c(-18.7f);
-	TEST_ASSERT_EQUALS_FLOAT((c / 2.4f).x, -7.7916666667);
+	TEST_ASSERT_EQUALS_FLOAT((c / 2.4f).x(), -7.7916666667);
 	c /= 7.5f;
-	TEST_ASSERT_EQUALS_FLOAT(c.x, -2.4933333333);
+	TEST_ASSERT_EQUALS_FLOAT(c.x(), -2.4933333333);
 }
 
 void

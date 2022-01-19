@@ -99,12 +99,13 @@ VectorTest::testCompare()
 	TEST_ASSERT_FALSE(a >= c);
 }
 
+// TODO I think this is no more required
 void
 VectorTest::testRawDataAccess()
 {
 	int16_t array[4] = {0, 1, 2, 3};
 	modm::Vector<int16_t,4> a(array);
-	int16_t *pointer = a.ptr();
+	int16_t *pointer = a.comps;
 
 	TEST_ASSERT_EQUALS(a[0], 0);
 	TEST_ASSERT_EQUALS(a[1], 1);
@@ -201,31 +202,31 @@ void VectorTest::testConvert()
 
 	// convert() is deprecated but we still test for b.c.
 	modm::Vector<double, 2> d2 = f.convert<double>();
-	TEST_ASSERT_EQUALS_FLOAT(d2.x, 1.3);
-	TEST_ASSERT_EQUALS_FLOAT(d2.y, 2.7);
+	TEST_ASSERT_EQUALS_FLOAT(d2.x(), 1.3);
+	TEST_ASSERT_EQUALS_FLOAT(d2.y(), 2.7);
 	// convert() is deprecated but we still test for b.c.
 	modm::Vector<float, 2> f2 = d.convert<float>();
-	TEST_ASSERT_EQUALS_FLOAT(f2.x, 1.3);
-	TEST_ASSERT_EQUALS_FLOAT(f2.y, 2.7);
+	TEST_ASSERT_EQUALS_FLOAT(f2.x(), 1.3);
+	TEST_ASSERT_EQUALS_FLOAT(f2.y(), 2.7);
 
 	// Conversion constructor replaces convert()
 	modm::Vector<double, 2> d3(f);
-	TEST_ASSERT_EQUALS_FLOAT(d3.x, 1.3);
-	TEST_ASSERT_EQUALS_FLOAT(d3.y, 2.7);
+	TEST_ASSERT_EQUALS_FLOAT(d3.x(), 1.3);
+	TEST_ASSERT_EQUALS_FLOAT(d3.y(), 2.7);
 	// Conversion constructor replaces convert()
 	modm::Vector<float, 2> f3(d);
-	TEST_ASSERT_EQUALS_FLOAT(f3.x, 1.3);
-	TEST_ASSERT_EQUALS_FLOAT(f3.y, 2.7);
+	TEST_ASSERT_EQUALS_FLOAT(f3.x(), 1.3);
+	TEST_ASSERT_EQUALS_FLOAT(f3.y(), 2.7);
 
 	modm::Vector<uint8_t, 2> u8(1.3, 2.7);
-	TEST_ASSERT_EQUALS(u8.x, 1);
-	TEST_ASSERT_EQUALS(u8.y, 3);
+	TEST_ASSERT_EQUALS(u8.x(), 1);
+	TEST_ASSERT_EQUALS(u8.y(), 3);
 
 	modm::Vector<int8_t, 2> i8(1.3, 2.7);
-	TEST_ASSERT_EQUALS(i8.x, 1);
-	TEST_ASSERT_EQUALS(i8.y, 3);
+	TEST_ASSERT_EQUALS(i8.x(), 1);
+	TEST_ASSERT_EQUALS(i8.y(), 3);
 
 	modm::Vector<int8_t, 2> i82(f);
-	TEST_ASSERT_EQUALS(i82.x, 1);
-	TEST_ASSERT_EQUALS(i82.y, 3);
+	TEST_ASSERT_EQUALS(i82.x(), 1);
+	TEST_ASSERT_EQUALS(i82.y(), 3);
 }

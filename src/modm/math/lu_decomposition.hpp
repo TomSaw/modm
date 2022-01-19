@@ -23,6 +23,7 @@ namespace modm
 	class Matrix;
 
 	template <typename T, std::size_t N>
+	requires (N > 0)
 	class Vector;
 
 	/**

@@ -161,10 +161,10 @@ template<typename T>
 bool
 modm::LineSegment2D<T>::intersects(const LineSegment2D<T>& other) const
 {
-	return (((Vector<T, 2>::ccw(this->startPoint, this->endPoint, other.startPoint) *
-			  Vector<T, 2>::ccw(this->startPoint, this->endPoint, other.endPoint)) <= 0) &&
-			((Vector<T, 2>::ccw(other.startPoint, other.endPoint, this->startPoint) *
-			  Vector<T, 2>::ccw(other.startPoint, other.endPoint, this->endPoint)) <= 0));
+	return (((modm::ccw(this->startPoint, this->endPoint, other.startPoint) *
+			  modm::ccw(this->startPoint, this->endPoint, other.endPoint)) <= 0) &&
+			((modm::ccw(other.startPoint, other.endPoint, this->startPoint) *
+			  modm::ccw(other.startPoint, other.endPoint, this->endPoint)) <= 0));
 }
 
 // ----------------------------------------------------------------------------

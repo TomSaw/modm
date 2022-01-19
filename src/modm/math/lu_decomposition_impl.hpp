@@ -40,7 +40,7 @@ modm::LUDecomposition::decompose(
 	*u = matrix;
 	*l = modm::Matrix<T, SIZE, SIZE>::identityMatrix();
 
-	return LUSubDecomposition<T, 0, SIZE, SIZE>::decomposeRecur(u->ptr(), l->ptr(), p->ptr());
+	return LUSubDecomposition<T, 0, SIZE, SIZE>::decomposeRecur(u->ptr(), l->ptr(), p->comps);
 }
 
 template<typename T, std::size_t SIZE>

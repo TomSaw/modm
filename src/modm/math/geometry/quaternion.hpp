@@ -20,6 +20,7 @@ namespace modm
 {
 	// forward declaration
 	template<class T, std::size_t N>
+	requires (N > 0)
 	class Vector;
 
 	template<class T, std::size_t ROWS, std::size_t COLUMNS>
