@@ -21,7 +21,7 @@ Vector3Test::testConstructor()
 	modm::Vector2i p2(1, 2);
 
 	int16_t array[3] = {-4, 5, 7};
-	modm::Matrix<int16_t, 3, 1> m(array);
+	/* modm::Matrix<int16_t, 3, 1> m(array); */
 
 	modm::Vector3i a;
 	TEST_ASSERT_EQUALS(a.x(), 0);
@@ -48,71 +48,70 @@ Vector3Test::testConstructor()
 	TEST_ASSERT_EQUALS(d.y(), 4);
 	TEST_ASSERT_EQUALS(d.z(), 4);
 
-	// TODO implement variadic constructor
-	// modm::Vector3i e(1,2,p1);
-	// TEST_ASSERT_EQUALS(e.x(), 1);
-	// TEST_ASSERT_EQUALS(e.y(), 2);
-	// TEST_ASSERT_EQUALS(e.z(), 3);
+	modm::Vector3i e(1,2,p1);
+	TEST_ASSERT_EQUALS(e.x(), 1);
+	TEST_ASSERT_EQUALS(e.y(), 2);
+	TEST_ASSERT_EQUALS(e.z(), 3);
 
-	// modm::Vector3i f(1,p1,2);
-	// TEST_ASSERT_EQUALS(f.x(), 1);
-	// TEST_ASSERT_EQUALS(f.y(), 3);
-	// TEST_ASSERT_EQUALS(f.z(), 2);
+	modm::Vector3i f(1,p1,2);
+	TEST_ASSERT_EQUALS(f.x(), 1);
+	TEST_ASSERT_EQUALS(f.y(), 3);
+	TEST_ASSERT_EQUALS(f.z(), 2);
 
-	// modm::Vector3i g(p1,2,1);
-	// TEST_ASSERT_EQUALS(g.x(), 3);
-	// TEST_ASSERT_EQUALS(g.y(), 2);
-	// TEST_ASSERT_EQUALS(g.z(), 1);
+	modm::Vector3i g(p1,2,1);
+	TEST_ASSERT_EQUALS(g.x(), 3);
+	TEST_ASSERT_EQUALS(g.y(), 2);
+	TEST_ASSERT_EQUALS(g.z(), 1);
 
-	// modm::Vector3i h(1,p1,p1);
-	// TEST_ASSERT_EQUALS(h.x(), 1);
-	// TEST_ASSERT_EQUALS(h.y(), 3);
-	// TEST_ASSERT_EQUALS(h.z(), 3);
+	modm::Vector3i h(1,p1,p1);
+	TEST_ASSERT_EQUALS(h.x(), 1);
+	TEST_ASSERT_EQUALS(h.y(), 3);
+	TEST_ASSERT_EQUALS(h.z(), 3);
 
-	// modm::Vector3i i(p1,1,p1);
-	// TEST_ASSERT_EQUALS(i.x(), 3);
-	// TEST_ASSERT_EQUALS(i.y(), 1);
-	// TEST_ASSERT_EQUALS(i.z(), 3);
+	modm::Vector3i i(p1,1,p1);
+	TEST_ASSERT_EQUALS(i.x(), 3);
+	TEST_ASSERT_EQUALS(i.y(), 1);
+	TEST_ASSERT_EQUALS(i.z(), 3);
 
-	// modm::Vector3i j(p1,p1,1);
-	// TEST_ASSERT_EQUALS(j.x(), 3);
-	// TEST_ASSERT_EQUALS(j.y(), 3);
-	// TEST_ASSERT_EQUALS(j.z(), 1);
+	modm::Vector3i j(p1,p1,1);
+	TEST_ASSERT_EQUALS(j.x(), 3);
+	TEST_ASSERT_EQUALS(j.y(), 3);
+	TEST_ASSERT_EQUALS(j.z(), 1);
 
-	// modm::Vector3i k(p1,p1,p1);
-	// TEST_ASSERT_EQUALS(k.x(), 3);
-	// TEST_ASSERT_EQUALS(k.y(), 3);
-	// TEST_ASSERT_EQUALS(k.z(), 3);
+	modm::Vector3i k(p1,p1,p1);
+	TEST_ASSERT_EQUALS(k.x(), 3);
+	TEST_ASSERT_EQUALS(k.y(), 3);
+	TEST_ASSERT_EQUALS(k.z(), 3);
 
-	// modm::Vector3i l(2,p2);
-	// TEST_ASSERT_EQUALS(l.x(), 2);
-	// TEST_ASSERT_EQUALS(l.y(), 1);
-	// TEST_ASSERT_EQUALS(l.z(), 2);
+	modm::Vector3i l(2,p2);
+	TEST_ASSERT_EQUALS(l.x(), 2);
+	TEST_ASSERT_EQUALS(l.y(), 1);
+	TEST_ASSERT_EQUALS(l.z(), 2);
 
-	// modm::Vector3i r(p2,6);
-	// TEST_ASSERT_EQUALS(r.x(), 1);
-	// TEST_ASSERT_EQUALS(r.y(), 2);
-	// TEST_ASSERT_EQUALS(r.z(), 6);
+	modm::Vector3i r(p2,6);
+	TEST_ASSERT_EQUALS(r.x(), 1);
+	TEST_ASSERT_EQUALS(r.y(), 2);
+	TEST_ASSERT_EQUALS(r.z(), 6);
 
-	// modm::Vector3i n(p1,p2);
-	// TEST_ASSERT_EQUALS(n.x(), 3);
-	// TEST_ASSERT_EQUALS(n.y(), 1);
-	// TEST_ASSERT_EQUALS(n.z(), 2);
+	modm::Vector3i n(p1,p2);
+	TEST_ASSERT_EQUALS(n.x(), 3);
+	TEST_ASSERT_EQUALS(n.y(), 1);
+	TEST_ASSERT_EQUALS(n.z(), 2);
 
-	// modm::Vector3i o(p2,p1);
-	// TEST_ASSERT_EQUALS(o.x(), 1);
-	// TEST_ASSERT_EQUALS(o.y(), 2);
-	// TEST_ASSERT_EQUALS(o.z(), 3);
+	modm::Vector3i o(p2,p1);
+	TEST_ASSERT_EQUALS(o.x(), 1);
+	TEST_ASSERT_EQUALS(o.y(), 2);
+	TEST_ASSERT_EQUALS(o.z(), 3);
 
-	// modm::Vector3i p(a);
-	// TEST_ASSERT_EQUALS(p.x(), 100);
-	// TEST_ASSERT_EQUALS(p.y(), 9);
-	// TEST_ASSERT_EQUALS(p.z(), 4);
+	modm::Vector3i p(a);
+	TEST_ASSERT_EQUALS(p.x(), 100);
+	TEST_ASSERT_EQUALS(p.y(), 9);
+	TEST_ASSERT_EQUALS(p.z(), 4);
 
-	// modm::Vector3i q(m);
-	// TEST_ASSERT_EQUALS(q.x(), -4);
-	// TEST_ASSERT_EQUALS(q.y(), 5);
-	// TEST_ASSERT_EQUALS(q.z(), 7);
+/* 	modm::Vector3i q(m);
+	TEST_ASSERT_EQUALS(q.x(), -4);
+	TEST_ASSERT_EQUALS(q.y(), 5);
+	TEST_ASSERT_EQUALS(q.z(), 7); */
 }
 
 void
@@ -121,7 +120,7 @@ Vector3Test::testAssign()
 	modm::Vector3i a(42,-4,3);
 
 	int16_t array[3] = {-26,9,2};
-	modm::Matrix<int16_t, 3, 1> m(array);
+	/* modm::Matrix<int16_t, 3, 1> m(array); */
 
 	modm::Vector3i b;
 
@@ -130,10 +129,10 @@ Vector3Test::testAssign()
 	TEST_ASSERT_EQUALS(b.y(), -4);
 	TEST_ASSERT_EQUALS(b.z(), 3);
 
-	b = m;
+	/* b = m;
 	TEST_ASSERT_EQUALS(b.x(), -26);
 	TEST_ASSERT_EQUALS(b.y(), 9);
-	TEST_ASSERT_EQUALS(b.z(), 2);
+	TEST_ASSERT_EQUALS(b.z(), 2); */
 }
 
 void
@@ -170,7 +169,7 @@ void
 Vector3Test::testRawDataAccess()
 {
 	modm::Vector3i a(0, 1, 2);
-	int16_t *pointer = a.ptr();
+	int16_t *pointer = a.data();
 
 	TEST_ASSERT_EQUALS(a[0], 0);
 	TEST_ASSERT_EQUALS(a[1], 1);

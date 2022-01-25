@@ -14,19 +14,6 @@
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::Ray2D<T>::Ray2D() :
-	basePoint(), direction()
-{
-}
-
-template<typename T>
-modm::Ray2D<T>::Ray2D(const Vector<T, 2>& start, const Vector<T, 2>& direction) :
-	basePoint(start), direction(direction)
-{
-}
-
-// ----------------------------------------------------------------------------
 template <typename T>
 inline void
 modm::Ray2D<T>::setStartPoint(const Vector<T, 2>& point)

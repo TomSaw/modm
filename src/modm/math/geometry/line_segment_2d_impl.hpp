@@ -16,19 +16,6 @@
 #endif
 
 // ----------------------------------------------------------------------------
-template<typename T>
-modm::LineSegment2D<T>::LineSegment2D() :
-	startPoint(), endPoint()
-{
-}
-
-template<typename T>
-modm::LineSegment2D<T>::LineSegment2D(const Vector<T, 2>& start, const Vector<T, 2>& end) :
-	startPoint(start), endPoint(end)
-{
-}
-
-// ----------------------------------------------------------------------------
 template <typename T>
 inline void
 modm::LineSegment2D<T>::setStartPoint(const Vector<T, 2>& point)

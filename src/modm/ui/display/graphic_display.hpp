@@ -117,7 +117,7 @@ public:
 	inline void
 	setPixel(glcd::Point p)
 	{
-		this->setPixel(p.x, p.y);
+		this->setPixel(p.x(), p.y());
 	}
 
 	/**
@@ -137,7 +137,7 @@ public:
 	inline void
 	clearPixel(glcd::Point p)
 	{
-		this->setPixel(p.x, p.y);
+		this->setPixel(p.x(), p.y());
 	}
 
 	/**
@@ -174,7 +174,7 @@ public:
 	inline void
 	drawLine(glcd::Point start, glcd::Point end)
 	{
-		this->drawLine(start.x, start.y, end.x, end.y);
+		this->drawLine(start.x(), start.y(), end.x(), end.y());
 	}
 
 	/**
@@ -349,7 +349,7 @@ public:
 	inline void
 	setCursorX(int16_t x)
 	{
-		this->cursor.x = x;
+		this->cursor.x() = x;
 	}
 
 	/**
@@ -360,7 +360,7 @@ public:
 	inline void
 	setCursorY(int16_t y)
 	{
-		this->cursor.y = y;
+		this->cursor.y() = y;
 	}
 
 	inline glcd::Point
