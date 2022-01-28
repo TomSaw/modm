@@ -42,6 +42,8 @@ public:
 
 	constexpr HsvD() = default;
 
+	// TODO Support for https://en.cppreference.com/w/cpp/utility/initializer_list
+
 	constexpr HsvD(HueType hue, SaturationType saturation, ValueType value)
 		: hue_(hue), saturation_(saturation), value_(value)
 	{}

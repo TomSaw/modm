@@ -47,6 +47,8 @@ public:
 
 	constexpr RgbD() = default;
 
+	// TODO Support for https://en.cppreference.com/w/cpp/utility/initializer_list
+
 	constexpr RgbD(RedType red, GreenType green, BlueType blue)
 		: red_(red), green_(green), blue_(blue)
 	{}
