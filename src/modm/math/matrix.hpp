@@ -55,7 +55,7 @@ namespace modm
 		static constexpr std::size_t ColumnCount = COLUMNS;
 		static constexpr std::size_t ElementCount = RowCount * ColumnCount;
 
-		T element[ElementCount];
+		T element[ElementCount]{};
 
 		/**
 		 * \brief	Default Constructor

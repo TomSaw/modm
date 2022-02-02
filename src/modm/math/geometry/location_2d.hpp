@@ -68,6 +68,7 @@ namespace modm
 				std::abs(orientation - other.orientation) < __FLT_EPSILON__
 			);
 		}
+		// TODO chris: implement this in terms of !(*this == other)?
 		bool operator!= (const Location2D &other) const {
 			return (
 				position != other.position or

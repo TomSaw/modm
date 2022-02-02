@@ -96,7 +96,7 @@ public:
 	template <class... Args>
 	constexpr Vector(Args... args)
 	{
-		// Not sure if perfect forwarding is required here !?
+		// Not yet sure if perfect forwarding is required here !? studying...
 		// assign<0>(std::forward<Args>(args)...);
 		assign<0>(args...);
 	}
@@ -372,7 +372,7 @@ public:
 
 	template<typename TR = T>
 	constexpr TR getLength() const
-	{ return modm::round_smart<TR, decltype(std::sqrt(getLengthSquared()))>(std::sqrt(getLengthSquared())); }
+	{ return modm::round_smart<TR>(std::sqrt(getLengthSquared())); }
 
 	constexpr WideType getDistanceTo(const Vector& other) const
 	{ return (other - *this).getLength(); }
@@ -504,9 +504,9 @@ operator<<(IOStream &os, const Vector<U, M> &v)
  * This definition is useful for inclusion or intersection testing.
  */
 template<typename T>
-int8_t
+constexpr int8_t
 ccw(Vector<T, 2> a, Vector<T, 2> b, Vector<T, 2> c) {
-	using WideType = std::conditional<std::is_floating_point_v<T>, T, modm::WideType<T>>::type;
+	using WideType = modm::WideType<T>;
 
 	const Vector<WideType, 2> v1 = b - a;
 	const Vector<WideType, 2> v2 = c - a;

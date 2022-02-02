@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2021-2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -73,8 +73,8 @@ template <typename ... Ts>
  * @brief 		Simple function that only applies std::round
  * 				when a float/double is assigned to an integral
  *
- * @tparam TA 	Type of argument
  * @tparam TR 	Type of return
+ * @tparam TA 	Type of argument
 
  */
 template <typename TR, typename TA>
