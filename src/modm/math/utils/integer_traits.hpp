@@ -13,6 +13,8 @@
 
 #include <limits>
 #include <type_traits>
+#include <numeric>
+#include <concepts>
 
 #include <cmath>
 namespace modm
@@ -81,4 +83,21 @@ struct bitmask {
 
 template<unsigned int N>
 using bitmask_t = typename bitmask<N>::value_type;
+
+/**
+ * @brief 		Simple function that only applies std::round
+ * 				when a float/double is assigned to an integral
+ *
+ * @tparam TR 	Type of return
+ * @tparam TA 	Type of argument
+
+ */
+template <typename TR, typename TA>
+TR round_smart(TA v)
+{ return v; }
+
+template <std::integral TR, std::floating_point TA>
+TR round_smart(TA v)
+{ return std::round(v); }
+
 }

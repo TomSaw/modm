@@ -44,8 +44,8 @@ MatrixTest::testConstruction()
 
 	modm::Matrix<int16_t, 3, 2> b(n);
 
-	TEST_ASSERT_EQUALS(b.getNumberOfRows(), 3);
-	TEST_ASSERT_EQUALS(b.getNumberOfColumns(), 2);
+	TEST_ASSERT_EQUALS(b.getNumberOfRows(), std::size_t(3));
+	TEST_ASSERT_EQUALS(b.getNumberOfColumns(), std::size_t(2));
 
 	TEST_ASSERT_EQUALS(b[0][0], 1);
 	TEST_ASSERT_EQUALS(b[0][1], 2);

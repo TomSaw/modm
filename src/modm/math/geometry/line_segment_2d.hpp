@@ -42,9 +42,11 @@ namespace modm
 		typedef typename GeometricTraits<T>::FloatType FloatType;
 
 	public:
-		LineSegment2D();
+		constexpr LineSegment2D() = default;
 
-		LineSegment2D(const Vector<T, 2>& start, const Vector<T, 2>& end);
+		constexpr LineSegment2D(const Vector<T, 2>& start, const Vector<T, 2>& end)
+			: startPoint(start), endPoint(end)
+		{}
 
 
 		/// Set the starting point of the line segment
