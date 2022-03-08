@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2021-2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -13,6 +13,8 @@
 
 #include <limits>
 #include <type_traits>
+#include <numeric>
+#include <concepts>
 
 #include <cmath>
 namespace modm
@@ -66,7 +68,49 @@ struct fits_any {
 };
 
 template <typename ... Ts>
-using fits_any_t = typename fits_any<Ts...>::type;
+	using fits_any_t = typename fits_any<Ts...>::type;
+
+/// Generates a bitmask with N bits set
+/// @author		Thomas Sommer
+template<unsigned int N>
+struct bitmask {
+	using value_type = uint_t<N>::least;
+	static constexpr value_type value = (1ull << N) - 1;
+	constexpr operator value_type() const noexcept { return value; }
+};
+
+template<unsigned int N>
+using bitmask_t = typename bitmask<N>::value_type;
+
+/**
+ * @brief 		Simple function that only applies std::round
+ * 				when a float/double is assigned to an integral
+ *
+ * @tparam TR 	Type of return
+ * @tparam TA 	Type of argument
+
+ */
+template <typename TR, typename TA>
+constexpr TR round_smart(TA v)
+{ return v; }
+
+template <std::integral TR, std::floating_point TA>
+constexpr TR round_smart(TA v)
+{ return std::round(v); }
+
+
+// Not sure about this
+template<typename T>
+concept unsigned_integral_max8 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 8;
+
+template<typename T>
+concept unsigned_integral_max16 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 16;
+
+template<typename T>
+concept unsigned_integral_max32 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 32;
+
+template<typename T>
+concept unsigned_integral_max64 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 64;
 
 /// @}
 }

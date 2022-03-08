@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018, Niklas Hauser
+# Copyright (c) 2021-2022, Thomas Sommer
 #
 # This file is part of the modm project.
 #
@@ -18,11 +18,20 @@ def init(module):
 Color containers and converters in various formats: RGB, HSV, Brightness, Rgb565
 """
 
+
 def prepare(module, options):
-    module.depends(":math:utils")
+    module.depends(
+		":math:utils",
+		":math:proportional_unsigned",
+		":math:saturation"
+	)
     return True
+
 
 def build(env):
     env.outbasepath = "modm/src/modm/ui/color"
-    env.copy(".")
+
+    ignore = ["*pattern*"]
+    env.copy(".", ignore=env.ignore_paths(*ignore))
+
     env.copy("../color.hpp")

@@ -106,7 +106,7 @@ public:
 		return address;
 	}
 
-private:
+protected:
 	const T* address;
 };
 

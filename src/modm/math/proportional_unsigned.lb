@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2022, Thomas Sommer
+#
+# This file is part of the modm project.
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# -----------------------------------------------------------------------------
+
+def init(module):
+    module.name = ":math:proportional_unsigned"
+    module.description = FileReader("proportional_unsigned.md")
+
+def prepare(module, options):
+    module.depends(
+        ":utils",
+        ":architecture:assert"
+    )
+    return True
+
+def build(env):
+    env.outbasepath = "modm/src/modm/math"
+    env.copy("proportional_unsigned.hpp")

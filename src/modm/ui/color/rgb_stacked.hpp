@@ -1,0 +1,216 @@
+/*
+ * Copyright (c) 2022, Thomas Sommer
+ *
+ * This file is part of the modm project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+// ----------------------------------------------------------------------------
+
+#pragma once
+
+#include "concepts.hpp"
+
+namespace modm::color {
+/**
+ * @brief 			Color in RGB space - mandatory for most graphic displays and stored images.
+ * 					Requires less space than unstacked rgb types. Calculations without dedicated graphics
+ * 					acceleration hardware are very inefficient.
+ * 					If theres no dedicated graphics acceleration but lots of RAM, using modm::RgbD<> for
+ * 					calculations and afterwards conversion to modm::RgbStackedD<> may be an option.
+ *
+ * @tparam DR 		Digits for red channel
+ * @tparam DG 		Digits for green channel
+ * @tparam DB 		Digits for blue channel
+ *
+ * @author			Thomas Sommer
+ * @ingroup			modm_ui_color
+ */
+template <int DR, int DG, int DB>
+requires (DR > 0) && (DG > 0) && (DB > 0)
+class RgbStackedD
+{
+public:
+	using RedType = GrayD<DR>;
+	using GreenType = GrayD<DG>;
+	using BlueType = GrayD<DB>;
+
+	using T = uint_t<DR + DG + DB>::least;
+
+	constexpr RgbStackedD() = default;
+
+	constexpr RgbStackedD(T value)
+		: value_(value)
+	{}
+
+	constexpr RgbStackedD(RedType red, GreenType green, BlueType blue)
+		: value_(red.value() << (DG + DB) | green.value() << DB | blue.value())
+	{}
+
+	constexpr RgbStackedD(const RgbStackedD &rgbstacked)
+		: value_(rgbstacked.value_)
+	{}
+
+	template<ColorGray C>
+	constexpr RgbStackedD(const C &gray)
+		: RgbStackedD(RgbD<C::Digits>(gray))
+	{}
+
+	template<ColorRgb C>
+	constexpr RgbStackedD(const C &rgb)
+		: RgbStackedD(rgb.red(), rgb.green(), rgb.blue())
+	{}
+
+	template<ColorRgbStacked C>
+	constexpr RgbStackedD(const C &rgstacked)
+		: RgbStackedD(rgstacked.red(), rgstacked.green(), rgstacked.blue())
+	{}
+
+	template<ColorHsv C>
+	constexpr RgbStackedD(const C &hsv)
+		: RgbStackedD(RgbD<5,6,5>(hsv))
+	{}
+
+	/**
+	 * @brief 			Interface to channels of stacked color types
+	 * 					May be used for StackedHsv as well
+	 *
+	 * @tparam TS 		unsigned integral type of stacked color value
+	 * @tparam TC 		GrayD<> type of channel
+	 * @tparam Shift 	lshift of channel in stacked color value
+	 *
+	 * @ingroup			modm_ui_color
+	 */
+	template<std::unsigned_integral TS, ColorGray TC, int Shift>
+	class ChannelAccessor {
+		TS &value_;
+
+		ChannelAccessor(TS &value) : value_(value) {};
+		friend class RgbStackedD;
+
+		public:
+			void operator= (const TC new_value)
+			{ value_ = (value_ & ~(TC::max << Shift)) | new_value.value() << Shift; }
+
+			const TC value() const { return (value_ >> Shift) & TC::max; }
+	};
+
+	// accessors
+	const T value() const { return value_; }
+
+	const RedType red() const { return value_ >> (DG + DB); }
+	const GreenType green() const { return value_ >> DB & GreenType::max;}
+	const BlueType blue() const { return value_ & BlueType::max; }
+
+	ChannelAccessor<T, RedType, DG + DB> red() { return {value_}; }
+	ChannelAccessor<T, GreenType, DB> green() { return {value_}; }
+	ChannelAccessor<T, BlueType, 0> blue() { return {value_}; }
+
+	void operator=(const RgbStackedD other) {
+		value_ = other.value_;
+	}
+
+	RgbStackedD& operator+=(const RgbD<DR, DG, DB>& rgb) {
+		operator=({
+			red().value() + rgb.red(),
+			green().value() + rgb.green(),
+			blue().value() + rgb.blue()
+		});
+		return *this;
+	}
+
+	RgbStackedD& operator-=(const RgbD<DR, DG, DB>& rgb) {
+		operator=({
+			red().value() - rgb.red(),
+			green().value() - rgb.green(),
+			blue().value() - rgb.blue()
+		});
+		return *this;
+	}
+
+	RgbStackedD& operator*=(const RgbD<DR, DG, DB>& rgb) {
+		operator=({
+			red().value() * rgb.red(),
+			green().value() * rgb.green(),
+			blue().value() * rgb.blue()
+		});
+		return *this;
+	}
+
+	RgbStackedD& operator/=(const RgbD<DR, DG, DB>& rgb) {
+		operator=({
+			red().value() * rgb.red(),
+			green().value() * rgb.green(),
+			blue().value() * rgb.blue()
+		});
+		return *this;
+	}
+
+	RgbStackedD operator+(const RgbD<DR, DG, DB>& rgb) {
+		return {
+			red().value() + rgb.red(),
+			green().value() + rgb.green(),
+			blue().value() + rgb.blue()
+		};
+	}
+
+	RgbStackedD operator-(const RgbD<DR, DG, DB>& rgb) {
+		return {
+			red().value() - rgb.red(),
+			green().value() - rgb.green(),
+			blue().value() - rgb.blue()
+		};
+	}
+
+	RgbStackedD operator*(const RgbD<DR, DG, DB>& rgb) {
+		return {
+			red().value() * rgb.red(),
+			green().value() * rgb.green(),
+			blue().value() * rgb.blue()
+		};
+	}
+
+	RgbStackedD operator/(const RgbD<DR, DG, DB>& rgb) {
+		return {
+			red().value() / rgb.red(),
+			green().value() / rgb.green(),
+			blue().value() / rgb.blue()
+		};
+	}
+
+	// Equality
+	constexpr bool
+	operator==(const RgbStackedD& other) const = default;
+
+	// Remaining comparison operators are server by color::RgbD<D> and implicit type conversion
+
+	void invert() {
+		value_ ^= bitmask<DR + DG + DB>();
+	}
+
+private:
+	T value_;
+
+	template<ColorRgbStacked C>
+	friend IOStream&
+	operator<<(IOStream&, const C&);
+};
+
+using Rgb565 = RgbStackedD<5,6,5>;
+using Rgb666 = RgbStackedD<6,6,6>;
+
+#if __has_include(<modm/io/iostream.hpp>)
+#include <modm/io/iostream.hpp>
+
+template<ColorRgbStacked C>
+IOStream&
+operator<<(IOStream& os, const C& rgb)
+{
+	os << rgb.red() << "\t" << rgb.green() << "\t" << rgb.blue();
+	return os;
+}
+#endif
+
+}
