@@ -19,11 +19,18 @@
 template<class SpiMaster, class Cs, Size R>
 modm::Touch2046<SpiMaster, Cs, R>::Touch2046()
 {
-	this->attachConfigurationHandler([]() {
-		SpiMaster::setDataMode(SpiMaster::DataMode::Mode0);
-		SpiMaster::setDataOrder(SpiMaster::DataOrder::MsbFirst);
-		SpiMaster::setDataSize(SpiMaster::DataSize::Bit16);
-	});
+	if constexpr ( spi::Support_DataSize_Bit16<SPI> ) {
+		this->attachConfigurationHandler([]() {
+			SpiMaster::setDataMode(SpiMaster::DataMode::Mode0);
+			SpiMaster::setDataOrder(SpiMaster::DataOrder::MsbFirst);
+			SpiMaster::setDataSize(SpiMaster::DataSize::Bit16);
+		});
+	} else {
+		this->attachConfigurationHandler([]() {
+			SpiMaster::setDataMode(SpiMaster::DataMode::Mode0);
+			SpiMaster::setDataOrder(SpiMaster::DataOrder::MsbFirst);
+		});
+	}
 
 	Cs::setOutput(true);
 }
@@ -37,7 +44,7 @@ modm::Touch2046<SpiMaster, Cs, R>::updateZ()
 	RF_WAIT_UNTIL(this->acquireMaster());
 	Cs::reset();
 
-	RF_CALL(SpiMaster::transfer(&bufferWrite[0], &bufferRead[0], 3));
+	RF_CALL(SpiMaster::transfer16(bufferWrite.begin(), bufferWrite.begin() + 3, bufferRead.begin()));
 
 	z = 4095 + (bufferRead[1] >> 3) - (bufferRead[2] >> 3);
 
@@ -56,17 +63,18 @@ modm::Touch2046<SpiMaster, Cs, R>::updateXY()
 	RF_WAIT_UNTIL(this->acquireMaster());
 	Cs::reset();
 
-	RF_CALL(SpiMaster::transfer(&bufferWrite[2], &bufferRead[0], bufferRead.size()));
+	RF_CALL(SpiMaster::transfer16(bufferWrite.begin() + 2, bufferWrite.end(), bufferRead.begin()));
 
 	if (this->releaseMaster())
 		Cs::set();
 
+	// TODO rewrite with algorithms
 	x = (bufferRead[1] >> 3) + (bufferRead[3] >> 3) + (bufferRead[5] >> 3);
 	y = (bufferRead[2] >> 3) + (bufferRead[4] >> 3) + (bufferRead[6] >> 3);
 
 	static constexpr int scale_shift = 10;
-	x = std::clamp<int16_t>((((uint32_t)(x * cal.FactorX) >> scale_shift) + cal.OffsetX), 0, R.x);
-	y = std::clamp<int16_t>((((uint32_t)(y * cal.FactorY) >> scale_shift) + cal.OffsetY), 0, R.y);
+	x = std::clamp<int16_t>((((uint32_t)(x * cal.FactorX) >> scale_shift) + cal.OffsetX), 0, R.x());
+	y = std::clamp<int16_t>((((uint32_t)(y * cal.FactorY) >> scale_shift) + cal.OffsetY), 0, R.y());
 
 	RF_END_RETURN();
 }
@@ -88,10 +96,14 @@ modm::Touch2046<SpiMaster, Cs, R>::getTouchPoint()
 	RF_CALL(updateXY());
 
 	switch(orientation) {
-		case Orientation::Landscape0: RF_RETURN(Point(R.y - y, R.x - x));
-		case Orientation::Portrait90: RF_RETURN(Point(x, R.y - y));
-		case Orientation::Landscape180: RF_RETURN(Point(y, x));
-		case Orientation::Portrait270: RF_RETURN(Point(R.x - x, y));
+		case Orientation::Landscape0:
+			RF_RETURN(modm::shape::Point(R.y() - y, R.x() - x));
+		case Orientation::Portrait90:
+			RF_RETURN(modm::shape::Point(x, R.y() - y));
+		case Orientation::Landscape180:
+			RF_RETURN(modm::shape::Point(y, x));
+		case Orientation::Portrait270:
+			RF_RETURN(modm::shape::Point(R.x() - x, y));
 	}
 
 	RF_END();
@@ -103,11 +115,17 @@ modm::Touch2046<SpiMaster, Cs, R>::getTouchPosition()
 {
 	RF_BEGIN();
 	RF_CALL(updateXY());
-	// TODO evaluate orientation & modm::graphic::OrientationFlags::TopDown
-	if (orientation & Orientation(modm::graphic::OrientationFlags::Portrait)) {
-		RF_RETURN(std::make_tuple(x, y));
-	} else {
-		RF_RETURN(std::make_tuple(y, x));
+
+	switch(orientation) {
+		case Orientation::Landscape0:
+			RF_RETURN(std::make_tuple(R.y() - y, R.x() - x));
+		case Orientation::Portrait90:
+			RF_RETURN(std::make_tuple(x, R.y() - y));
+		case Orientation::Landscape180:
+			RF_RETURN(std::make_tuple(y, x));
+		case Orientation::Portrait270:
+			RF_RETURN(std::make_tuple(R.x() - x, y));
 	}
+
 	RF_END();
 }

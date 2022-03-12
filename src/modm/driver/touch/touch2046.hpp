@@ -33,6 +33,7 @@ struct touch2046 {
 		A2 = Bit6,		// see enum class ChDiff / ChSingleEnd
 		A1 = Bit5,
 		A0 = Bit4,
+
 		MODE = Bit3,	// see enum class Mode
 		REF = Bit2,		// see enum class Reference
 
@@ -117,8 +118,8 @@ struct touch2046 {
  *
  * Datasheet TSC2046: https://www.ti.com/lit/ds/symlink/tsc2046.pdf
  */
-template < class SpiMaster, class Cs, Size R>
-class Touch2046 : public touch2046, public modm::SpiDevice< SpiMaster >, protected modm::NestedResumable<3>
+template <class Spi, class Cs, Size R>
+class Touch2046 : public touch2046, public modm::SpiDevice<Spi>, protected modm::NestedResumable<3>
 {
 public:
 	Touch2046();
@@ -174,6 +175,7 @@ private:
 
 	static constexpr Control_t Measure = Control::START | Mode_t(Mode::Res_12Bit)
 		| Reference_t(Reference::Differential) | PowerDown_t(PowerDown::RefOff_AdcOn);
+
 	static constexpr std::array<uint16_t, 8> bufferWrite = {
 		(Measure | ChDiff_t(ChDiff::Z1)).value,
 		((Measure | ChDiff_t(ChDiff::Z2)) & ~PowerDown_t::mask()).value,
@@ -187,6 +189,7 @@ private:
 	std::array<uint16_t, 7> bufferRead = {};
 
 public:
+	// TODO use a modm::Vector<uint16_t, 2>?
 	uint16_t x{0}, y{0}, z{0};
 	Calibration cal;
 	Orientation orientation = Orientation::Portrait90;
