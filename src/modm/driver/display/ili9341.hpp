@@ -26,8 +26,8 @@
 #include <modm/math/geometry/shape/section.hpp>
 #include <modm/ui/graphic/style.hpp>
 
-#include "ili9341_interface_parallel.hpp"
-#include "ili9341_interface_spi.hpp"
+#include "ili9341_parallel.hpp"
+#include "ili9341_spi.hpp"
 
 namespace modm
 {
@@ -38,7 +38,7 @@ template<class Transport, class Reset, size_t BC = 512>
 // requires std::derived_from<Painter, RemotePainter<R>>
 class Ili9341 : public Transport, public graphic::Display<color::Rgb565, {320, 240}, true>
 {
-	// OPTIMIZE determine good contraints 
+	// OPTIMIZE determine good contraints
 	static_assert(BC >= 32, "Conversion Buffer < 64 pixels produces too much overhead.");
 	static_assert(BC <= 2048, "Conversion Buffer > 2048 pixels doesn't make it any better.");
 

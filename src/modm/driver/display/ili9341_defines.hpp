@@ -44,7 +44,7 @@ public:
 	{
 		Nop = 0x00,
 		SwReset = 0x01,
-		
+
 		GammaSet = 0x26,
 		ColumnAddressSet = 0x2A,
 		PageAddressSet = 0x2B,
@@ -54,7 +54,7 @@ public:
 
 		PartialMode = 0x12,
 		NormalMode = 0x13,
-		
+
 		PartialArea = 0x30,
 		VerticalScrollDefinition = 0x33,
 		MemoryAccessCtrl = 0x36,
@@ -65,7 +65,7 @@ public:
 		ReadMemoryContinue = 0x3E,
 		SetTearScanLine = 0x44,
 		GetScanLine = 0x45,
-	
+
 		// Extended
 		RgbInterfaceSignalCtrl = 0xB0,
 		FrameCtrlNormalMode = 0xB1,
@@ -105,7 +105,7 @@ public:
 	enum class ReadCommand : uint8_t {
 		// TODO got 0s only for each of ReadId*
 		Id = 0x04,				// returns 4 bytes
-		Id1 = 0xDA,				
+		Id1 = 0xDA,
 		Id2 = 0xDB,
 		Id3 = 0xDC,
 		Id4 = 0xD3,

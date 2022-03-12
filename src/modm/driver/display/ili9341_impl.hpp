@@ -56,7 +56,7 @@ modm::Ili9341<Transport, Reset, BC>::initialize()
 	RF_CALL(this->writeCommand(Command::VComCtrl2, 0xb7));
 	// constexpr uint8_t pumpRatioCtrl[] { 0x20 };
 	RF_CALL(this->writeCommand(Command::PixelFormatSet, 0x55));
-	
+
 	MODM_INIT_BUFFER({0x00, 0x1a})
 	RF_CALL(this->writeCommand(Command::FrameCtrlNormalMode, buff_cmd8, 2));
 
@@ -210,7 +210,7 @@ modm::Ili9341<Transport, Reset, BC>::updateClipping()
 	p.buff_cmd_clipping[0] = this->clipping.topLeft.y();
 	p.buff_cmd_clipping[1] = this->clipping.bottomRight.y() - 1;
 	RF_CALL(this->writeCommand(Command::ColumnAddressSet, p.buff_cmd_clipping, 2));
-	
+
 	p.buff_cmd_clipping[0] = this->clipping.topLeft.x();
 	p.buff_cmd_clipping[1] = this->clipping.bottomRight.x() - 1;
 	RF_CALL(this->writeCommand(Command::PageAddressSet, p.buff_cmd_clipping, 2));
@@ -228,11 +228,11 @@ modm::Ili9341<Transport, Reset, BC>::writeImage(ImageAccessor<CO, Accessor> acce
 	// Found no cast for a share the memory between all of the writeImage()-methods.
 	// This waste of RAM will be history once Resumable Functions become history.
 	static ImageAccessor<CO, Accessor> a;
-	
+
 	RF_BEGIN();
 
 	a = accessor;
-	
+
 	this->clipping = this->getIntersection(a.getSection());
 	RF_CALL(updateClipping());
 
@@ -257,7 +257,7 @@ modm::Ili9341<Transport, Reset, BC>::writeImage(ImageAccessor<CO, Accessor> acce
 				a.incrementRow_preparePixel();
 			}
 		}
-		
+
 		// Transfer buffer
 		RF_CALL(this->writeData(p.buffer, p.i));
 		p.pixels -= p.i;
@@ -276,7 +276,7 @@ modm::Ili9341<Transport, Reset, BC>::writeImage(ImageAccessor<ColorType, Accesso
 	static ImageAccessor<ColorType, Accessor> a;
 
 	RF_BEGIN();
-	
+
 	a = accessor;
 
 	this->clipping = this->getIntersection(a.getSection());
@@ -316,7 +316,7 @@ modm::Ili9341<Transport, Reset, BC>::writePattern(Rectangle rectangle, P pattern
 	{
 		// Fill buffer
 		for(p.i = 0; p.i < std::min<uint32_t>(p.pixels, BC); p.i++) {
-			p.buffer[p.i] = pattern(p.scanner);			
+			p.buffer[p.i] = pattern(p.scanner);
 			if (++p.scanner.y() == this->clipping.bottomRight.y) {
 				p.scanner.x++;
 				p.scanner.y() = this->clipping.topLeft.y;
@@ -338,7 +338,7 @@ modm::Ili9341<Transport, Reset, BC>::drawBlind(const Point& point)
 	RF_BEGIN();
 	// This snipers single pixels and is quite heavy because anytime
 	// the clipping and thus the DataCommand-line is modulated.
-	// 
+	//
 	// OPTIMIZE Modulate DC with hardware: Timer connected with a DMA.
 	// 1. An array contains periods for modulation of the DC-Line: [1, 2, 1, 2, 1] => 1cmd, 2data, 1cmd, 1cmd, 2data
 	// 2. A DMA sequences these periods into a Timers compare-register
@@ -349,13 +349,13 @@ modm::Ili9341<Transport, Reset, BC>::drawBlind(const Point& point)
 	p.buff_cmd_clipping[0] = point.y;
 	p.buff_cmd_clipping[1] = p.buff_cmd_clipping[0];
 	RF_CALL(this->writeCommand(Command::ColumnAddressSet, p.buff_cmd_clipping, 2));
-	
+
 	p.buff_cmd_clipping[0] = point.x;
 	p.buff_cmd_clipping[1] = p.buff_cmd_clipping[0];
 	RF_CALL(this->writeCommand(Command::PageAddressSet, p.buff_cmd_clipping, 2));
 
 	RF_CALL(this->writeCommand(Command::MemoryWrite));
-	
+
 	RF_END_RETURN_CALL(this->writeData(colormap[1].value()));
 }
 
@@ -380,7 +380,7 @@ modm::ResumableResult<void>
 modm::Ili9341<Transport, Reset, BC>::drawBlind(const Section& section)
 {
 	RF_BEGIN();
-	
+
 	this->clipping = section;
 	RF_CALL(updateClipping());
 

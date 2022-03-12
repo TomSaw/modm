@@ -29,7 +29,5 @@ def build(env):
     env.copy("ili9341_defines.hpp")
     env.copy("ili9341.hpp")
     env.copy("ili9341_impl.hpp")
-    env.copy("ili9341_interface_parallel.hpp")
-
-    env.substitutions = {'spi_16bit_hardware': env[":target"].has_driver("spi:stm32")}
-    env.template("ili9341_interface_spi.hpp.in")
+    env.copy("ili9341_spi.hpp")
+    env.copy("ili9341_parallel.hpp")

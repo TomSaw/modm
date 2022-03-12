@@ -24,23 +24,14 @@ namespace modm
 template<class Spi, class Cs, class Dc>
 class Ili9341InterfaceSpi : public ili9341_register, public modm::SpiDevice< Spi >, protected modm::NestedResumable<5>
 {
-	uint8_t read;
-
-	static constexpr auto configuration8bit = []() {
-		Spi::setDataMode(Spi::DataMode::Mode0);
-		Spi::setDataOrder(Spi::DataOrder::MsbFirst);
-		Spi::setDataSize(Spi::DataSize::Bit8);
-	};
-
-	static constexpr auto configuration16bit = []() {
-		Spi::setDataMode(Spi::DataMode::Mode0);
-		Spi::setDataOrder(Spi::DataOrder::MsbFirst);
-		Spi::setDataSize(Spi::DataSize::Bit16);
-	};
 protected:
 	Ili9341InterfaceSpi()
 	{
-		this->attachConfigurationHandler(configuration16bit);
+		this->attachConfigurationHandler([]() {
+			Spi::setDataMode(Spi::DataMode::Mode0);
+			Spi::setDataOrder(Spi::DataOrder::MsbFirst);
+		});
+
 		Cs::setOutput(modm::Gpio::High);
 		Dc::setOutput();
 	}
@@ -53,8 +44,10 @@ protected:
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint16_t(command))); // It's Ok to send sole commands in 16bit
+		RF_CALL(Spi::transfer(uint8_t(command)));
 		Dc::set();
 
 		if (this->releaseMaster())
@@ -64,13 +57,15 @@ protected:
 	}
 
 	modm::ResumableResult<void>
-	writeCommand(Command command, const uint8_t data)
+	writeCommand(Command command, uint8_t data)
 	{
 		RF_BEGIN();
-		this->attachConfigurationHandler(configuration8bit);
+
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
 		RF_CALL(Spi::transfer(uint8_t(command)));
 		Dc::set();
@@ -80,18 +75,19 @@ protected:
 		if (this->releaseMaster())
 			Cs::set();
 
-		this->attachConfigurationHandler(configuration16bit);
 		RF_END();
 	}
 
 	modm::ResumableResult<void>
-	writeCommand(Command command, const uint8_t *data, uint16_t length)
+	writeCommand(Command command, const uint8_t *data, std::size_t length)
 	{
 		RF_BEGIN();
-		this->attachConfigurationHandler(configuration8bit);
+
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
 		RF_CALL(Spi::transfer(uint8_t(command)));
 		Dc::set();
@@ -101,23 +97,25 @@ protected:
 		if (this->releaseMaster())
 			Cs::set();
 
-		this->attachConfigurationHandler(configuration16bit);
 		RF_END();
 	}
 
 	modm::ResumableResult<void>
-	writeCommand(Command command, const uint16_t *data, uint16_t length)
+	writeCommand(Command command, const uint16_t *data, std::size_t length)
 	{
 		RF_BEGIN();
 
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		// It's OK to send sole 8bit commands in 16bit
-		RF_CALL(Spi::transfer(uint16_t(command)));
+		RF_CALL(Spi::transfer(uint8_t(command)));
 		Dc::set();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit16);
 		RF_CALL(Spi::transfer(data, (uint16_t*)(nullptr), length));
 
 		if (this->releaseMaster())
@@ -134,6 +132,8 @@ protected:
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit16);
 		RF_CALL(Spi::transfer(pixel.value()));
 
 		if (this->releaseMaster())
@@ -150,6 +150,8 @@ protected:
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit16);
 		RF_CALL(Spi::transfer((uint16_t*)(pixel), repeat));
 
 		if (this->releaseMaster())
@@ -159,13 +161,15 @@ protected:
 	}
 
 	modm::ResumableResult<void>
-	writeData(const color::Rgb565* pixels, uint16_t length)
+	writeData(const color::Rgb565* pixels, std::size_t length)
 	{
 		RF_BEGIN();
 
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit16);
 		RF_CALL(Spi::transfer((uint16_t*)(pixels), (uint16_t*)(nullptr), length));
 
 		if (this->releaseMaster())
@@ -178,16 +182,18 @@ protected:
 	readData(Command command)
 	{
 		RF_BEGIN();
-		
+
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
 		RF_CALL(Spi::transfer(uint8_t(command)));
 		Dc::set();
 
-		read = RF_CALL(Spi::transfer(0x00)).getResult();
-		
+		read = RF_CALL(Spi::transfer(0)).getResult();
+
 		if (this->releaseMaster())
 			Cs::set();
 
@@ -195,13 +201,15 @@ protected:
 	}
 
 	modm::ResumableResult<void>
-	readData(Command command, uint8_t *buffer, uint16_t length)
+	readData(Command command, uint8_t *buffer, std::size_t length)
 	{
 		RF_BEGIN();
 
 		RF_WAIT_UNTIL(this->acquireMaster());
 		Cs::reset();
 
+		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
+			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
 		RF_CALL(Spi::transfer(uint8_t(command)));
 		Dc::set();
@@ -213,6 +221,9 @@ protected:
 
 		RF_END();
 	}
+
+private:
+	uint8_t read;
 };
 
 }  // namespace modm

@@ -12,7 +12,6 @@
 #include "ili9341.hpp"
 
 #include <modm/math/utils/endianness.hpp>
-
 #include "ili9341_defines.hpp"
 
 namespace modm
