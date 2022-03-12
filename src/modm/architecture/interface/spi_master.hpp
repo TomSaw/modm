@@ -3,7 +3,6 @@
  * Copyright (c) 2010, Martin Rosekeit
  * Copyright (c) 2012-2017, Niklas Hauser
  * Copyright (c) 2013, Sascha Schade
- * Copyright (c) 2021, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -13,8 +12,7 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_INTERFACE_SPI_MASTER_HPP
-#define MODM_INTERFACE_SPI_MASTER_HPP
+#pragma once
 
 #include <modm/processing/resumable.hpp>
 #include "spi.hpp"
@@ -103,22 +101,8 @@ public:
 	 * 		data to be sent
 	 * @return	received data
 	 */
-	template <std::unsigned_integral T>
-	static T
-	transferBlocking(T data);
-
-	/**
-	 * Swap a single byte or word or word multiple times and wait for completion non-blocking!
-	 * This may be hardware accelerated (DMA or Interrupt), but not guaranteed.
-	 *
-	 * @param[in]   tx
-	 *      pointer to transmit data
-	 * @param       repeat
-	 *      number of repetitions for same byte or word or word
-	 */
-	template <std::unsigned_integral T>
-	static modm::ResumableResult<void>
-	transfer(const T *tx, const std::size_t repeat);
+	static uint8_t
+	transferBlocking(uint8_t data);
 
 	/**
 	 * Set the data buffers and length with options and starts a transfer.
@@ -131,12 +115,11 @@ public:
 	 * @param       length
 	 *      number of bytes to be shifted out
 	 */
-	template <std::unsigned_integral T>
 	static void
-	transferBlocking(const T *tx, T *rx, const std::size_t length);
+	transferBlocking(const uint8_t *tx, uint8_t *rx, std::size_t length);
 
 	/**
-	 * Swap a single byte or word and wait for completion non-blocking!
+	 * Swap a single byte and wait for completion non-blocking!.
 	 *
 	 * You must call this inside a Protothread or Resumable
 	 * using `PT_CALL` or `RF_CALL` respectively.
@@ -148,28 +131,8 @@ public:
 	 * 		data to be sent
 	 * @return	received data
 	 */
-	template <std::unsigned_integral T>
-	static modm::ResumableResult<T>
-	transfer(T data);
-
-	/**
-	 * Swap a single byte or word multiple times and wait for completion non-blocking!
-	 * This may be hardware accelerated (DMA or Interrupt), but not guaranteed.
-	 *
-	 * You must call this inside a Protothread or Resumable
-	 * using `PT_CALL` or `RF_CALL` respectively.
-	 * @warning	These methods differ from Resumables by lacking context protection!
-	 * 			You must ensure that only one driver is accessing this resumable function
-	 * 			by using `acquire(ctx)` and `release(ctx)`.
-	 *
-	 * @param[in]   tx
-	 *      pointer to transmit data
-	 * @param       repeat
-	 *      number of repetitions for same byte or word
-	 */
-	template <std::unsigned_integral T>
-	static modm::ResumableResult<void>
-	transfer(const T *tx, const std::size_t repeat);
+	static modm::ResumableResult<uint8_t>
+	transfer(uint8_t data);
 
 	/**
 	 * Set the data buffers and length with options and
@@ -189,12 +152,25 @@ public:
 	 * @param       length
 	 *      number of bytes to be shifted out
 	 */
-	template <std::unsigned_integral T>
 	static modm::ResumableResult<void>
-	transfer(const T *tx, T *rx, const std::size_t length);
+	transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
 #endif
+
+public:
+	enum State : uint8_t {
+		Idle = Bit6,	// Transaction is running
+		Repeat = Bit7,	// Send same tx multiple times
+	};
+	MODM_FLAGS8(State);
+
+	enum DataType : uint8_t {
+		Byte = 0,			// 1 byte
+		HalfWord = 1,		// 2 bytes
+		Word = 2,			// 4 bytes
+		// WordWord = 3		// 8 bytes
+	};
+	typedef Value<State_t, 2> DataType_t;
+
 };
 
 } // namespace modm
-
-#endif // MODM_INTERFACE_SPI_MASTER_HPP
