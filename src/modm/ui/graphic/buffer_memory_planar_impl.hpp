@@ -10,7 +10,7 @@
 // ----------------------------------------------------------------------------
 
 #pragma once
-#include "buffer.hpp"
+#include "buffer_memory_planar.hpp"
 
 namespace modm::graphic {
 

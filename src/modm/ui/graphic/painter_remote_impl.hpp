@@ -240,32 +240,32 @@ RemotePainter<GD>::draw(shape::Circle circle, Style style)
 		cf.f = 1 - circle.radius;
 		cf.ddF_x = 0;
 		cf.ddF_y = -2 * circle.radius;
-		cf.x() = 0;
-		cf.y() = circle.radius;
+		cf.x = 0;
+		cf.y = circle.radius;
 
 		cf.start = {circle.center.x(), circle.center.y() - circle.radius};
 		RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * circle.radius)));
 
-		while (cf.x() < cf.y())
+		while (cf.x < cf.y)
 		{
 			if (cf.f >= 0)
 			{
-				cf.y()--;
+				cf.y--;
 				cf.ddF_y += 2;
 				cf.f += cf.ddF_y;
 			}
-			cf.x()++;
+			cf.x++;
 			cf.ddF_x += 2;
 			cf.f += cf.ddF_x + 1;
 
-			cf.start = circle.center + shape::Point(cf.x(), -cf.y());
-			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.y())));
-			cf.start = circle.center + shape::Point(cf.y(), -cf.x());
-			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.x())));
-			cf.start = circle.center - shape::Point(cf.x(), cf.y());
-			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.y())));
-			cf.start = circle.center - shape::Point(cf.y(), cf.x());
-			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.x())));
+			cf.start = circle.center + shape::Point(cf.x, -cf.y);
+			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.y)));
+			cf.start = circle.center + shape::Point(cf.y, -cf.x);
+			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.x)));
+			cf.start = circle.center - shape::Point(cf.x, cf.y);
+			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.y)));
+			cf.start = circle.center - shape::Point(cf.y, cf.x);
+			RF_CALL(GD::drawBlind(shape::VLine(cf.start, cf.start.y() + 2 * cf.x)));
 		}
 	}
 

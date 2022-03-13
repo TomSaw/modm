@@ -14,10 +14,6 @@
 
 #include <limits>
 
-using namespace modm::shape;
-using namespace modm::color;
-using namespace modm::graphic;
-
 #define MODM_INIT_BUFFER(...) {\
 	constexpr uint8_t data[]__VA_ARGS__;\
 	std::copy(std::begin(data), std::end(data), std::begin(buff_cmd8));\
@@ -150,26 +146,22 @@ modm::Ili9341<Transport, Reset, BC>::get(ReadWrite reg)
 
 template<class Transport, class Reset, size_t BC>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::setOrientation(
-	Orientation orientation)
+modm::Ili9341<Transport, Reset, BC>::setOrientation(graphic::Orientation orientation)
 {
 	RF_BEGIN();
 	this->orientation = orientation;
 
-	using MemoryAccessCtrl = ili9341_register::MemoryAccessCtrl;
-	using OrientationFlags = graphic::OrientationFlags;
-
-	madCtrl = MemoryAccessCtrl::PIXEL_DIR;
+	madCtrl = ili9341_register::MemoryAccessCtrl::PIXEL_DIR;
 
 	// FIXME adjust for flipped x-y in Buffer
-	if (orientation & Orientation(OrientationFlags::Portrait))
-		madCtrl |= MemoryAccessCtrl::MEMORY_MODE;
+	if (orientation & graphic::Orientation(graphic::OrientationFlags::Portrait))
+		madCtrl |= ili9341_register::MemoryAccessCtrl::MEMORY_MODE;
 
-	if (orientation & Orientation(OrientationFlags::TopDown))
-		madCtrl |= MemoryAccessCtrl::MEMORY_DIR_Y;
+	if (orientation & graphic::Orientation(graphic::OrientationFlags::TopDown))
+		madCtrl |= ili9341_register::MemoryAccessCtrl::MEMORY_DIR_Y;
 
-	if (bool(orientation & Orientation(OrientationFlags::Portrait)) == bool(orientation & Orientation(OrientationFlags::TopDown)))
-		madCtrl |= MemoryAccessCtrl::MEMORY_DIR_X;
+	if (bool(orientation & graphic::Orientation(graphic::OrientationFlags::Portrait)) == bool(orientation & graphic::Orientation(graphic::OrientationFlags::TopDown)))
+		madCtrl |= ili9341_register::MemoryAccessCtrl::MEMORY_DIR_X;
 
 	RF_CALL(this->writeCommand(Command::MemoryAccessCtrl, madCtrl.value));
 
@@ -222,58 +214,13 @@ modm::Ili9341<Transport, Reset, BC>::updateClipping()
 }
 
 template<class Transport, class Reset, size_t BC>
-template<Color CO, template<typename> class Accessor>
-modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::writeImage(ImageAccessor<CO, Accessor> accessor) {
-	// Found no cast for a share the memory between all of the writeImage()-methods.
-	// This waste of RAM will be history once Resumable Functions become history.
-	static ImageAccessor<CO, Accessor> a;
-
-	RF_BEGIN();
-
-	a = accessor;
-
-	this->clipping = this->getIntersection(a.getSection());
-	RF_CALL(updateClipping());
-
-	a.incrementRow_preparePixel();
-	p.scanner = this->clipping.topLeft;
-
- 	while (p.pixels)
-	{
-		// Fill buffer
-		for(p.i = 0; p.i < std::min<uint32_t>(p.pixels, BC); p.i++) {
-			if constexpr (ColorPalletized<CO>) {
-				// Apply colormap
-				p.buffer[p.i] = colormap[ a.nextPixel().value() ];
-			} else {
-				// convert color
-				p.buffer[p.i] = a.nextPixel();
-			}
-
-			if (++p.scanner.y() == this->clipping.bottomRight.y) {
-				p.scanner.x++;
-				p.scanner.y() = this->clipping.topLeft.y;
-				a.incrementRow_preparePixel();
-			}
-		}
-
-		// Transfer buffer
-		RF_CALL(this->writeData(p.buffer, p.i));
-		p.pixels -= p.i;
-	}
-
-	RF_END();
-}
-
-template<class Transport, class Reset, size_t BC>
 template<template<typename> class Accessor>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::writeImage(ImageAccessor<ColorType, Accessor> accessor)
+modm::Ili9341<Transport, Reset, BC>::writeImage(modm::graphic::ImageAccessor<ColorType, Accessor> accessor)
 {
 	// Found no cast for a share the memory between all of the writeImage()-methods.
 	// This waste of RAM will be history once Resumable Functions become history.
-	static ImageAccessor<ColorType, Accessor> a;
+	static modm::graphic::ImageAccessor<ColorType, Accessor> a;
 
 	RF_BEGIN();
 
@@ -302,9 +249,54 @@ modm::Ili9341<Transport, Reset, BC>::writeImage(ImageAccessor<ColorType, Accesso
 }
 
 template<class Transport, class Reset, size_t BC>
-template<ColorPattern P>
+template<modm::color::Color CO, template<typename> class Accessor>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::writePattern(Rectangle rectangle, P pattern) {
+modm::Ili9341<Transport, Reset, BC>::writeImage(modm::graphic::ImageAccessor<CO, Accessor> accessor) {
+	// Found no cast for a share the memory between all of the writeImage()-methods.
+	// This waste of RAM will be history once Resumable Functions become history.
+	static modm::graphic::ImageAccessor<CO, Accessor> a;
+
+	RF_BEGIN();
+
+	a = accessor;
+
+	this->clipping = this->getIntersection(a.getSection());
+	RF_CALL(updateClipping());
+
+	a.incrementRow_preparePixel();
+	p.scanner = this->clipping.topLeft;
+
+ 	while (p.pixels)
+	{
+		// Fill buffer
+		for(p.i = 0; p.i < std::min<uint32_t>(p.pixels, BC); p.i++) {
+			if constexpr (modm::color::ColorPalletized<CO>) {
+				// Apply colormap
+				p.buffer[p.i] = colormap[ a.nextPixel().value() ];
+			} else {
+				// convert color
+				p.buffer[p.i] = a.nextPixel();
+			}
+
+			if (++p.scanner.y() == this->clipping.bottomRight.y()) {
+				p.scanner.x()++;
+				p.scanner.y() = this->clipping.topLeft.y();
+				a.incrementRow_preparePixel();
+			}
+		}
+
+		// Transfer buffer
+		RF_CALL(this->writeData(p.buffer, p.i));
+		p.pixels -= p.i;
+	}
+
+	RF_END();
+}
+
+template<class Transport, class Reset, size_t BC>
+template<modm::graphic::ColorPattern P>
+modm::ResumableResult<void>
+modm::Ili9341<Transport, Reset, BC>::writePattern(shape::Rectangle rectangle, P pattern) {
 	RF_BEGIN();
 
 	this->clipping = this->getIntersection(rectangle);
@@ -333,7 +325,7 @@ modm::Ili9341<Transport, Reset, BC>::writePattern(Rectangle rectangle, P pattern
 // Fundamental drawing of shapes
 template<class Transport, class Reset, size_t BC>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::drawBlind(const Point& point)
+modm::Ili9341<Transport, Reset, BC>::drawBlind(const shape::Point& point)
 {
 	RF_BEGIN();
 	// This snipers single pixels and is quite heavy because anytime
@@ -346,38 +338,38 @@ modm::Ili9341<Transport, Reset, BC>::drawBlind(const Point& point)
 	// 4. Compare match toggles the DC-Line and triggers the DMA
 	// OPTIMIZE Now it's possible to buffer remote drawing-instructions and do efficient DMA transfers
 	// without CPU intervention.
-	p.buff_cmd_clipping[0] = point.y;
+	p.buff_cmd_clipping[0] = point.y();
 	p.buff_cmd_clipping[1] = p.buff_cmd_clipping[0];
 	RF_CALL(this->writeCommand(Command::ColumnAddressSet, p.buff_cmd_clipping, 2));
 
-	p.buff_cmd_clipping[0] = point.x;
+	p.buff_cmd_clipping[0] = point.x();
 	p.buff_cmd_clipping[1] = p.buff_cmd_clipping[0];
 	RF_CALL(this->writeCommand(Command::PageAddressSet, p.buff_cmd_clipping, 2));
 
 	RF_CALL(this->writeCommand(Command::MemoryWrite));
 
-	RF_END_RETURN_CALL(this->writeData(colormap[1].value()));
+	RF_END_RETURN_CALL(this->writeData(color.value()));
 }
 
 template<class Transport, class Reset, size_t BC>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::drawBlind(const HLine& hline)
+modm::Ili9341<Transport, Reset, BC>::drawBlind(const shape::HLine& hline)
 {
 	RF_BEGIN();
-	RF_END_RETURN_CALL(drawBlind(Section(hline.start, {hline.end_x, hline.start.y() + 1})));
+	RF_END_RETURN_CALL(drawBlind(shape::Section(hline.start, {hline.end_x, hline.start.y() + 1})));
 }
 
 template<class Transport, class Reset, size_t BC>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::drawBlind(const VLine& vline)
+modm::Ili9341<Transport, Reset, BC>::drawBlind(const shape::VLine& vline)
 {
 	RF_BEGIN();
-	RF_END_RETURN_CALL(drawBlind(Section(vline.start, {vline.start.x() + 1, vline.end_y})));
+	RF_END_RETURN_CALL(drawBlind(shape::Section(vline.start, {vline.start.x() + 1, vline.end_y})));
 }
 
 template<class Transport, class Reset, size_t BC>
 modm::ResumableResult<void>
-modm::Ili9341<Transport, Reset, BC>::drawBlind(const Section& section)
+modm::Ili9341<Transport, Reset, BC>::drawBlind(const shape::Section& section)
 {
 	RF_BEGIN();
 
@@ -387,7 +379,7 @@ modm::Ili9341<Transport, Reset, BC>::drawBlind(const Section& section)
 	while(p.pixels) {
 		// respect DMAs max bulksize of 2^16-1
 		p.pixels_bulk = std::min<uint32_t>(p.pixels, std::numeric_limits<uint16_t>::max());
-		RF_CALL(this->writeDataRepeat(&this->colormap[1], p.pixels_bulk));
+		RF_CALL(this->writeDataRepeat(&this->color, p.pixels_bulk));
 		p.pixels -= p.pixels_bulk;
 	}
 
@@ -401,10 +393,10 @@ modm::Ili9341<Transport, Reset, BC>::clear(ColorType color)
 {
 	RF_BEGIN();
 
-	p.temp_color = this->colormap[1];
-	this->colormap[1] = color;
+	p.temp_color = this->color;
+	this->color = color;
 	RF_CALL(this->drawBlind(this->asSection()));
-	this->colormap[1] = p.temp_color;
+	this->color = p.temp_color;
 
 	RF_END();
 }

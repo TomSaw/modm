@@ -99,10 +99,12 @@ class Ssd1306 : public ssd1306,
 	static_assert((H == 64) or (H == 32), "Display height must be either 32 or 64 pixel!");
 public:
 	using ColorType = color::Monochrome;
-	using Buffer = graphic::Buffer<ColorType, {128, H}>;
+	static constexpr graphic::Size Resolution = {128, H};
+
+	using Buffer = graphic::Buffer<ColorType, Resolution>;
 
 	Ssd1306(uint8_t address = 0x3C)
-		: graphic::Display<ColorType, {128, H}, false>(true), I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
+		: graphic::Display<ColorType, Resolution, false>(true), I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
 	{}
 
 	/// Pings the display

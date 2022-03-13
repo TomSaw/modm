@@ -25,13 +25,19 @@
 namespace modm::graphic
 {
 
-enum OrientationFlags : uint8_t
+enum
+// enum class
+OrientationFlags : uint8_t
 {
 	Portrait = Bit0,
 	TopDown = Bit1
 };
+// TODO implemenet modm typesafe registers for ssd1306 and ili9431
+// MODM_FLAGS8(OrientationFlags);
 
-enum Orientation : uint8_t
+enum
+// enum class
+Orientation : uint8_t
 {
 	Landscape0,
 	Portrait90 = Portrait,

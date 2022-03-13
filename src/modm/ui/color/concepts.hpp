@@ -74,28 +74,4 @@ template<class C>
 concept Color = ColorGray<C> || ColorRgb<C> || ColorHsv<C> || ColorRgbStacked<C>; // conjunction
 // concept Color = std::convertible_to<C, RgbD<8,8,8> >; // more tolerant alternative: convertability
 
-/**
- * @brief 	Concept to ident palettizing (stacking) colortype instances
- *
- * @see: https://en.wikipedia.org/wiki/Framebuffer#Memory_access
- */
-template<class C>
-concept ColorPalletized = ColorGray<C> and C::Digits < 8 and std::popcount(unsigned(C::Digits)) == 1;
-
-/**
- * @brief 	Concept to ident non-palettizing (planar) colortype instances
- *
- * @see: https://en.wikipedia.org/wiki/Framebuffer#Memory_access
- */
-template<class C>
-concept ColorPlanar = !ColorPalletized<C>;
-
-/**
- * @brief 	Concept to ident monochrome colortype
- */
-template<class C>
-concept ColorMonochrome = std::is_same_v<C, GrayD<1>>;
-// Alternative implementation as reference
-// concept ColorMonochrome = ColorGray<C> and C::Digits == 1;
-
 }

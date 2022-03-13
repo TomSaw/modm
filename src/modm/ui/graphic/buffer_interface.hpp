@@ -8,12 +8,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
 #pragma once
 
-#include <modm/math/geometry/shape/point.hpp>
+#include <tuple>
 #include <modm/ui/color/concepts.hpp>
-
+#include <modm/math/geometry/shape/point.hpp>
 #include "canvas.hpp"
 
 namespace modm::graphic
@@ -22,20 +21,25 @@ namespace modm::graphic
 /**
  * @brief 		Interface to Buffer to serve graphic::ImageAccessor
  *
- * @tparam C 	ColorType. Althought it's an interface, the Variation over C is
- * 				required for optimal performance. Anyways // TODO find a way to get rid of this C
+ * @tparam C 	ColorType of the Interface.
+ * 				A consumer of BufferInterface (other Buffers or Displays) variate their methods
+ * 				over C cause is critical for performance.
+ * 				Size and the actual address of the Buffer is decoupled: It's cheap enough using a virtual call.
  */
 
-// FIXME BufferMemory::UnderlyingType must pass T
-template<color::Color C, typename T = uint8_t>
+template<color::Color C>
 class BufferInterface
 {
 public:
+	// OPTIMIZE Maybe returned with one call using std::tuple
 	virtual Size
 	virtualSize() const = 0;
 
-	virtual const T*
+	virtual const void*
 	virtualBuffer() const = 0;
+
+	virtual std::tuple<Size, const void*>
+	getSizeAndBuffer() const = 0;
 protected:
 	BufferInterface() = default;
 };

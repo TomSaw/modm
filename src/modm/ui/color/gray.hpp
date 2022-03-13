@@ -45,7 +45,7 @@ class GrayD : public modm::ProportionalUnsigned<D>
 public:
 	// TODO any unsigned_integral can be PalleteType
 	// depends on architecture and target Display
-	using PalleteType = uint8_t;
+	using TPallete = uint8_t;
 
 	using T = ProportionalUnsigned<D>::T;
 

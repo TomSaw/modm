@@ -8,122 +8,42 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
-#pragma once
-
-#include <concepts>
-#include <algorithm>
-
-#include <modm/math/utils/misc.hpp>
-
 #include <modm/ui/color/concepts.hpp>
-#include "concepts.hpp"
 
-#include <modm/math/geometry/shape.hpp>
+namespace modm::color {
 
-#include "accessor_image.hpp"
+	/**
+	 * @brief 	Concept to ident palettizing colortype instances
+	 *			Targets: Monochrome, Gray2, Gray4
+	 *
+	 * @see: https://en.wikipedia.org/wiki/Framebuffer#Memory_access
+	 */
+	template<class C>
+	concept ColorPalletized = ColorGray<C> and C::Digits < 8 and std::popcount(unsigned(C::Digits)) == 1;
+
+	/**
+	 * @brief 	Concept to ident planar colortype instances
+	 *
+	 * @see: https://en.wikipedia.org/wiki/Framebuffer#Memory_access
+	 */
+	template<class C>
+	concept ColorPlanar = !ColorPalletized<C>;
+
+	/**
+	 * @brief 	Concept to ident monochrome colortype
+	 */
+	template<class C>
+	concept ColorMonochrome = std::is_same_v<C, Monochrome>;
+	// concept ColorMonochrome = ColorGray<C> and C::Digits == 1; // Alternative implementation
+}
 
 namespace modm::graphic
 {
-
-template<class, Size>
-class BufferMemory;
-
-/**
- * @brief 		Framebuffer with random access and low-lvl drawing methods. Each pixel has it's own address
- *
- * @tparam	C	color::Gray{>= 8}, color::Rgb, color::Hsv or color::RgbStacked - to be expanded in the future
- * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
- *
- * @author		Thomas Sommer
- * @ingroup		modm_ui_graphic
- */
-template<color::ColorPlanar C, Size R>
-class BufferMemory<C, R> : public BufferInterface<C>, public Canvas<C, R>
-{
-protected:
-	BufferMemory(C* colormap) : Canvas<C, R>(colormap) {};
-
-	template<color::ColorPlanar CO>
-	constexpr BufferMemory(const BufferMemory<CO, R> &other)
-	{
-		std::copy(std::begin(other.buffer_1d), std::end(other.buffer_1d), std::begin(this->buffer_1d));
-	}
-
-	template<color::ColorPalletized CO>
-	constexpr BufferMemory(const BufferMemory<CO, R> &other)
-	{
-		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
-	}
-
-	template<color::ColorPlanar CO>
-	void operator=(const BufferMemory<CO, R> &other)
-	{
-		std::copy(std::begin(other.buffer_1d), std::end(other.buffer_1d), std::begin(this->buffer_1d));
-	}
-
-	template<color::ColorPalletized CO>
-	void operator=(const BufferMemory<CO, R> &other)
-	{
-		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
-	}
-
-protected:
-	union {
-		C buffer[R.y()][R.x()];
-		C buffer_1d[R.y() * R.x()];
-	};
-
-	C::ValueType clearValue(C color = 0) const {
-		return color.value();
-	}
-
-	/**
-	 * @brief				Write Image with foreign Color
-	 *
-	 * @param accessor		ImageAccessor inheriting an accessor::Flash or accessor::Ram
-	 * @param placement		Placement for the image
-	 */
-	template<color::Color CO, template<typename> class Accessor>
-	void
-	writeImage(ImageAccessor<CO, Accessor> accessor);
-
-	/**
-	 * @brief 				Write Image with same C
-	 *
-	 * @param accessor		ImageAccessor inheriting an accessor::Flash or accessor::Ram
-	 * @param placement		Placement for the image
-	 */
-	template<template<typename> class Accessor>
-	void
-	writeImage(ImageAccessor<C, Accessor> accessor);
-
-	/**
-	 * @warning 	These methods do not check sanity!
-	 *				It is your responsibility to check if the shape
-	 *				is within buffer boundaries.
-	 */
-	void drawBlind(const shape::Point& point);
-	void drawBlind(const shape::HLine& hline);
-	void drawBlind(const shape::VLine& vline);
-	void drawBlind(const shape::Section& section);
-
-	C getBlind(const shape::Point& point) const
-	{
-		return buffer[point.y()][point.x()];
-	}
-
-	C& operator()(const shape::Point& point)
-	{
-		return buffer[point.y()][point.x()];
-	}
-
 	template<class, Size>
-	friend class BufferMemory;
-};
-}  // namespace modm
+	class BufferMemory;
+}
 
-#include "buffer_memory_impl.hpp"
-
+#include "buffer_memory_planar.hpp"
 #include "buffer_memory_palletized.hpp"
+// TODO
 // #include "buffer_memory_palletized_mono.hpp"

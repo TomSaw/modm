@@ -10,9 +10,7 @@
  */
 
 #pragma once
-#ifndef MODM_ILI9341_HPP
-#error "Don't include this file directly, use 'ili9341.hpp' instead!"
-#endif
+#include "ili9341.hpp"
 
 #include <modm/math/utils/bit_constants.hpp>
 

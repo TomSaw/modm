@@ -47,7 +47,7 @@ protected:
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint8_t(command)));
+		RF_CALL(Spi::transmit(uint8_t(command)));
 		Dc::set();
 
 		if (this->releaseMaster())
@@ -67,10 +67,10 @@ protected:
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint8_t(command)));
+		RF_CALL(Spi::transmit(uint8_t(command)));
 		Dc::set();
 
-		RF_CALL(Spi::transfer(data));
+		RF_CALL(Spi::transmit(data));
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -89,10 +89,10 @@ protected:
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint8_t(command)));
+		RF_CALL(Spi::transmit(uint8_t(command)));
 		Dc::set();
 
-		RF_CALL(Spi::transfer(data, (uint8_t*)(nullptr), length));
+		RF_CALL(Spi::transmit(data, (uint8_t*)(nullptr), length));
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -111,12 +111,12 @@ protected:
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint8_t(command)));
+		RF_CALL(Spi::transmit(uint8_t(command)));
 		Dc::set();
 
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit16);
-		RF_CALL(Spi::transfer(data, (uint16_t*)(nullptr), length));
+		RF_CALL(Spi::transmit(data, (uint16_t*)(nullptr), length));
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -134,7 +134,7 @@ protected:
 
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit16);
-		RF_CALL(Spi::transfer(pixel.value()));
+		RF_CALL(Spi::transmit(pixel.value()));
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -152,7 +152,7 @@ protected:
 
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit16);
-		RF_CALL(Spi::transfer((uint16_t*)(pixel), repeat));
+		RF_CALL(Spi::transmit((uint16_t*)(pixel), repeat));
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -170,7 +170,7 @@ protected:
 
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit16);
-		RF_CALL(Spi::transfer((uint16_t*)(pixels), (uint16_t*)(nullptr), length));
+		RF_CALL(Spi::transmit((uint16_t*)(pixels), (uint16_t*)(nullptr), length));
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -189,10 +189,10 @@ protected:
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint8_t(command)));
+		RF_CALL(Spi::transmit(uint8_t(command)));
 		Dc::set();
 
-		read = RF_CALL(Spi::transfer(0)).getResult();
+		read = RF_CALL(Spi::transmit(0)).getResult();
 
 		if (this->releaseMaster())
 			Cs::set();
@@ -211,10 +211,10 @@ protected:
 		if constexpr ( spi::Support_DataSize_Bit16<Spi> )
 			Spi::setDataSize(Spi::DataSize::Bit8);
 		Dc::reset();
-		RF_CALL(Spi::transfer(uint8_t(command)));
+		RF_CALL(Spi::transmit(uint8_t(command)));
 		Dc::set();
 
-		RF_CALL(Spi::transfer(nullptr, buffer, length));
+		RF_CALL(Spi::transmit(nullptr, buffer, length));
 
 		if (this->releaseMaster())
 			Cs::set();

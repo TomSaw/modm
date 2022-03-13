@@ -33,6 +33,8 @@ class Sh1106 : public Ssd1306<I2cMaster, H>
 {
 public:
 	using ColorType = Ssd1306<I2cMaster, H>::ColorType;
+	// Resolution see Ssd1306
+	
 	using Buffer = Ssd1306<I2cMaster, H>::Buffer;
 
 	Sh1106(uint8_t address = 0x3C) : Ssd1306<I2cMaster, H>(address) {}

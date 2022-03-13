@@ -137,7 +137,7 @@ public:
 		this->writeImage(ImageAccessor<CO, modm::accessor::Flash>(addr, placement));
 	}
 
-	void clear(ColorType color = 0);
+	void clear(C color = 0);
 
 	void invert();
 
@@ -147,11 +147,15 @@ public:
 		void operator>>=(const std::size_t shift);
 
 	// TODO Maybe possible to get this typesafe
-	const uint8_t* virtualBuffer() const final
-	{ return (uint8_t*)(this->buffer); }
+	const void* virtualBuffer() const final
+	{ return reinterpret_cast<const void*>(this->buffer); }
 
 	Size virtualSize() const final
 	{ return R; }
+
+	std::tuple<Size, const void*>
+	getSizeAndBuffer() const final
+	{ return std::make_tuple(R, reinterpret_cast<const void*>(this->buffer)); }
 
 private:
 	template<color::Color, Size>

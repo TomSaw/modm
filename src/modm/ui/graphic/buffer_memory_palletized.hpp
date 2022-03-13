@@ -36,21 +36,22 @@ template<color::ColorPalletized C, Size R>
 class BufferMemory<C, R> : public BufferInterface<C>, public Canvas<C, R>
 {
 protected:
-	using PalleteType = C::PalleteType;
+	using TPallete = C::TPallete;
 
 	// TODO check if it works with uint16_t and uint32_t
-	static constexpr int digits = std::numeric_limits<PalleteType>::digits;
-	static constexpr PalleteType allBits = std::numeric_limits<PalleteType>::max();
+	static constexpr int digits = std::numeric_limits<TPallete>::digits;
+	static constexpr TPallete allBits = std::numeric_limits<TPallete>::max();
 
 	static constexpr int ppb = digits / C::Digits;
 	static constexpr std::size_t RY = (R.y() + digits - 1) / ppb;
 
 	union {
-		PalleteType buffer[RY][R.x()];
-		PalleteType buffer_1d[RY * R.x()];
+		TPallete buffer[RY][R.x()];
+		// algorithms dislike 2 dimensional arrays
+		TPallete buffer_1d[RY * R.x()];
 	};
 
-	PalleteType clearValue(C color = 0) const {
+	TPallete clearValue(C color = 0) const {
 		return color::GrayD<digits>(color).value();
 	}
 
@@ -110,11 +111,11 @@ private:
 	getYlshift(int_fast16_t y)
 	{ return (y * C::Digits) & (digits - 1); } // x & (digits - 1) coresponds x % digits with support for negative int
 
-	PalleteType&
+	TPallete&
 	getByte(const shape::Point& point)
 	{ return buffer[getY(point.y())][point.x()]; }
 
-	PalleteType
+	TPallete
 	getByte(const shape::Point& point) const
 	{ return buffer[getY(point.y())][point.x()]; }
 
@@ -125,7 +126,7 @@ private:
 	struct Looper {
 		const std::size_t yb_top, yb_bot;
 		const int lshift_top, lshift_bot;
-		const PalleteType keepmask_top, keepmask_bot;
+		const TPallete keepmask_top, keepmask_bot;
 
 		// Maybe this is the beginning of a general service-class
 		// including the // Top End, Middle part, Bottom end code-blocks in various methods of BufferMemory<C, R>
@@ -150,9 +151,9 @@ private:
 
 	// OPTIMIZE confirm "inline" doesn't help
 	template<color::Color CO, template<typename> class Accessor>
-	PalleteType
+	TPallete
 	palletizeByte(ImageAccessor<CO, Accessor>& accessor, int lshift, const int lshift_max) {
-		PalleteType byte(0);
+		TPallete byte(0);
 
 		while(lshift < lshift_max) {
 			if constexpr (color::ColorPalletized<CO>) {

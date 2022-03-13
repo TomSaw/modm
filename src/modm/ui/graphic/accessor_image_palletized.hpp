@@ -28,22 +28,23 @@ namespace modm::graphic
  * @ingroup				modm_ui_graphic
  */
 template<color::ColorPalletized C, template<typename> class Accessor>
-class ImageAccessor<C, Accessor> : public Accessor<typename C::PalleteType>
+class ImageAccessor<C, Accessor> : public Accessor<const typename C::TPallete>
 {
 public:
-	static constexpr int digits = std::numeric_limits<typename C::PalleteType>::digits;
+	static constexpr int digits = std::numeric_limits<typename C::TPallete>::digits;
 
 	ImageAccessor() = default;
 
 	ImageAccessor(const BufferInterface<C>* buffer, shape::Point placement = {0, 0})
-		: Accessor<typename C::PalleteType>((typename C::PalleteType*)(buffer->virtualBuffer())), section(placement, placement + buffer->virtualSize())
+		: Accessor<const typename C::TPallete>(reinterpret_cast<const typename C::TPallete*>(buffer->virtualBuffer())),
+		section(placement, placement + buffer->virtualSize())
 	{
 		col_size = buffer->virtualSize().x();
 		initialize(placement);
 	}
 
 	ImageAccessor(const uint8_t* addr, shape::Point placement = {0, 0})
-		: Accessor<typename C::PalleteType>((typename C::PalleteType*)(addr + 2))
+		: Accessor<const typename C::TPallete>((typename C::TPallete*)(addr + 2))
 	{
 		auto flash = modm::accessor::asFlash(addr);
 		section = {placement, placement + shape::Point(flash[0], flash[1])};
@@ -52,18 +53,19 @@ public:
 	}
 
 	ImageAccessor(const uint8_t* addr, shape::Point size, shape::Point placement)
-		: Accessor<typename C::PalleteType>((typename C::PalleteType*)(addr)), section(placement, placement + size), col_size(size.x())
-	{
-		initialize(placement);
-	}
+		: Accessor<const typename C::TPallete>((typename C::TPallete*)(addr)), section(placement, placement + size), col_size(size.x())
+	{ initialize(placement); }
 
-	shape::Section getSection() const
+	shape::Section
+	getSection() const
 	{ return section; }
 
-	void incrementRow()
+	void
+	incrementRow()
 	{ this->address = addr_top++; }
 
-	void incrementCol()
+	void
+	incrementCol()
 	{ this->address += col_size; }
 
 	void
@@ -72,7 +74,7 @@ public:
 		incrementRow();
 		// Reset reading head
 		rotr = rotr_top;
-		byte = std::rotr(Accessor<typename C::PalleteType>::operator*(), rotr);
+		byte = std::rotr(Accessor<const typename C::TPallete>::operator*(), rotr);
 	}
 
 	C
@@ -84,7 +86,7 @@ public:
 			rotr = 0;
 			incrementCol();
 			// load next byte
-			byte = Accessor<typename C::PalleteType>::operator*();
+			byte = Accessor<const typename C::TPallete>::operator*();
 		} else {
 			// rotate to next pixel
 			byte = std::rotr(byte, C::Digits);
@@ -112,11 +114,11 @@ private:
 	size_t col_size;
 
 	// Start conditions for new row
-	const C::PalleteType* addr_top;
+	const C::TPallete* addr_top;
 	int rotr_top;
 
 	// Current byte
-	C::PalleteType byte;
+	C::TPallete byte;
 	// Track current rotation
 	int rotr;
 };

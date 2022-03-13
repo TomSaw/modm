@@ -8,9 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-
-#ifndef MODM_ILI9341_HPP
-#define MODM_ILI9341_HPP
+#pragma once
 
 #include <concepts>
 
@@ -35,7 +33,6 @@ namespace modm
 /// @ingroup modm_driver_ili9341
 
 template<class Transport, class Reset, size_t BC = 512>
-// requires std::derived_from<Painter, RemotePainter<R>>
 class Ili9341 : public Transport, public graphic::Display<color::Rgb565, {320, 240}, true>
 {
 	// OPTIMIZE determine good contraints
@@ -49,11 +46,13 @@ class Ili9341 : public Transport, public graphic::Display<color::Rgb565, {320, 2
 
 public:
 	using ColorType = color::Rgb565;
-	using BufferLandscape = graphic::Buffer<ColorType, ResolutionVector>;
-	using BufferPortrait = graphic::Buffer<ColorType, ResolutionVector.swapped()>;
-
-	ColorType color;
-	ColorType* colormap;
+	static constexpr graphic::Size Resolution = {320, 240};
+	
+	template<color::Color = ColorType>
+	using BufferLandscape = graphic::Buffer<ColorType, Resolution>;
+	
+	template<color::Color = ColorType>
+	using BufferPortrait = graphic::Buffer<ColorType, Resolution.swapped()>;
 
 	template<typename... Args>
 	Ili9341(Args &&...args)
@@ -121,17 +120,8 @@ protected:
 	setClipping(shape::Point point);
 
 	/**
-	 * Write Image with foreign Color
-	 *
-	 * @param accessor	ImageAccessor with underlying Flash or Ram Accessor
-	 * @param placement	Placement for the image
-	 */
- 	template<Color CO, template<typename> class Accessor>
-	ResumableResult<void>
-	writeImage(graphic::ImageAccessor<CO, Accessor> accessor);
-
-	/**
 	 * Write Image with same Color
+	 * Transmits an image as is.
 	 *
 	 * @param accessor	ImageAccessor with underlying Flash or Ram Accessor
 	 * @param placement	Placement for the image
@@ -139,6 +129,17 @@ protected:
 	template<template<typename> class Accessor>
 	ResumableResult<void>
 	writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor);
+
+	/**
+	 * Write Image with foreign Color
+	 * Uses local buffer for color conversion before transmission.
+	 *
+	 * @param accessor	ImageAccessor with underlying Flash or Ram Accessor
+	 * @param placement	Placement for the image
+	 */
+ 	template<color::Color CO, template<typename> class Accessor>
+	ResumableResult<void>
+	writeImage(graphic::ImageAccessor<CO, Accessor> accessor);
 
 	ResumableResult<void> drawBlind(const shape::Point& point);
 	ResumableResult<void> drawBlind(const shape::Section& section);
@@ -165,7 +166,7 @@ private:
 
 			ColorType buffer[BC]; // Conversion buffer
 			size_t i; // index in conversion buffer
-			Point scanner; // index on display
+			shape::Point scanner; // index on display
 
 			uint64_t pixels; // Must fit R.x() * R.y() = 76800
 			size_t pixels_bulk; // Number of pixels of current bulk
@@ -174,9 +175,6 @@ private:
 		} p;  // p for parallel
 	};
 };
-
 }  // namespace modm
 
 #include "ili9341_impl.hpp"
-
-#endif  //  MODM_ILI9341_HPP

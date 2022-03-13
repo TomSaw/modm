@@ -13,6 +13,7 @@
 
 #include <modm/math/geometry/shape/point.hpp>
 #include <modm/math/geometry/shape/section.hpp>
+#include <modm/ui/color/rgb_html.hpp>
 
 namespace modm::graphic
 {
@@ -65,18 +66,18 @@ public:
 	{ this->colormap = colormap; }
 
 	void
-	setColor(const std::size_t color_idx)
+	setColor(std::size_t color_idx)
 	{ this->color = colormap[color_idx]; }
 
 	void
-	setColor(const C color)
+	setColor(C color)
 	{ this->color = color; }
 
 protected:
-	Canvas(C* colormap = nullptr) : colormap(colormap) {}
+	Canvas(C* colormap = nullptr) : colormap(colormap), color() {}
 
-	C* colormap;
-	C color;
+	C* colormap{nullptr};
+	C color{color::html::White};
 
 	static constexpr shape::Point
 	getSourceOrigin(shape::Point placement) {

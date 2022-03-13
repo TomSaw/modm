@@ -18,7 +18,7 @@ template<color::ColorPalletized C, Size R>
 void
 BufferMemory<C, R>::drawBlind(const shape::Point& point)
 {
-	PalleteType& byte = getByte(point);
+	TPallete& byte = getByte(point);
 	const int lshift = getYlshift(point.y());
 
 	byte = (byte & ~(C::max << lshift)) | this->color.value() << lshift;
@@ -31,7 +31,7 @@ BufferMemory<C, R>::drawBlind(const shape::HLine& hline)
 	const std::size_t yb = getY(hline.start.y());
 	const int lshift = getYlshift(hline.start.y());
 
-	const PalleteType keepmask = ~(C::max << lshift);
+	const TPallete keepmask = ~(C::max << lshift);
 	const typename C::T value = this->color.value() << lshift;
 
 	size_t x = hline.start.x();
@@ -46,7 +46,7 @@ void
 BufferMemory<C, R>::drawBlind(const shape::VLine& vline)
 {
 	const Looper looper(vline);
-	const PalleteType byte_middle = clearValue(this->color);
+	const TPallete byte_middle = clearValue(this->color);
 
 	const std::size_t x = vline.start.x();
 	size_t yb = looper.yb_top;
@@ -71,7 +71,7 @@ BufferMemory<C, R>::drawBlind(const shape::Section& section)
 {
 	const Looper looper(section);
 
-	const PalleteType byte_middle = clearValue(this->color);
+	const TPallete byte_middle = clearValue(this->color);
 
 	for (int_fast16_t x = section.topLeft.x(); x < section.bottomRight.x(); x++) {
 		size_t yb = looper.yb_top;
