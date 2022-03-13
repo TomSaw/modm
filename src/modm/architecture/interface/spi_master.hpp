@@ -158,8 +158,9 @@ public:
 
 public:
 	enum State : uint8_t {
-		Idle = Bit6,	// Transaction is running
-		Repeat = Bit7,	// Send same tx multiple times
+		Idle = Bit5,		// Transaction is running
+		Repeat = Bit6,		// Send same tx multiple times
+		LowByte = Bit7,		// Low byte has been transmitted
 	};
 	MODM_FLAGS8(State);
 

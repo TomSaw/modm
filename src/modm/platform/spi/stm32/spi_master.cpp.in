@@ -81,10 +81,8 @@ modm::platform::SpiMaster{{ id }}::release(void *ctx)
 	return count;
 }
 
-MODM_ISR(SPI{{ id }}_EV)
+MODM_ISR(SPI{{ id }})
 {
-	// TODO Required?
-	// Spi::acknowledgeInterruptFlags();
 	modm::platform::SpiMaster{{ id }}::isr_handler();
 }
 
@@ -183,4 +181,6 @@ void modm::platform::SpiMaster{{ id }}::isr_handler()
 		SpiHal{{ id }}::write(uint16_t(*tx.u32 >> shift));
 		return;
 	}
+
+	SpiHal{{ id }}::acknowledgeInterruptFlag(SpiBase::InterruptFlag::TxBufferEmpty);
 }

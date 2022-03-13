@@ -125,6 +125,9 @@ public:
 	static void
 	disableInterrupt(Interrupt_t interrupt);
 
+	static bool
+	isInterruptEnabled(Interrupt_t interrupt);
+
 	static InterruptFlag_t
 	getInterruptFlags();
 

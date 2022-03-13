@@ -60,7 +60,7 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(T da
 	//   1. waiting to start, and
 	//   2. waiting to finish.
 
-	if (!state.all(SpiBase::LowByte))
+	if (!state.all(SpiMaster::LowByte))
 	{
 		// disable DMA for single transfer
 		SpiHal{{ id }}::disableInterrupt(SpiBase::Interrupt::TxDmaEnable |
@@ -74,7 +74,7 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(T da
 		SpiHal{{ id }}::write(data);
 
 		// set LSB = Bit0
-		state.set(SpiBase::LowByte);
+		state.set(SpiMaster::LowByte);
 	}
 
 	if (!SpiHal{{ id }}::isReceiveRegisterNotEmpty())
@@ -83,7 +83,7 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(T da
 	SpiHal{{ id }}::read(data);
 
 	// transfer finished
-	state.reset(SpiBase::LowByte);
+	state.reset(SpiMaster::LowByte);
 	return {modm::rf::Stop, data};
 }
 
@@ -99,11 +99,11 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(cons
 	//   1. initialize index, and
 	//   2. wait for transfer to finish.
 
-	switch(int(state.all(SpiBase::Idle)))
+	switch(int(state.all(SpiMaster::Idle)))
 	{
 	case 0:
 		// we will only visit this state once
-		state.set(SpiBase::Idle);
+		state.set(SpiMaster::Idle);
 		dmaError = false;
 
 		SpiHal{{ id }}::enableInterrupt(SpiBase::Interrupt::TxDmaEnable |
@@ -143,7 +143,7 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(cons
 		SpiHal{{ id }}::disableInterrupt(SpiBase::Interrupt::TxDmaEnable |
 				SpiBase::Interrupt::RxDmaEnable);
 
-		state.reset(SpiBase::Idle);
+		state.reset(SpiMaster::Idle);
 		return {modm::rf::Stop};
 	}
 }
@@ -161,11 +161,11 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(cons
 	//   2. wait for transfer to finish.
 
 	// we are only interested in Bit1
-	switch(int(state.all(SpiBase::Idle)))
+	switch(int(state.all(SpiMaster::Idle)))
 	{
 	case 0:
 		// we will only visit this state once
-		state.set(SpiBase::Idle);
+		state.set(SpiMaster::Idle);
 		dmaError = false;
 
 		SpiHal{{ id }}::enableInterrupt(SpiBase::Interrupt::TxDmaEnable |
@@ -217,7 +217,7 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(cons
 		SpiHal{{ id }}::disableInterrupt(SpiBase::Interrupt::TxDmaEnable |
 				SpiBase::Interrupt::RxDmaEnable);
 
-		state.reset(SpiBase::Idle);
+		state.reset(SpiMaster::Idle);
 		return {modm::rf::Stop};
 	}
 }

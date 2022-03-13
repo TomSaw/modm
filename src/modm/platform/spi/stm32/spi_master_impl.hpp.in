@@ -17,6 +17,78 @@
 #pragma once
 #include "spi_master_{{ id }}.hpp"
 
+template <std::unsigned_integral T>
+modm::ResumableResult<T>
+modm::platform::SpiMaster{{ id }}::transmit(T data)
+{
+ 	// Interrupt enabled? transmission in progress!
+	if(SpiHal{{ id }}::isInterruptEnabled(SpiBase::Interrupt::TxBufferEmpty)) {
+		return {modm::rf::Running};
+	} else if(!state.all(State::Idle)) {
+		state.set(State::Idle);
+		state.reset(State::Repeat);
+
+		temp = data;
+		tx.repeat = 0;
+		tx_end.repeat = 1;
+
+		setup_isr<T>();
+		return {modm::rf::Running};
+	}
+
+	state.reset(State::Idle);
+
+	return {modm::rf::Stop, T(temp | data)};
+}
+
+template <std::unsigned_integral T>
+modm::ResumableResult<void>
+modm::platform::SpiMaster{{ id }}::transmit(T data, std::size_t repeat)
+{
+	// Interrupt enabled? transmission in progress!
+	if(SpiHal{{ id }}::isInterruptEnabled(SpiBase::Interrupt::TxBufferEmpty)) {
+		return {modm::rf::Running};
+	} else if(!state.all(State::Idle)) {
+		state.set(State::Idle);
+		state.set(State::Repeat);
+
+		temp = data;
+		tx.repeat = 0;
+		tx_end.repeat = repeat;
+
+		setup_isr<T>();
+		return {modm::rf::Running};
+	}
+
+	state.reset(State::Idle);
+	return {modm::rf::Stop};
+}
+
+template <std::unsigned_integral T>
+modm::ResumableResult<void>
+modm::platform::SpiMaster{{ id }}::transmit(const T *tx_first, const T *tx_last, T *rx_first)
+{
+	modm_assert_continue_fail_debug(tx_first < tx_last, "SpiMaster::transmit", "tx_first > tx_last");
+	modm_assert_continue_fail_debug(
+		tx_last < rx_first || rx_first + (tx_last - tx_first) <= tx_first,
+		"SpiMaster::transmit", "rx overlaps tx"
+	);
+
+	// Interrupt enabled? transmission in progress!
+	if(SpiHal{{ id }}::isInterruptEnabled(SpiBase::Interrupt::TxBufferEmpty)) {
+		return {modm::rf::Running};
+	} else if(!state.all(State::Idle)) {
+		state.set(State::Idle);
+		state.reset(State::Repeat);
+
+		setup_isr<T>(tx_first, tx_last);
+		return {modm::rf::Running};
+	}
+
+	state.reset(State::Idle);
+	return {modm::rf::Stop};
+}
+
 template <typename T>
 void modm::platform::SpiMaster{{ id }}::setup_isr()
 {
@@ -41,6 +113,7 @@ void modm::platform::SpiMaster{{ id }}::setup_isr()
 	}
 
 	SpiHal{{ id }}::enableInterrupt(SpiBase::Interrupt::TxBufferEmpty);
+	SpiHal{{ id }}::enableInterruptVector(true, 3);
 }
 
 template <typename T>
@@ -76,4 +149,5 @@ void modm::platform::SpiMaster{{ id }}::setup_isr(const T *tx_first, const T *tx
 	}
 
 	SpiHal{{ id }}::enableInterrupt(SpiBase::Interrupt::TxBufferEmpty);
+	SpiHal{{ id }}::enableInterruptVector(true, 3);
 }

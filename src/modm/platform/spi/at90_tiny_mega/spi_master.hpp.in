@@ -143,9 +143,9 @@ public:
 	 * @param data
 	 * @return modm::ResumableResult<T>
 	 */
-	template <modm::unsigned_integral_max32 T>
+	template <std::unsigned_integral T>
 	static modm::ResumableResult<T>
-	transmit(const T data);
+	transmit(T data);
 
 	// OPTIMIZE specialize transmit(byte) without ISR overhead
  	// static modm::ResumableResult<uint8_t>
@@ -157,9 +157,9 @@ public:
 	 * @param data
 	 * @return modm::ResumableResult<T>
 	 */
-	template <modm::unsigned_integral_max32 T>
+	template <std::unsigned_integral T>
 	static modm::ResumableResult<void>
-	transmit(const T data, std::size_t repeat);
+	transmit(T data, std::size_t repeat);
 
 	/**
 	 * @brief 			Send and optional receive data in range begin()->end().
@@ -169,7 +169,7 @@ public:
 	 * @param tx_first	Pointer to one after last element to send: f.e. tx.end() OR tx.end() - 4
 	 * @param rx_first	Pointer to first element to receive: f.e. rx_data.begin() OR rx_data.begin() + 1
 	 */
- 	template <modm::unsigned_integral_max32 T>
+ 	template <std::unsigned_integral T>
 	static modm::ResumableResult<void>
 	transmit(const T *tx_first, const T *tx_last, T *rx_first = nullptr);
 

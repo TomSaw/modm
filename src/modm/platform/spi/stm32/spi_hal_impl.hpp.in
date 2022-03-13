@@ -172,6 +172,12 @@ modm::platform::SpiHal{{ id }}::disableInterrupt(Interrupt_t interrupt)
 	SPI{{ id }}->CR2 &= ~interrupt.value;
 }
 
+bool inline
+modm::platform::SpiHal{{ id }}::isInterruptEnabled(Interrupt_t interrupt)
+{
+	return SPI{{ id }}->CR2 | interrupt.value;
+}
+
 modm::platform::SpiHal{{ id }}::InterruptFlag_t inline
 modm::platform::SpiHal{{ id }}::getInterruptFlags()
 {

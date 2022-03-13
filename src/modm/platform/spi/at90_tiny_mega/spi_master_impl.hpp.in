@@ -13,9 +13,9 @@
 
 #include <modm/platform.hpp>
 
-template <modm::unsigned_integral_max32 T>
+template <std::unsigned_integral T>
 modm::ResumableResult<T>
-modm::platform::SpiMaster{{ id }}::transmit(const T data)
+modm::platform::SpiMaster{{ id }}::transmit(T data)
 {
  	// Interrupt enabled? transmission in progress!
 	if(SPCR{{ id }} & (1 << SPIE)) {
@@ -37,9 +37,9 @@ modm::platform::SpiMaster{{ id }}::transmit(const T data)
 	return {modm::rf::Stop, T(temp | SPDR{{ id }})};
 }
 
-template <modm::unsigned_integral_max32 T>
+template <std::unsigned_integral T>
 modm::ResumableResult<void>
-modm::platform::SpiMaster{{ id }}::transmit(const T data, std::size_t repeat)
+modm::platform::SpiMaster{{ id }}::transmit(T data, std::size_t repeat)
 {
 	// Interrupt enabled? transmission in progress!
 	if(SPCR{{ id }} & (1 << SPIE)) {
@@ -60,7 +60,7 @@ modm::platform::SpiMaster{{ id }}::transmit(const T data, std::size_t repeat)
 	return {modm::rf::Stop};
 }
 
-template <modm::unsigned_integral_max32 T>
+template <std::unsigned_integral T>
 modm::ResumableResult<void>
 modm::platform::SpiMaster{{ id }}::transmit(const T *tx_first, const T *tx_last, T *rx_first)
 {

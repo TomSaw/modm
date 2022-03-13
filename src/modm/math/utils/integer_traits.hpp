@@ -98,19 +98,5 @@ template <std::integral TR, std::floating_point TA>
 constexpr TR round_smart(TA v)
 { return std::round(v); }
 
-
-// Not sure about this
-template<typename T>
-concept unsigned_integral_max8 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 8;
-
-template<typename T>
-concept unsigned_integral_max16 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 16;
-
-template<typename T>
-concept unsigned_integral_max32 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 32;
-
-template<typename T>
-concept unsigned_integral_max64 = std::unsigned_integral<T> and std::numeric_limits<T>::digits <= 64;
-
 /// @}
 }
