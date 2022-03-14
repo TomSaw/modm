@@ -1,9 +1,9 @@
-// OPTIMIZE BufferMemory<Monochrome, R> for speed
+// OPTIMIZE BufferMal<Monochrome, R> for speed
 
 template<Size R>
 template<template<typename> class Accessor>
 void
-BufferMemory<Monochrome, R>::writeImage(ImageAccessor<C, Accessor> accessor, shape::Point placement)
+BufferMal<Monochrome, R>::writeImage(ImageAccessor<C, Accessor> accessor, shape::Point placement)
 {
 	const shape::Section clipping = this->getIntersection(Rectangle(placement, accessor.getSize()));
 

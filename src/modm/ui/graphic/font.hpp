@@ -92,8 +92,7 @@ public:
 	uint8_t
 	getTabWidth() const {
 		// TODO Imrove this tab feature
-		// Maybe a public member f.e.
-		return 2 * height;
+		return height;
 	}
 
 	Size

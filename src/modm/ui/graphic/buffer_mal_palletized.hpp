@@ -10,40 +10,49 @@
 // ----------------------------------------------------------------------------
 
 #pragma once
-#include "buffer.hpp"
+#include "buffer_mal.hpp"
 
-#include <algorithm>
-#include <concepts>
-
+#include <limits>
 #include <modm/ui/color/gray.hpp>
 
 namespace modm::graphic
 {
 
-template<color::Color, Size>
-class Buffer;
-
 /**
- * @brief		Framebuffer with random access and low-lvl drawing methods. Multiple pixels share one address
+ * @brief		Memory abstration Layer for Palettized colors. Palettized -> multiple pixels share one address
  *
- * @tparam	C	color::Monochrome, color::Gray2 or color::Gray4 - to be expanded in the future
+ * @tparam	C	color::Monochrome, color::Gray2 or color::Gray4 - (to be expanded in the future)
  * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
  *
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic
  */
 template<color::ColorPalletized C, Size R>
-class BufferMemory<C, R> : public BufferInterface<C>, public Canvas<C, R>
+class BufferMal<C, R> : public BufferInterface<C>, public Canvas<C, R>
 {
-protected:
+public:
 	using TPallete = C::TPallete;
 
+	BufferMal() = default;
+
+	template<color::Color CO>
+	constexpr BufferMal(const BufferMal<CO, R>& other) {
+		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
+	}
+
+	template<color::Color CO>
+	void operator=(const BufferMal<CO, R> &other)
+	{
+		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
+	}
+
+protected:
 	// TODO check if it works with uint16_t and uint32_t
-	static constexpr int digits = std::numeric_limits<TPallete>::digits;
+	static constexpr int digitsPallete = std::numeric_limits<TPallete>::digits;
 	static constexpr TPallete allBits = std::numeric_limits<TPallete>::max();
 
-	static constexpr int ppb = digits / C::Digits;
-	static constexpr std::size_t RY = (R.y() + digits - 1) / ppb;
+	static constexpr int ppb = digitsPallete / C::Digits;
+	static constexpr std::size_t RY = (R.y() + digitsPallete - 1) / ppb;
 
 	union {
 		TPallete buffer[RY][R.x()];
@@ -52,22 +61,7 @@ protected:
 	};
 
 	TPallete clearValue(C color = 0) const {
-		return color::GrayD<digits>(color).value();
-	}
-
-	// ------------------------------------------------------------------
-
-	BufferMemory(C* colormap) : Canvas<C, R>(colormap) {};
-
-	template<color::Color CO>
-	constexpr BufferMemory(const BufferMemory<CO, R>& other) {
-		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
-	}
-
-	template<color::Color CO>
-	void operator=(const BufferMemory<CO, R> &other)
-	{
-		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
+		return color::GrayT<TPallete>(color).value();
 	}
 
 	/**
@@ -109,7 +103,7 @@ private:
 
 	static int
 	getYlshift(int_fast16_t y)
-	{ return (y * C::Digits) & (digits - 1); } // x & (digits - 1) coresponds x % digits with support for negative int
+	{ return (y * C::Digits) & (digitsPallete - 1); } // x & (digitsPallete - 1) coresponds x % digitsPallete with support for negative int
 
 	TPallete&
 	getByte(const shape::Point& point)
@@ -129,12 +123,12 @@ private:
 		const TPallete keepmask_top, keepmask_bot;
 
 		// Maybe this is the beginning of a general service-class
-		// including the // Top End, Middle part, Bottom end code-blocks in various methods of BufferMemory<C, R>
+		// including the // Top End, Middle part, Bottom end code-blocks in various methods of BufferMal<C, R>
 		Looper(const shape::Section section) :
 			yb_top(getY(section.topLeft.y())),
 			yb_bot(getY(section.bottomRight.y() - 1)),
 			lshift_top(getYlshift(section.topLeft.y())),
-			lshift_bot(getYlshift(section.bottomRight.y()) ? getYlshift(section.bottomRight.y()) : digits),
+			lshift_bot(getYlshift(section.bottomRight.y()) ? getYlshift(section.bottomRight.y()) : digitsPallete),
 			keepmask_top(~(allBits << lshift_top)),
 			keepmask_bot(yb_top == yb_bot ? keepmask_top | allBits << lshift_bot : allBits << lshift_bot)
 		{}
@@ -143,13 +137,12 @@ private:
 			yb_top(getY(vline.start.y())),
 			yb_bot(getY(vline.end_y - 1)),
 			lshift_top(getYlshift(vline.start.y())),
-			lshift_bot(getYlshift(vline.end_y) ? getYlshift(vline.end_y) : digits),
+			lshift_bot(getYlshift(vline.end_y) ? getYlshift(vline.end_y) : digitsPallete),
 			keepmask_top(~(allBits << lshift_top)),
 			keepmask_bot(yb_top == yb_bot ? keepmask_top | allBits << lshift_bot : allBits << lshift_bot)
 		{}
 	};
 
-	// OPTIMIZE confirm "inline" doesn't help
 	template<color::Color CO, template<typename> class Accessor>
 	TPallete
 	palletizeByte(ImageAccessor<CO, Accessor>& accessor, int lshift, const int lshift_max) {
@@ -169,9 +162,8 @@ private:
 	}
 
 	template<class, Size>
-	friend class BufferMemory;
+	friend class BufferMal;
 };
 }  // namespace modm
 
-#include "buffer_memory_palletized_impl.hpp"
-#include "buffer_memory_palletized_draw_impl.hpp"
+#include "buffer_mal_palletized_impl.hpp"

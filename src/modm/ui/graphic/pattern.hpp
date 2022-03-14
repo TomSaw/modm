@@ -17,7 +17,7 @@
 namespace modm::graphic::pattern {
 
 	// Small collection of pattern lambdas
-	// Pass them as secon parameter to BufferMemory::writePattern(...) or Display::writePattern(...)
+	// Pass them as secon parameter to BufferMal::writePattern(...) or Display::writePattern(...)
 	constexpr int width = 16;
 
 	constexpr auto solid = [](shape::Point) { return color::html::MediumSpringGreen; };

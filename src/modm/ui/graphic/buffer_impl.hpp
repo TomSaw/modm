@@ -15,6 +15,14 @@
 namespace modm::graphic {
 
 template<color::Color C, Size R>
+C
+Buffer<C, R>::get(const shape::Point& point) const
+{
+	// modm_assert(this->pointIntersects(point), "LocalPainter", "get(shape::Point)", "value out of range");
+	return this->pointIntersects(point) ? this->getBlind(point) : C(0);
+};
+
+template<color::Color C, Size R>
 void
 Buffer<C, R>::clear(ColorType color)
 {

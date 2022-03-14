@@ -8,15 +8,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
 #pragma once
-#include "buffer_memory_planar.hpp"
+#include "buffer_mal_planar.hpp"
 
 namespace modm::graphic {
 
 template<color::ColorPlanar C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::Point& point)
+BufferMal<C, R>::drawBlind(const shape::Point& point)
 {
 	buffer[point.y()][point.x()] = this->color;
 }
@@ -24,14 +23,14 @@ BufferMemory<C, R>::drawBlind(const shape::Point& point)
 template<color::ColorPlanar C, Size R>
 void
 // TODO make const HLine ... but benchmark with const and
-BufferMemory<C, R>::drawBlind(const shape::HLine& hline)
+BufferMal<C, R>::drawBlind(const shape::HLine& hline)
 {
 	std::fill(&buffer[hline.start.y()][hline.start.x()], &buffer[hline.start.y()][hline.end_x], this->color);
 }
 
 template<color::ColorPlanar C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::VLine& vline)
+BufferMal<C, R>::drawBlind(const shape::VLine& vline)
 {
 	shape::Point scanner = vline.start;
 	while (scanner.y() < vline.end_y)
@@ -43,7 +42,7 @@ BufferMemory<C, R>::drawBlind(const shape::VLine& vline)
 
 template<color::ColorPlanar C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::Section& section)
+BufferMal<C, R>::drawBlind(const shape::Section& section)
 {
 	shape::Point scanner = section.topLeft;
 	while (scanner.y() < section.bottomRight.y())
@@ -56,7 +55,7 @@ BufferMemory<C, R>::drawBlind(const shape::Section& section)
 template<color::ColorPlanar C, Size R>
 template<color::Color CO, template<typename> class Accessor>
 void
-BufferMemory<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
+BufferMal<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
 {
 	const shape::Section clipping = this->getIntersection(accessor.getSection());
 
@@ -83,7 +82,7 @@ BufferMemory<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
 template<color::ColorPlanar C, Size R>
 template<template<typename> class Accessor>
 void
-BufferMemory<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)
+BufferMal<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)
 {
 	// IMPLEMENT. see ili9341 equivalent
 

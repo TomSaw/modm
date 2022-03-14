@@ -8,16 +8,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
 #pragma once
-
-#include <bit>
-
-#include <modm/architecture/interface/accessor.hpp>
-#include <modm/math/utils/bit_constants.hpp>
-#include <modm/math/geometry/shape/point.hpp>
-
-#include <modm/ui/color/concepts.hpp>
+#include "accessor_image.hpp"
 
 namespace modm::graphic
 {

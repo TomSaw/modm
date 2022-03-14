@@ -40,7 +40,7 @@ class RemotePainter : public GD
 public:
 	using ColorType = GD::ColorType;
 
-	RemotePainter() {};
+	RemotePainter() {}
 
 	void drawBlocking(shape::Point point)
 	{ RF_CALL_BLOCKING(draw(point)); }

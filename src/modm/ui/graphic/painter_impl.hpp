@@ -337,13 +337,4 @@ LocalPainter<GB>::drawQuadPoints(shape::Point center, shape::Point point)
 		}
 	}
 }
-
-template<GraphicBuffer GB>
-GB::ColorType
-LocalPainter<GB>::get(const shape::Point& point) const
-{
-	modm_assert(this->pointIntersects(point), "LocalPainter", "get(shape::Point)", "value out of range");
-	return this->pointIntersects(point) ? this->getBlind(point) : 0;
-};
-
 } // namespace modm::graphic

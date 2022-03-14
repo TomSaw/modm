@@ -22,7 +22,7 @@
 namespace modm::graphic
 {
 /**
- * @brief		Painter for BufferMemory stored in local RAM
+ * @brief		Painter for BufferMal stored in local RAM
  *				Can draw fundamental shapes: shape::Point, Line, Rectangle, Circle, Ellipse
  *				Can write other buffers from RAM and images from FLASH.
  *
@@ -38,8 +38,7 @@ template<GraphicBuffer GB>
 class LocalPainter : public GB
 {
 public:
-	// TODO find a way to provide default colormap and font
-	LocalPainter(GB::ColorType* colormap = nullptr, Font* font = nullptr) : GB(colormap, font) {};
+	using ColorType = GB::ColorType;
 
 	/**
 	 * @brief 			Fundamental drawing routines. Should be self-explained.
@@ -52,8 +51,6 @@ public:
 	void draw(shape::Rectangle rectangle, uint16_t radius, Style style = Style::Outline);
 	void draw(shape::Circle circle, Style style = Style::Outline);
 	void draw(shape::Ellipse ellipse, Style style = Style::Outline);
-
-	GB::ColorType get(const shape::Point& point) const;
 
 	template<color::Color CO, Size RO>
 	LocalPainter& operator=(const Buffer<CO, RO> &other)

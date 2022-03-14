@@ -22,7 +22,7 @@ namespace modm::graphic
 using Size = shape::Point;
 
 /**
- * Baseclass for 2D Graphic Objects like Display and BufferMemory
+ * Baseclass for 2D Graphic Objects like Display and BufferMal
  *
  * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
  *
@@ -32,7 +32,7 @@ using Size = shape::Point;
 template <color::Color C, Size R>
 class Canvas
 {
-public:
+public:	
 	constexpr virtual Size
 	getSize() const
 	{ return R; }
@@ -61,6 +61,7 @@ public:
 		}};
 	}
 
+	// TODO The colormap API has absolutely no protection bad color_idx or nullptr
 	void
 	setColormap(C* colormap)
 	{ this->colormap = colormap; }
@@ -73,9 +74,10 @@ public:
 	setColor(C color)
 	{ this->color = color; }
 
-protected:
-	Canvas(C* colormap = nullptr) : colormap(colormap), color() {}
+	constexpr C getColor() const
+	{ return this->color; }
 
+protected:
 	C* colormap{nullptr};
 	C color{color::html::White};
 
@@ -87,6 +89,7 @@ protected:
 		};
 	}
 
+	// TODO reuse Intersection builtin geometry::shape
 	constexpr bool
 	xIntersects(int16_t x) const
 	{ return x >= 0 and x < int16_t(getWidth()); }

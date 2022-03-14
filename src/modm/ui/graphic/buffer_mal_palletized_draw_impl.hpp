@@ -10,13 +10,13 @@
 // ----------------------------------------------------------------------------
 
 #pragma once
-#include "buffer_memory_palletized.hpp"
+#include "buffer_mal_palletized.hpp"
 
 namespace modm::graphic {
 
 template<color::ColorPalletized C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::Point& point)
+BufferMal<C, R>::drawBlind(const shape::Point& point)
 {
 	TPallete& byte = getByte(point);
 	const int lshift = getYlshift(point.y());
@@ -26,7 +26,7 @@ BufferMemory<C, R>::drawBlind(const shape::Point& point)
 
 template<color::ColorPalletized C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::HLine& hline)
+BufferMal<C, R>::drawBlind(const shape::HLine& hline)
 {
 	const std::size_t yb = getY(hline.start.y());
 	const int lshift = getYlshift(hline.start.y());
@@ -43,7 +43,7 @@ BufferMemory<C, R>::drawBlind(const shape::HLine& hline)
 
 template<color::ColorPalletized C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::VLine& vline)
+BufferMal<C, R>::drawBlind(const shape::VLine& vline)
 {
 	const Looper looper(vline);
 	const TPallete byte_middle = clearValue(this->color);
@@ -67,7 +67,7 @@ BufferMemory<C, R>::drawBlind(const shape::VLine& vline)
 
 template<color::ColorPalletized C, Size R>
 void
-BufferMemory<C, R>::drawBlind(const shape::Section& section)
+BufferMal<C, R>::drawBlind(const shape::Section& section)
 {
 	const Looper looper(section);
 
@@ -93,7 +93,7 @@ BufferMemory<C, R>::drawBlind(const shape::Section& section)
 
 template<color::ColorPalletized C, Size R>
 C
-BufferMemory<C, R>::getBlind(const shape::Point& point) const
+BufferMal<C, R>::getBlind(const shape::Point& point) const
 {
 	return C(getByte(point) >> getYlshift(point.y()) & C::max);
 }

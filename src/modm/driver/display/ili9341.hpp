@@ -46,13 +46,12 @@ class Ili9341 : public Transport, public graphic::Display<color::Rgb565, {320, 2
 
 public:
 	using ColorType = color::Rgb565;
-	static constexpr graphic::Size Resolution = {320, 240};
+
+	template<color::Color = ColorType>
+	using BufferLandscape = graphic::Buffer<ColorType, {320, 240}>;
 	
 	template<color::Color = ColorType>
-	using BufferLandscape = graphic::Buffer<ColorType, Resolution>;
-	
-	template<color::Color = ColorType>
-	using BufferPortrait = graphic::Buffer<ColorType, Resolution.swapped()>;
+	using BufferPortrait = graphic::Buffer<ColorType, {240, 320}>;
 
 	template<typename... Args>
 	Ili9341(Args &&...args)

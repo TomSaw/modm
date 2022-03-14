@@ -27,28 +27,43 @@
 #include <modm/ui/font/fixed_width_5x8.hpp>
 
 #include "buffer_interface.hpp"
-#include "buffer_memory.hpp"
+#include "buffer_mal.hpp"
 
 #include "accessor_image.hpp"
 #include "font.hpp"
 
+#if __has_include(<modm/io/iostream.hpp>)
+#include <modm/io/iostream.hpp>
+#endif
+
 namespace modm::graphic
 {
+
+#if __has_include(<modm/io/iostream.hpp>)
 template<color::Color C, Size R>
-class Buffer : public BufferMemory<C, R>, public IOStream
+class Buffer : public BufferMal<C, R>, public IOStream
 {
 public:
-	using ColorType = C;
-
-	Buffer(C* colormap, Font* font)
-		: BufferMemory<C, R>(colormap), IOStream(writer), font(font), writer(this)
+	Buffer()
+		: IOStream(writer), writer(this), font(nullptr)
 	{}
+#else
+template<color::Color C, Size R>
+class Buffer : public BufferMal<C, R>
+{
+public:
+#endif
+
+	using ColorType = C;
+	static constexpr graphic::Size Resolution = R;
 
 	/// Same Color and Size: use std::copy or DMA
 	constexpr Buffer(const Buffer &other)
 	{
 		/* this->colormap = other.colormap;
-		this->font = other.font; */
+		#if __has_include(<modm/io/iostream.hpp>)
+		this->font = other.font;
+		#endif */
 
 		// OPTIMIZE add DMA support
 		std::copy(std::begin(other.buffer_1d), std::end(other.buffer_1d), std::begin(this->buffer_1d));
@@ -58,7 +73,9 @@ public:
 	{
 		if(this != &other) {
 			/* this->colormap = other.colormap;
-			this->font = other.font; */
+			#if __has_include(<modm/io/iostream.hpp>)
+			this->font = other.font;
+			#endif */
 
 			// OPTIMIZE add DMA support
 			std::copy(std::begin(other.buffer_1d), std::end(other.buffer_1d), std::begin(this->buffer_1d));
@@ -70,26 +87,32 @@ public:
 	constexpr Buffer(Buffer &&other)
 	{
 		/* this->colormap = other.colormap;
-		this->font = other.font; */
+		#if __has_include(<modm/io/iostream.hpp>)
+		this->font = other.font;
+		#endif */
 
 		this->buffer = other.buffer;
 	}
 
 	/// Different color but same size: deligate copying to BufferMem
  	template<color::Color CO>
-	constexpr Buffer(const Buffer<CO, R> &other) : BufferMemory<C, R>(other), IOStream(writer), writer(this)
+	constexpr Buffer(const Buffer<CO, R> &other) : BufferMal<C, R>(other), IOStream(writer), writer(this)
 	{
 		this->colormap = other.colormap;
+		#if __has_include(<modm/io/iostream.hpp>)
 		font = other.font;
+		#endif
 	}
 
 	template<color::Color CO>
 	Buffer& operator=(const Buffer<CO, R> &other)
 	{
 		this->colormap = other.colormap;
+		#if __has_include(<modm/io/iostream.hpp>)
 		this->font = other.font;
+		#endif
 
-		BufferMemory<C, R>::operator=(other);
+		BufferMal<C, R>::operator=(other);
 		return *this;
 	}
 
@@ -98,7 +121,9 @@ public:
 	constexpr Buffer(const Buffer<CO, RO> &other) : IOStream(writer), writer(this)
 	{
 		this->colormap = other.colormap;
+		#if __has_include(<modm/io/iostream.hpp>)
 		this->font = other.font;
+		#endif
 
 		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
 	}
@@ -137,7 +162,9 @@ public:
 		this->writeImage(ImageAccessor<CO, modm::accessor::Flash>(addr, placement));
 	}
 
-	void clear(C color = 0);
+	C get(const shape::Point& point) const;
+
+	void clear(C color = color::html::Black);
 
 	void invert();
 
@@ -146,7 +173,6 @@ public:
  		void operator<<=(const std::size_t shift);
 		void operator>>=(const std::size_t shift);
 
-	// TODO Maybe possible to get this typesafe
 	const void* virtualBuffer() const final
 	{ return reinterpret_cast<const void*>(this->buffer); }
 
@@ -161,12 +187,8 @@ private:
 	template<color::Color, Size>
 	friend class Buffer;
 
-/// IOStream
+#if __has_include(<modm/io/iostream.hpp>)
 public:
-	Font* font;
-	shape::Point cursor;
-	bool linebreak = true;
-
 	void
 	writeChar(char c);
 
@@ -200,7 +222,49 @@ private:
 	};
 
 	Writer writer;
+public:
+	// TODO Clever way to set default font?
+	Font* font{nullptr};
+	shape::Point cursor{0, 0};
+	bool linebreak{true};
+#endif
+
+	template <modm::graphic::GraphicBuffer GB>
+	friend modm::IOStream &
+	operator<<(modm::IOStream &, const GB&);
 };
+
+#if __has_include(<modm/io/iostream.hpp>)
+
+// TODO Exclude for production
+template <modm::graphic::GraphicBuffer GB>
+modm::IOStream &
+operator<<(modm::IOStream &os, const GB& buffer)
+{
+	os << "Size: " << GB::Resolution;
+	modm::shape::Point scanner;
+	while(scanner.y() < GB::Resolution.y()) {
+		os << modm::endl;
+		while(scanner.x() < GB::Resolution.x()) {
+			modm::color::Gray2 gray2 = buffer.get(scanner);
+			
+			const char utf8[4] = {' ', '.', 'o', 'O'};
+			os << utf8[gray2.value()];
+
+			// TODO possible to transmit ░, ▒, ▓, █ via terminal?
+			// @see: https://de.wikipedia.org/wiki/Unicodeblock_Blockelemente
+			// const char* unicode_block[4] = {"\u2591", "\u2592", "\u2593", "\u2588"};
+			// os << unicode_block[gray2.value()];
+
+			scanner.x()++;
+		}
+		scanner.x() = 0;
+		scanner.y()++;
+	}
+	return os;
+}
+#endif
+
 }  // namespace modm::graphic
 
 #include "buffer_impl.hpp"

@@ -8,62 +8,50 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
 #pragma once
+#include "buffer_mal.hpp"
 
-#include <concepts>
 #include <algorithm>
-
 #include <modm/math/utils/misc.hpp>
-
-#include <modm/ui/color/concepts.hpp>
-#include "concepts.hpp"
-
-#include <modm/math/geometry/shape.hpp>
-
-#include "accessor_image.hpp"
 
 namespace modm::graphic
 {
 
-template<class, Size>
-class BufferMemory;
-
 /**
- * @brief 		Framebuffer with random access and low-lvl drawing methods. Each pixel has it's own address
+ * @brief 		Memory abstration Layer for Planar colors. Planar -> each pixel has it's own address.
  *
- * @tparam	C	color::Gray{>= 8}, color::Rgb, color::Hsv or color::RgbStacked - to be expanded in the future
+ * @tparam	C	color::Rgb, color::Hsv, color::RgbStacked, color::Gray{>= 8} - (to be expanded in the future)
  * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
  *
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic
  */
 template<color::ColorPlanar C, Size R>
-class BufferMemory<C, R> : public BufferInterface<C>, public Canvas<C, R>
+class BufferMal<C, R> : public BufferInterface<C>, public Canvas<C, R>
 {
-protected:
-	BufferMemory(C* colormap) : Canvas<C, R>(colormap) {};
-
+public:
+	BufferMal() = default;
+	
 	template<color::ColorPlanar CO>
-	constexpr BufferMemory(const BufferMemory<CO, R> &other)
+	constexpr BufferMal(const BufferMal<CO, R> &other)
 	{
 		std::copy(std::begin(other.buffer_1d), std::end(other.buffer_1d), std::begin(this->buffer_1d));
 	}
 
 	template<color::ColorPalletized CO>
-	constexpr BufferMemory(const BufferMemory<CO, R> &other)
+	constexpr BufferMal(const BufferMal<CO, R> &other)
 	{
 		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
 	}
 
 	template<color::ColorPlanar CO>
-	void operator=(const BufferMemory<CO, R> &other)
+	void operator=(const BufferMal<CO, R> &other)
 	{
 		std::copy(std::begin(other.buffer_1d), std::end(other.buffer_1d), std::begin(this->buffer_1d));
 	}
 
 	template<color::ColorPalletized CO>
-	void operator=(const BufferMemory<CO, R> &other)
+	void operator=(const BufferMal<CO, R> &other)
 	{
 		this->writeImage(ImageAccessor<CO, modm::accessor::Ram>(&other));
 	}
@@ -114,14 +102,14 @@ protected:
 		return buffer[point.y()][point.x()];
 	}
 
-	C& operator()(const shape::Point& point)
+	C& operator[](const shape::Point& point)
 	{
 		return buffer[point.y()][point.x()];
 	}
 
 	template<class, Size>
-	friend class BufferMemory;
+	friend class BufferMal;
 };
 }  // namespace modm
 
-#include "buffer_memory_planar_impl.hpp"
+#include "buffer_mal_planar_impl.hpp"
