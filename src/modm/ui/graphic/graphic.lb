@@ -17,6 +17,7 @@ def init(module):
 def prepare(module, options):
     module.depends(
         ":architecture:accessor",
+        ":processing:resumable", # for RemotePainter only
         ":io",
         ":math:utils",
         ":math:geometry",

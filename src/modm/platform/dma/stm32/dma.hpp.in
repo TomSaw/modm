@@ -4,6 +4,7 @@
  * Copyright (c) 2020, Mike Wolfram
  * Copyright (c) 2021, Raphael Lehmann
  * Copyright (c) 2021, Christopher Durand
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -196,7 +197,7 @@ public:
 			ChannelHal::setPeripheralAddress(address);
 		}
 
-				static void
+		static void
 		setMemoryDataSize(MemoryDataSize memoryDataSize)
 		{
 			ChannelHal::setMemoryDataSize(memoryDataSize);
@@ -206,6 +207,22 @@ public:
 		setPeripheralDataSize(PeripheralDataSize peripheralDataSize)
 		{
 			ChannelHal::setPeripheralDataSize(peripheralDataSize);
+		}
+
+		template<std::unsigned_integral T>
+		static void
+		configureDataSize() {
+			if constexpr(std::is_same<T, uint8_t>::value) {
+				ChannelHal::setMemoryDataSize(DmaBase::MemoryDataSize::Byte);
+				ChannelHal::setPeripheralDataSize(DmaBase::PeripheralDataSize::Byte);
+			}
+			else if constexpr(std::is_same<T, uint16_t>::value) {
+				ChannelHal::setMemoryDataSize(DmaBase::MemoryDataSize::HalfWord);
+				ChannelHal::setPeripheralDataSize(DmaBase::PeripheralDataSize::HalfWord);
+			} else if constexpr(std::is_same<T, uint32_t>::value) {
+				ChannelHal::setMemoryDataSize(DmaBase::MemoryDataSize::Word);
+				ChannelHal::setPeripheralDataSize(DmaBase::PeripheralDataSize::Word);
+			}
 		}
 
 		/**

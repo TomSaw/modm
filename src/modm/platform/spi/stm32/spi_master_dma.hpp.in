@@ -52,21 +52,6 @@ public:
 	static void
 	initialize();
 
-	static void
-	setDataSize(DataSize size)
-	{
-		SpiMaster{{ id }}::setDataSize(size);
-
-		if(size < DataSize::Bit9) {
-			Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Byte);
-			Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Byte);
-		}
-		else {
-			Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::HalfWord);
-			Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::HalfWord);
-		}
-	}
-
 	static uint8_t
 	transferBlocking(const uint8_t data)
 	{
@@ -133,18 +118,19 @@ public:
 		return transmit<uint16_t>(tx, rx, length);
 	}
 
-	// TODO "transmit" == good?
 	template <std::unsigned_integral T>
 	static modm::ResumableResult<T>
-	transmit(const T data);
+	transmit(T data);
 
+	/// DMAs data max is 2^16 thus uint16_t is prefered to std::size_t
 	template <std::unsigned_integral T>
 	static modm::ResumableResult<void>
-	transmit(const T *tx, const uint16_t repeat);
+	transmit(const T *tx, uint16_t repeat);
 
- 	template <std::unsigned_integral T>
+	/// DMAs data max is 2^16 thus uint16_t is prefered to std::size_t
+	template <std::unsigned_integral T>
 	static modm::ResumableResult<void>
-	transmit(const T *tx, T *rx, const uint16_t length);
+	transmit(const T *tx, T *rx, uint16_t length);
 
 private:
 	static void
