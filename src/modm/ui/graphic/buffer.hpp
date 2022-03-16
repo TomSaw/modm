@@ -193,7 +193,7 @@ public:
 	writeChar(char c);
 
 private:
-	void do_linebreak()
+	void wrap_cursor()
 	{
 		cursor.x() = 0;
 		cursor.y() += font->getLineHeight();
@@ -225,8 +225,13 @@ private:
 public:
 	// TODO Clever way to set default font?
 	Font* font{nullptr};
+
+	/// When streaming chars to the buffer, they are drawn at the cursor position
 	shape::Point cursor{0, 0};
-	bool linebreak{true};
+
+	// This is a very simple 'charwrap' feature
+	// TODO Improve to also support 'wordwrap'
+	bool cursor_autowrap{true};
 #endif
 
 	template <modm::graphic::GraphicBuffer GB>
@@ -235,7 +240,6 @@ public:
 };
 
 #if __has_include(<modm/io/iostream.hpp>)
-
 // TODO Exclude for production
 template <modm::graphic::GraphicBuffer GB>
 modm::IOStream &

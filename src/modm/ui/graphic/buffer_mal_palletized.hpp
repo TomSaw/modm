@@ -22,7 +22,7 @@ namespace modm::graphic
  * @brief		Memory abstration Layer for Palettized colors. Palettized -> multiple pixels share one address
  *
  * @tparam	C	color::Monochrome, color::Gray2 or color::Gray4 - (to be expanded in the future)
- * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
+ * @tparam	R	Resolution - R.width(): horizontal, R.height(): vertical
  *
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic
@@ -52,12 +52,12 @@ protected:
 	static constexpr TPallete allBits = std::numeric_limits<TPallete>::max();
 
 	static constexpr int ppb = digitsPallete / C::Digits;
-	static constexpr std::size_t RY = (R.y() + digitsPallete - 1) / ppb;
+	static constexpr std::size_t RY = (R.height() + digitsPallete - 1) / ppb;
 
 	union {
-		TPallete buffer[RY][R.x()];
+		TPallete buffer[RY][R.width()];
 		// algorithms dislike 2 dimensional arrays
-		TPallete buffer_1d[RY * R.x()];
+		TPallete buffer_1d[RY * R.width()];
 	};
 
 	TPallete clearValue(C color = 0) const {

@@ -21,7 +21,7 @@ namespace modm::graphic
  * @brief 		Memory abstration Layer for Planar colors. Planar -> each pixel has it's own address.
  *
  * @tparam	C	color::Rgb, color::Hsv, color::RgbStacked, color::Gray{>= 8} - (to be expanded in the future)
- * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
+ * @tparam	R	Resolution - R.width(): horizontal, R.height(): vertical
  *
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic
@@ -58,9 +58,9 @@ public:
 
 protected:
 	union {
-		C buffer[R.y()][R.x()];
+		C buffer[R.height()][R.width()];
 		// algorithms dislike 2 dimensional arrays
-		C buffer_1d[R.y() * R.x()];
+		C buffer_1d[R.height() * R.width()];
 	};
 
 	C::T clearValue(C color = 0) const {

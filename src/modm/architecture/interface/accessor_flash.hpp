@@ -10,12 +10,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
-#ifndef	MODM_INTERFACE_ACCESSOR_FLASH_HPP
-#define	MODM_INTERFACE_ACCESSOR_FLASH_HPP
+#pragma once
 
 #include <modm/architecture/utils.hpp>
-#if MODM_HAS_IOSTREAM
+
+#if __has_include(<modm/io/iostream.hpp>)
 #include <modm/io/iostream.hpp>
 #endif
 
@@ -46,7 +45,6 @@
 
 namespace modm
 {
-
 namespace accessor
 {
 
@@ -69,23 +67,21 @@ class Flash
 public:
 	explicit Flash(const T* addr = 0) :
 		address(addr)
-	{
-	}
+	{}
 
 	template <typename U>
 	explicit Flash(const Flash<U>& rhs) :
 		address((T*) rhs.address)
-	{
-	}
+	{}
 
 	const T
-	operator *() const
+	operator*() const
 	{
 		return FlashReader<T, sizeof(T)>::read(address);
 	}
 
 	const T
-	operator [](size_t index) const
+	operator[](size_t index) const
 	{
 		return FlashReader<T, sizeof(T)>::read(address + index);
 	}
@@ -137,6 +133,7 @@ public:
 	bool
 	isValid() const
 	{
+		// TODO shouldnt it be address != nullptr?
 		return (address != 0);
 	}
 
@@ -148,12 +145,12 @@ public:
 
 protected:
 	const T* address;
-#if MODM_HAS_IOSTREAM
+
 private:
 	template <typename U>
 	friend IOStream&
 	operator << (IOStream&, const Flash<U>&);
-#endif
+
 };
 
 /// Convert a normal pointer to a accessor::Flash
@@ -166,27 +163,22 @@ asFlash(const T* ptr)
 
 }	// namespace accessor
 
-}	// namespace modm
-
-#if MODM_HAS_IOSTREAM
-namespace modm
-{
+#if __has_include(<modm/io/iostream.hpp>)
 
 /**
  * Streamoperator - specialization for `char`
  * @ingroup modm_architecture_accessor
  */
 inline modm::IOStream&
-operator << (modm::IOStream& os, modm::accessor::Flash<char> ptr)
+operator<<(modm::IOStream& os, modm::accessor::Flash<char> ptr)
 {
 	char c;
-	while ((c = *ptr++)) {
+	while ((c = *ptr++))
 		os << c;
-	}
+
 	return os;
 }
 
-}	// namespace modm
 #endif
 
-#endif	// MODM_INTERFACE_ACCESSOR_FLASH_HPP
+}	// namespace modm

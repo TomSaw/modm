@@ -49,7 +49,7 @@ Orientation : uint8_t
  * Baseclass for Graphic Display
  *
  * @tparam	C			One of color::* or bool
- * @tparam	R			Resolution - R.x(): horizontal, R.y(): vertical
+ * @tparam	R			Resolution - R.width(): horizontal, R.height(): vertical
  * @tparam	CanPortrait	Wether the Display supports Portrait90 / Portrait270 Orientation
  *
  * @author				Thomas Sommer
@@ -68,11 +68,11 @@ public:
 
 	int16_t
 	getWidth() const override
-	{ return (orientation & Orientation(OrientationFlags::Portrait)) ? R.y() : R.x(); }
+	{ return (orientation & Orientation(OrientationFlags::Portrait)) ? R.height() : R.width(); }
 
 	int16_t
 	getHeight() const override
-	{ return (orientation & Orientation(OrientationFlags::Portrait)) ? R.x() : R.y(); }
+	{ return (orientation & Orientation(OrientationFlags::Portrait)) ? R.width() : R.height(); }
 
 	Size
 	getSize() const override

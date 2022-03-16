@@ -218,8 +218,7 @@ template<template<typename> class Accessor>
 modm::ResumableResult<void>
 modm::Ili9341<Transport, Reset, BC>::writeImage(modm::graphic::ImageAccessor<ColorType, Accessor> accessor)
 {
-	// Found no cast for a share the memory between all of the writeImage()-methods.
-	// This waste of RAM will be history once Resumable Functions become history.
+	// TODO Find a way to share the memory used for ImageAccessor with all writeImage() methods
 	static modm::graphic::ImageAccessor<ColorType, Accessor> a;
 
 	RF_BEGIN();
@@ -252,8 +251,7 @@ template<class Transport, class Reset, size_t BC>
 template<modm::color::Color CO, template<typename> class Accessor>
 modm::ResumableResult<void>
 modm::Ili9341<Transport, Reset, BC>::writeImage(modm::graphic::ImageAccessor<CO, Accessor> accessor) {
-	// Found no cast for a share the memory between all of the writeImage()-methods.
-	// This waste of RAM will be history once Resumable Functions become history.
+	// TODO Find a way to share the memory used for ImageAccessor with all writeImage() methods
 	static modm::graphic::ImageAccessor<CO, Accessor> a;
 
 	RF_BEGIN();

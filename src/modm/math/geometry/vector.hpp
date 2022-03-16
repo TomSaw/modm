@@ -57,7 +57,7 @@ class Vector : public std::array<T, N>
 	template<std::size_t K>
 	constexpr void assign()
 	{
-		static_assert(K == N, "Number of components passed to constructor must be N!");
+		static_assert(K == N, "Total number of components passed to constuctor must be equal to N of Vector!");
 	};
 
 	template<std::size_t K, typename U, class... Args>
@@ -306,27 +306,6 @@ private:
 	{ return std::accumulate(this->begin(), this->end(), WideType(0)); }
 
 public:
-	// comparison operators
-	constexpr bool operator==(const Vector &other) const
-	{ return sum() == other.sum(); }
-
-	constexpr bool operator!=(const Vector &other) const
-	{ return sum() != other.sum(); }
-
-	constexpr bool operator< (const Vector &other) const
-	{ return sum() < other.sum(); }
-
-	constexpr bool operator<= (const Vector &other) const
-	{ return sum() <= other.sum(); }
-
-	constexpr bool operator> (const Vector &other) const
-	{ return sum() > other.sum(); }
-
-	constexpr bool operator>= (const Vector &other) const
-	{ return sum() >= other.sum(); }
-
-	// additional methods
-
 	/**
 	 * \brief	Calculate the cross-product
 	 *

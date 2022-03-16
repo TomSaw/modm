@@ -36,7 +36,7 @@ class Rgb;
 
 template<int DR, int DG, int DB>
 requires (DR > 0) && (DG > 0) && (DB > 0)
-class RgbStackedD;
+class RgbStacked;
 
 template <int DH, int DS, int DV>
 requires (DH > 0) && (DS > 0) && (DV > 0)
@@ -62,7 +62,7 @@ template<class C>
 concept ColorRgb = is_instance<C, Rgb>::value;
 
 template<class C>
-concept ColorRgbStacked = is_instance<C, RgbStackedD>::value;
+concept ColorRgbStacked = is_instance<C, RgbStacked>::value;
 
 template<class C>
 concept ColorHsv = is_instance<C, Hsv>::value;

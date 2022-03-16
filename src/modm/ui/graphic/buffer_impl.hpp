@@ -47,13 +47,13 @@ Buffer<C, R>::operator<<=(const std::size_t shift)
 	for (size_t yb = 0; yb < Buffer<C, R>::BY; yb++)
 	{
 		size_t x = 0;
-		while (x < R.x() - shift)
+		while (x < R.width() - shift)
 		{
 			this->buffer[yb][x] = this->buffer[yb][x + shift];
 			x++;
 		}
 		const auto clear = this->clearValue();
-		while (x < R.x())
+		while (x < R.width())
 			this->buffer[yb][x++] = clear;
 	}
 }
@@ -64,7 +64,7 @@ Buffer<C, R>::operator>>=(const std::size_t shift)
 {
 	for (size_t yb = 0; yb < Buffer<C, R>::BY; yb++)
 	{
-		size_t x = R.x();
+		size_t x = R.width();
 		while (x > shift)
 		{
 			x--;
@@ -82,14 +82,14 @@ Buffer<C, R>::writeChar(char character)
 {
 	switch(character) {
 		case '\n':
-			do_linebreak();
+			wrap_cursor();
 			return;
 		case '\t':
 			const uint8_t tab_width = font->getTabWidth();
-			if (cursor.x() < R.x() + tab_width)
+			if (cursor.x() < R.width() + tab_width)
 				cursor.x() += tab_width;
 			else
-				do_linebreak();
+				wrap_cursor();
 			return;
 	}
 
@@ -98,8 +98,8 @@ Buffer<C, R>::writeChar(char character)
 
 	const Size charSize = font->getCharSize(character);
 
-	if (linebreak and cursor.x() > R.x() - charSize.x())
-		do_linebreak();
+	if (cursor_autowrap and cursor.x() > R.width() - charSize.x())
+		wrap_cursor();
 
 	// this->writeImage may be an asynchronious call one day...
 	this->writeImage(font->getImageAccessor(character, cursor));

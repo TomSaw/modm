@@ -33,7 +33,7 @@ namespace modm::graphic::pattern {
 	constexpr auto gradient_blue = [](shape::Point p) { return color::Rgb888(30, 30, p.x() + p.y() / width); };
 
 	constexpr auto noize = [](shape::Point) { return color::Rgb888(rand(), rand(), rand()); };
-	constexpr auto white_noize = [](shape::Point) { return color::GrayD<8>(rand()); };
+	constexpr auto white_noize = [](shape::Point) { return color::Gray<8>(rand()); };
 
 	// Rgb888 Mandelbrot(shape::Point p) {
 	// 	return ... TODO

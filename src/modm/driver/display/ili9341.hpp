@@ -167,7 +167,7 @@ private:
 			size_t i; // index in conversion buffer
 			shape::Point scanner; // index on display
 
-			uint64_t pixels; // Must fit R.x() * R.y() = 76800
+			uint64_t pixels; // Must fit R.width() * R.height() = 76800
 			size_t pixels_bulk; // Number of pixels of current bulk
 
 			ColorType temp_color; // Temporary storage for a color

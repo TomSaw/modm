@@ -17,7 +17,7 @@ BufferMal<Monochrome, R>::writeImage(ImageAccessor<C, Accessor> accessor, shape:
 	if (lshift_upper)
 	{
 		// Split bytes, shift and reassembly
-		if (clipping.bottomRight.y() == int16_t(R.y())) yb_max++;
+		if (clipping.bottomRight.y() == int16_t(R.height())) yb_max++;
 		const uint8_t rshift_lower = 8 - lshift_upper;
 
 		if(this->color.value()) {
@@ -38,7 +38,7 @@ BufferMal<Monochrome, R>::writeImage(ImageAccessor<C, Accessor> accessor, shape:
 					this->buffer[yb][x] |= accessor[i] << lshift_upper;
 					yb++;
 				}
-				if (clipping.bottomRight.y() < int16_t(R.y()))
+				if (clipping.bottomRight.y() < int16_t(R.height()))
 					this->buffer[yb][x] |= accessor[i] >> rshift_lower;
 			}
 		} else {
@@ -59,7 +59,7 @@ BufferMal<Monochrome, R>::writeImage(ImageAccessor<C, Accessor> accessor, shape:
 					this->buffer[yb][x] &= ~(accessor[i] << lshift_upper);
 					yb++;
 				}
-				if (clipping.bottomRight.y() < int16_t(R.y()))
+				if (clipping.bottomRight.y() < int16_t(R.height()))
 					this->buffer[yb][x] &= ~(accessor[i] >> rshift_lower);
 			}
 		}

@@ -84,7 +84,7 @@ BufferMal<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)
 			}
 
 			// Bottom end
-			if (clipping.bottomRight.y() < int16_t(R.y()))
+			if (clipping.bottomRight.y() < int16_t(R.height()))
 				this->buffer[yb][x] = (this->buffer[yb][x] & looper.keepmask_bot) | *accessor >> rshift_bot;
 		}
 	} else if (clipping.topLeft.y() < clipping.bottomRight.y()) {

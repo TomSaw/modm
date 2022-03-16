@@ -20,7 +20,7 @@ namespace modm::graphic
  * @brief		Memory abstration Layer for Palettized Monochrome colors. Palettized -> multiple pixels share one address
  *
  * @tparam	C	color::Monochrome
- * @tparam	R	Resolution - R.x(): horizontal, R.y(): vertical
+ * @tparam	R	Resolution - R.width(): horizontal, R.height(): vertical
  *
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic

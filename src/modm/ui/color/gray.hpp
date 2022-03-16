@@ -43,6 +43,10 @@ class Gray : public modm::ProportionalUnsigned<D>
 	using ProportionalUnsigned<D>::ProportionalUnsigned;
 
 public:
+	// TODO any unsigned_integral can be PalleteType
+	// depends on architecture and target Display
+	using TPallete = uint8_t;
+
 	using T = ProportionalUnsigned<D>::T;
 
 	using modm::ProportionalUnsigned<D>::operator=;

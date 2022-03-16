@@ -10,17 +10,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
-#ifndef	MODM_INTERFACE_ACCESSOR_RAM_HPP
-#define	MODM_INTERFACE_ACCESSOR_RAM_HPP
+#pragma once
 
 #include <cstddef>
 #include <modm/architecture/utils.hpp>
 
-namespace modm
-{
-
-namespace accessor
+namespace modm::accessor
 {
 
 /**
@@ -35,14 +30,12 @@ class Ram
 public:
 	Ram(const T* addr = 0) :
 		address(addr)
-	{
-	}
+	{}
 
 	template <typename U>
 	explicit Ram(const Ram<U>& rhs) :
 		address((T*) rhs.address)
-	{
-	}
+	{}
 
 	const T
 	operator *() const
@@ -108,10 +101,7 @@ public:
 
 protected:
 	const T* address;
+	
 };
 
-}	// namespace accessor
-
-}	// namespace modm
-
-#endif	// MODM_INTERFACE_ACCESSOR_RAM_HPP
+}	// namespace modm::accessor
