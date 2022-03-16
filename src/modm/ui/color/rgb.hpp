@@ -36,36 +36,36 @@ namespace modm::color
  */
 template<int DR, int DG = DR, int DB = DR>
 requires (DR > 0) && (DG > 0) && (DB > 0)
-class RgbD
+class Rgb
 {
 public:
-	using RedType = GrayD<DR>;
-	using GreenType = GrayD<DG>;
-	using BlueType = GrayD<DB>;
+	using RedType = Gray<DR>;
+	using GreenType = Gray<DG>;
+	using BlueType = Gray<DB>;
 
 	// using RgbSumValueType = modm::fits_any_t<RedType::T, GreenType::T, BlueType::T>;
 
-	constexpr RgbD() = default;
+	constexpr Rgb() = default;
 
 	// TODO Support for https://en.cppreference.com/w/cpp/utility/initializer_list
 
-	constexpr RgbD(RedType red, GreenType green, BlueType blue)
+	constexpr Rgb(RedType red, GreenType green, BlueType blue)
 		: red_(red), green_(green), blue_(blue)
 	{}
 
 	template<class C>
 	requires ColorRgb<C> || ColorRgbStacked<C>
-	constexpr RgbD(const C& other)
+	constexpr Rgb(const C& other)
 		: red_(other.red()), green_(other.green()), blue_(other.blue())
 	{}
 
 	template<ColorGray C>
-	constexpr RgbD(const C &gray)
+	constexpr Rgb(const C &gray)
 		: red_(gray), green_(gray), blue_(gray)
 	{}
 
 	template<ColorHsv C>
-	constexpr RgbD(const C& hsv)
+	constexpr Rgb(const C& hsv)
 	{
 		// OPTIMIZE No need to calculate sharper than the output
 		// Develop CalcType from types of conversion target: RedType, GreenType and BlueType.
@@ -76,7 +76,7 @@ public:
 		using WideWideType = modm::WideType<WideType>;
 		static_assert(!std::is_same_v<WideType, WideWideType>, "C::T too big");
 
-		const T hue = CalcType(GrayD<C::HueType::Digits>(hsv.hue().value())).value();
+		const T hue = CalcType(Gray<C::HueType::Digits>(hsv.hue().value())).value();
 		const T saturation = CalcType(hsv.saturation()).value();
 		const T value = CalcType(hsv.value()).value();
 
@@ -111,14 +111,14 @@ public:
 	BlueType& blue() { return blue_; }
 
 	// operator +=, -=, *=, /=
-	RgbD& operator+=(const RgbD& other) {
+	Rgb& operator+=(const Rgb& other) {
 		red_ += other.red();
 		green_ += other.green();
 		blue_ += other.blue();
 		return *this;
 	}
 
-	RgbD& operator-=(const RgbD& other) {
+	Rgb& operator-=(const Rgb& other) {
 		red_ -= other.red();
 		green_ -= other.green();
 		blue_ -= other.blue();
@@ -126,7 +126,7 @@ public:
 	}
 
 	template <typename S>
-	RgbD operator*= (S scale) {
+	Rgb operator*= (S scale) {
 		red_ *= scale;
 		green_ *= scale;
 		blue_ *= scale;
@@ -134,7 +134,7 @@ public:
 	}
 
 	template <typename S>
-	RgbD operator/= (S scale) {
+	Rgb operator/= (S scale) {
 		red_ *= scale;
 		green_ *= scale;
 		blue_ *= scale;
@@ -142,8 +142,8 @@ public:
 	}
 
 	// operator +, -, *, /
-	constexpr RgbD
-	operator+(const RgbD& rgb) const {
+	constexpr Rgb
+	operator+(const Rgb& rgb) const {
 		return {
 			red_ + rgb.red(),
 			green_ + rgb.green(),
@@ -151,8 +151,8 @@ public:
 		};
 	}
 
-	constexpr RgbD
-	operator-(const RgbD& rgb) const {
+	constexpr Rgb
+	operator-(const Rgb& rgb) const {
 		return {
 			red_ - rgb.red(),
 			green_ - rgb.green(),
@@ -161,7 +161,7 @@ public:
 	}
 
 	template <typename S>
-	constexpr RgbD
+	constexpr Rgb
 	operator*(S scale) const {
 		return {
 			red_ * scale,
@@ -171,7 +171,7 @@ public:
 	}
 
 	template <typename S>
-	constexpr RgbD
+	constexpr Rgb
 	operator/(S scale) const {
 		return {
 			red_ / scale,
@@ -182,7 +182,7 @@ public:
 
 	// Equality
 	constexpr bool
-	operator==(const RgbD& other) const = default;
+	operator==(const Rgb& other) const = default;
 
 	// Compare perceived brightness. For simplicity, the intermediate brightnes tyoe
 	// is hardcoded to Gray8, This may be improved.
@@ -218,7 +218,7 @@ private:
 	BlueType blue_{0};
 
 	template<int, int, int>
-	friend class RgbD;
+	friend class Rgb;
 
 	template<ColorRgb C>
 	friend IOStream&
@@ -226,7 +226,7 @@ private:
 };
 
 template<std::unsigned_integral U>
-using RgbT = RgbD<std::numeric_limits<U>::digits>;
+using RgbT = Rgb<std::numeric_limits<U>::digits>;
 
 /// @ingroup modm_ui_color
 using Rgb888 = RgbT<uint8_t>;

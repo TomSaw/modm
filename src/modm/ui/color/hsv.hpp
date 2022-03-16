@@ -33,34 +33,34 @@ namespace modm::color
  */
 template<int DH, int DS = DH, int DV = DH>
 requires (DH > 0) && (DS > 0) && (DV > 0)
-class HsvD
+class Hsv
 {
 public:
 	// Hue is a ProportionalUnsigned<> because it needs wrapping instead of saturating arithmetics
 	using HueType = ProportionalUnsigned<DH>;
-	using SaturationType = GrayD<DS>;
-	using ValueType = GrayD<DV>;
+	using SaturationType = Gray<DS>;
+	using ValueType = Gray<DV>;
 
-	constexpr HsvD() = default;
+	constexpr Hsv() = default;
 
-	// TODO support https://en.cppreference.com/w/cpp/utility/initializer_list
+	// TODO Support for https://en.cppreference.com/w/cpp/utility/initializer_list
 
-	constexpr HsvD(HueType hue, SaturationType saturation, ValueType value)
+	constexpr Hsv(HueType hue, SaturationType saturation, ValueType value)
 		: hue_(hue), saturation_(saturation), value_(value)
 	{}
 
 	template<ColorHsv C>
-	constexpr HsvD(const C &other)
+	constexpr Hsv(const C &other)
 		: hue_(other.hue_), saturation_(other.saturation_), value_(other.value_)
 	{}
 
 	template<ColorGray C>
-	constexpr HsvD(const C &gray)
+	constexpr Hsv(const C &gray)
 		: hue_(0), saturation_(0), value_(gray)
 	{}
 
 	template<ColorRgb C>
-	constexpr HsvD(const C& rgb)
+	constexpr Hsv(const C& rgb)
 	{
 		// OPTIMIZE No need to calculate sharper than the output
 		// Develop CalcType from target types: HueType, SaturationType and ValueType
@@ -98,8 +98,8 @@ public:
 	}
 
 	template<ColorRgbStacked C>
- 	constexpr HsvD(const C& rgbstacked)
-	 	: HsvD(RgbD<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
+ 	constexpr Hsv(const C& rgbstacked)
+	 	: Hsv(Rgb<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
 	{}
 
 	// accesors
@@ -111,26 +111,32 @@ public:
 	SaturationType& saturation() { return saturation_; }
 	ValueType& value() { return value_; }
 
+	// TODO operator +=, -=, *=, /=
+	// @see: https://gamedev.stackexchange.com/questions/26525/how-do-you-blend-multiple-colors-in-hsv-polar-color-space
+
+	// TODO operator +, -, *, /
+
+	// Equality
 	bool
-	operator==(const HsvD& other) const = default;
+	operator==(const Hsv& other) const = default;
 
 	bool
-	operator>(const HsvD& other) const {
+	operator>(const Hsv& other) const {
 		return value_ > other.value();
 	};
 
 	bool
-	operator<(const HsvD& other) const {
+	operator<(const Hsv& other) const {
 		return value_ < other.value();
 	};
 
 	bool
-	operator>=(const HsvD& other) const {
+	operator>=(const Hsv& other) const {
 		return value_ >= other.value();
 	};
 
 	bool
-	operator<=(const HsvD& other) const {
+	operator<=(const Hsv& other) const {
 		return value_ <= other.value();
 	};
 
@@ -143,7 +149,7 @@ private:
 	ValueType value_{0};
 
 	template<int, int, int>
-	friend class HsvD;
+	friend class Hsv;
 
 	template<ColorHsv C>
 	friend IOStream&
@@ -156,7 +162,7 @@ private:
 };
 
 template<std::unsigned_integral T>
-using HsvT = HsvD<std::numeric_limits<T>::digits>;
+using HsvT = Hsv<std::numeric_limits<T>::digits>;
 
 /// @ingroup modm_ui_color
 using Hsv888 = HsvT<uint8_t>;

@@ -38,15 +38,11 @@ namespace modm::color {
  */
 template <int D>
 requires (D > 0)
-class GrayD : public modm::ProportionalUnsigned<D>
+class Gray : public modm::ProportionalUnsigned<D>
 {
 	using ProportionalUnsigned<D>::ProportionalUnsigned;
 
 public:
-	// TODO any unsigned_integral can be PalleteType
-	// depends on architecture and target Display
-	using TPallete = uint8_t;
-
 	using T = ProportionalUnsigned<D>::T;
 
 	using modm::ProportionalUnsigned<D>::operator=;
@@ -55,29 +51,29 @@ public:
 	// OPTIMIZE what's the best algorithm?
 	// @see: https://github.com/modm-io/modm/pull/781#discussion_r818419586
   	template<ColorRgb C>
-	constexpr GrayD(const C& rgb)
+	constexpr Gray(const C& rgb)
 		: ProportionalUnsigned<D>(
-			( 1742 * GrayD(rgb.red()).value()
-			+ 5859 * GrayD(rgb.green()).value()
-			+ 591 * GrayD(rgb.blue()).value()
+			( 1742 * Gray(rgb.red()).value()
+			+ 5859 * Gray(rgb.green()).value()
+			+ 591 * Gray(rgb.blue()).value()
 		) >> 13)
 	{}
 
 	template<ColorRgbStacked C>
- 	constexpr GrayD(const C& rgbstacked)
-	 	: GrayD(RgbD<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
+ 	constexpr Gray(const C& rgbstacked)
+	 	: Gray(Rgb<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
 	{}
 
 	// However, using hsv.value() feels natural
 	// Conversion from Hsv does not reflect human brightness perception like conversion from Rgb above
 	// e.g. converting Hsv->Rgb->Gray will not produce the same result like Hsv->Gray
  	template<ColorHsv C>
-	constexpr GrayD(const C& hsv) : ProportionalUnsigned<D>(hsv.value())
+	constexpr Gray(const C& hsv) : ProportionalUnsigned<D>(hsv.value())
 	{}
 
 	// operator +=, -=, *=, /=
 	template <std::integral I>
-	GrayD&
+	Gray&
 	operator+=(I value) {
 		modm::Saturated<T&> saturated(this->value_);
 		saturated += value;
@@ -88,12 +84,12 @@ public:
 	}
 
 	template <int I>
- 	GrayD&
-	operator+=(const GrayD<I>& other)
+ 	Gray&
+	operator+=(const Gray<I>& other)
 	{ return this->operator+=(other.value_); }
 
 	template <std::integral I>
-	GrayD&
+	Gray&
 	operator-=(I value) {
 		modm::Saturated<T&> saturated(this->value_);
 		saturated -= value;
@@ -104,12 +100,12 @@ public:
 	}
 
 	template <int I>
- 	GrayD&
-	operator-=(const GrayD<I>& other)
+ 	Gray&
+	operator-=(const Gray<I>& other)
 	{ return this->operator-=(other.value_); }
 
 	template<std::integral I>
-	GrayD&
+	Gray&
 	operator*=(I value) {
 		modm::Saturated<T&> saturated(this->value_);
 		saturated *= value;
@@ -120,12 +116,12 @@ public:
 	}
 
 	template <int I>
- 	GrayD&
-	operator*=(const GrayD<I>& other)
+ 	Gray&
+	operator*=(const Gray<I>& other)
 	{ return this->operator*=(other.value_); }
 
 	template<std::integral I>
-	GrayD&
+	Gray&
 	operator/=(I value) {
 		modm::Saturated<T&> saturated(this->value_);
 		saturated /= value;
@@ -136,13 +132,13 @@ public:
 	}
 
 	template <int I>
- 	GrayD&
-	operator/=(const GrayD<I>& other)
+ 	Gray&
+	operator/=(const Gray<I>& other)
 	{ return this->operator*=(other.value_); }
 
 	// operator +, -, *, /
 	template<std::integral I>
-	GrayD
+	Gray
 	operator+(I value) const {
 		modm::Saturated<T> saturated(this->value_);
 		saturated += value;
@@ -151,12 +147,12 @@ public:
 		return {std::min(saturated.value(), this->max)};
 	}
 
-	GrayD
-	operator+(const GrayD& other) const
+	Gray
+	operator+(const Gray& other) const
 	{ return this->operator+(other.value_); }
 
 	template<std::integral I>
-	GrayD
+	Gray
 	operator-(I value) const {
 		modm::Saturated<T> saturated(this->value_);
 		saturated -= value;
@@ -165,12 +161,12 @@ public:
 		return {std::min(saturated.value(), this->max)};
 	}
 
-	GrayD
-	operator-(const GrayD& other) const
+	Gray
+	operator-(const Gray& other) const
 	{ return this->operator-(other.value_); }
 
 	template<std::integral I>
-	GrayD
+	Gray
 	operator*(I scale) const {
 		modm::Saturated<I> saturated(this->value_);
 		saturated *= scale;
@@ -179,23 +175,23 @@ public:
 		return {std::min(saturated.value(), this->max)};
 	}
 
-	GrayD
-	operator*(const GrayD& other) const
+	Gray
+	operator*(const Gray& other) const
 	{ return this->operator*(other.value_); }
 
 	template<std::integral I>
-	GrayD
+	Gray
 	operator/(I scale) const {
 		modm::Saturated<I> saturated(this->value_);
 		saturated /= scale;
 	}
 
-	GrayD
-	operator/(const GrayD& other) const
+	Gray
+	operator/(const Gray& other) const
 	{ return this->operator/(other.value_); }
 
 	template<std::floating_point F>
-	GrayD
+	Gray
 	operator*(F scale) const
 	{
 		// OPTIMIZE develop optimal decimals from D
@@ -217,19 +213,19 @@ public:
 
 private:
 	template<int>
-	friend class GrayD;
+	friend class Gray;
 
 	template <int E>
 	friend modm::IOStream &
-	operator<<(modm::IOStream &, const GrayD<E> &);
+	operator<<(modm::IOStream &, const Gray<E> &);
 };
 
 template<typename E>
-using GrayT = GrayD<std::numeric_limits<E>::digits>;
+using GrayT = Gray<std::numeric_limits<E>::digits>;
 
-using Monochrome = GrayD<1>;
-using Gray2 = GrayD<2>;
-using Gray4 = GrayD<4>;
+using Monochrome = Gray<1>;
+using Gray2 = Gray<2>;
+using Gray4 = Gray<4>;
 using Gray8 = GrayT<uint8_t>;
 using Gray16 = GrayT<uint16_t>;
 
@@ -238,7 +234,7 @@ using Gray16 = GrayT<uint16_t>;
 
 template <int E>
 modm::IOStream &
-operator<<(modm::IOStream &os, const GrayD<E> &color)
+operator<<(modm::IOStream &os, const Gray<E> &color)
 {
 	os << color.value();
 	return os;

@@ -18,7 +18,7 @@ namespace modm::color {
  * @brief 			Color in RGB space - mandatory for most graphic displays and stored images.
  * 					Requires less space than unstacked rgb types. Calculations without dedicated graphics
  * 					acceleration hardware are very inefficient.
- * 					If theres no dedicated graphics acceleration but lots of RAM, using modm::RgbD<> for
+ * 					If theres no dedicated graphics acceleration but lots of RAM, using modm::Rgb<> for
  * 					calculations and afterwards conversion to modm::RgbStackedD<> may be an option.
  *
  * @tparam DR 		Digits for red channel
@@ -33,9 +33,9 @@ requires (DR > 0) && (DG > 0) && (DB > 0)
 class RgbStackedD
 {
 public:
-	using RedType = GrayD<DR>;
-	using GreenType = GrayD<DG>;
-	using BlueType = GrayD<DB>;
+	using RedType = Gray<DR>;
+	using GreenType = Gray<DG>;
+	using BlueType = Gray<DB>;
 
 	using T = uint_t<DR + DG + DB>::least;
 
@@ -55,7 +55,7 @@ public:
 
 	template<ColorGray C>
 	constexpr RgbStackedD(const C &gray)
-		: RgbStackedD(RgbD<C::Digits>(gray))
+		: RgbStackedD(Rgb<C::Digits>(gray))
 	{}
 
 	template<ColorRgb C>
@@ -70,7 +70,7 @@ public:
 
 	template<ColorHsv C>
 	constexpr RgbStackedD(const C &hsv)
-		: RgbStackedD(RgbD<5,6,5>(hsv))
+		: RgbStackedD(Rgb<5,6,5>(hsv))
 	{}
 
 	/**
@@ -78,7 +78,7 @@ public:
 	 * 					May be used for StackedHsv as well
 	 *
 	 * @tparam TS 		unsigned integral type of stacked color value
-	 * @tparam TC 		GrayD<> type of channel
+	 * @tparam TC 		Gray<> type of channel
 	 * @tparam Shift 	lshift of channel in stacked color value
 	 *
 	 * @ingroup			modm_ui_color
@@ -112,7 +112,7 @@ public:
 		value_ = other.value_;
 	}
 
-	RgbStackedD& operator+=(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD& operator+=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() + rgb.red(),
 			green().value() + rgb.green(),
@@ -121,7 +121,7 @@ public:
 		return *this;
 	}
 
-	RgbStackedD& operator-=(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD& operator-=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() - rgb.red(),
 			green().value() - rgb.green(),
@@ -130,7 +130,7 @@ public:
 		return *this;
 	}
 
-	RgbStackedD& operator*=(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD& operator*=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() * rgb.red(),
 			green().value() * rgb.green(),
@@ -139,7 +139,7 @@ public:
 		return *this;
 	}
 
-	RgbStackedD& operator/=(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD& operator/=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() * rgb.red(),
 			green().value() * rgb.green(),
@@ -148,7 +148,7 @@ public:
 		return *this;
 	}
 
-	RgbStackedD operator+(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD operator+(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() + rgb.red(),
 			green().value() + rgb.green(),
@@ -156,7 +156,7 @@ public:
 		};
 	}
 
-	RgbStackedD operator-(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD operator-(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() - rgb.red(),
 			green().value() - rgb.green(),
@@ -164,7 +164,7 @@ public:
 		};
 	}
 
-	RgbStackedD operator*(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD operator*(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() * rgb.red(),
 			green().value() * rgb.green(),
@@ -172,7 +172,7 @@ public:
 		};
 	}
 
-	RgbStackedD operator/(const RgbD<DR, DG, DB>& rgb) {
+	RgbStackedD operator/(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() / rgb.red(),
 			green().value() / rgb.green(),
@@ -184,7 +184,7 @@ public:
 	constexpr bool
 	operator==(const RgbStackedD& other) const = default;
 
-	// Remaining comparison operators are server by color::RgbD<D> and implicit type conversion
+	// Remaining comparison operators are server by color::Rgb<D> and implicit type conversion
 
 	void invert() {
 		value_ ^= bitmask<DR + DG + DB>();

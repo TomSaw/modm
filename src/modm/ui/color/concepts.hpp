@@ -28,11 +28,11 @@ namespace modm::color {
 // Forward declarations
 template <int D>
 requires (D > 0)
-class GrayD;
+class Gray;
 
 template<int DR, int DG, int DB>
 requires (DR > 0) && (DG > 0) && (DB > 0)
-class RgbD;
+class Rgb;
 
 template<int DR, int DG, int DB>
 requires (DR > 0) && (DG > 0) && (DB > 0)
@@ -40,7 +40,7 @@ class RgbStackedD;
 
 template <int DH, int DS, int DV>
 requires (DH > 0) && (DS > 0) && (DV > 0)
-class HsvD;
+class Hsv;
 
 /**
  * @brief 	Identify template class instance
@@ -56,22 +56,22 @@ struct is_instance<U<Ts...>, U> : public std::true_type {};
  * @brief 	Concepts to ident specific colortype instance
  */
 template<class C>
-concept ColorGray = is_instance<C, GrayD>::value;
+concept ColorGray = is_instance<C, Gray>::value;
 
 template<class C>
-concept ColorRgb = is_instance<C, RgbD>::value;
+concept ColorRgb = is_instance<C, Rgb>::value;
 
 template<class C>
 concept ColorRgbStacked = is_instance<C, RgbStackedD>::value;
 
 template<class C>
-concept ColorHsv = is_instance<C, HsvD>::value;
+concept ColorHsv = is_instance<C, Hsv>::value;
 
 /**
  * @brief 	Concept to ident any colortype instance
  */
 template<class C>
 concept Color = ColorGray<C> || ColorRgb<C> || ColorHsv<C> || ColorRgbStacked<C>; // conjunction
-// concept Color = std::convertible_to<C, RgbD<8,8,8> >; // more tolerant alternative: convertability
+// concept Color = std::convertible_to<C, Rgb<8,8,8> >; // more tolerant alternative: convertability
 
 }
