@@ -28,7 +28,7 @@ namespace modm::graphic
 	 * 					Changing a Monochrome pixels value does not require masking out the old value.
 	 * 					In other words, manipulating binary (Monochrome) data is a feature of the CPU.
 	 */
-	template<class, Size>
+	template<class, shape::Size>
 	class BufferMal;
 }
 

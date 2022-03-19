@@ -15,7 +15,7 @@
 
 namespace modm::graphic {
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 template<color::Color CO, template<typename> class Accessor>
 void
 BufferMal<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
@@ -32,21 +32,21 @@ BufferMal<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
 
 		// Top end
 		if(yb < looper.yb_bot) {
-			this->buffer[yb][x] = (this->buffer[yb][x] & looper.keepmask_top) | palletizeByte(accessor, lshift, digitsPallete);
+			this->buffer[yb][x] = (this->buffer[yb][x] & looper.keepmask_top) | palletizeByte(accessor, lshift, Pallete::digits);
 			lshift = 0;
 			yb++;
 		}
 
 		// Middle part
 		while(yb < looper.yb_bot)
-			this->buffer[yb++][x] = palletizeByte(accessor, 0, digitsPallete);
+			this->buffer[yb++][x] = palletizeByte(accessor, 0, Pallete::digits);
 
 		// Bottom end
 		this->buffer[yb][x] = (this->buffer[yb][x] & looper.keepmask_bot) | palletizeByte(accessor, lshift, looper.lshift_bot);
 	}
 }
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 template<template<typename> class Accessor>
 void
 BufferMal<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)
@@ -54,7 +54,7 @@ BufferMal<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)
 	const shape::Section clipping = this->getIntersection(accessor.getSection());
 	const Looper looper(clipping);
 
-	const int rshift_bot = digitsPallete - looper.lshift_top;
+	const int rshift_bot = Pallete::digits - looper.lshift_top;
 
 	// FIXME looper.lshift_top always 0 for placement.y() < 0
 	// Thus writeImage top offscreen is buggy
@@ -106,24 +106,24 @@ BufferMal<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)
 	}
 }
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::Point& point)
 {
-	TPallete& byte = getByte(point);
-	const int lshift = getYlshift(point.y());
+	T& byte = getByte(point);
+	const int lshift = Pallete::getLShift(point.y());
 
 	byte = (byte & ~(C::max << lshift)) | this->color.value() << lshift;
 }
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::HLine& hline)
 {
-	const std::size_t yb = getY(hline.start.y());
-	const int lshift = getYlshift(hline.start.y());
+	const std::size_t yb = Pallete::getOffset(hline.start.y());
+	const int lshift = Pallete::getLShift(hline.start.y());
 
-	const TPallete keepmask = ~(C::max << lshift);
+	const T keepmask = ~(C::max << lshift);
 	const typename C::T value = this->color.value() << lshift;
 
 	size_t x = hline.start.x();
@@ -133,12 +133,12 @@ BufferMal<C, R>::drawBlind(const shape::HLine& hline)
 	}
 }
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::VLine& vline)
 {	
 	const Looper looper(vline);
-	const TPallete byte_middle = clearValue(this->color);
+	const T byte_middle = clearValue(this->color);
 
 	const std::size_t x = vline.start.x();
 	size_t yb = looper.yb_top;
@@ -157,13 +157,13 @@ BufferMal<C, R>::drawBlind(const shape::VLine& vline)
 	buffer[yb][x] = (buffer[yb][x] & looper.keepmask_bot) | (byte_middle & ~looper.keepmask_bot);
 }
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::Section& section)
 {
 	const Looper looper(section);
 
-	const TPallete byte_middle = clearValue(this->color);
+	const T byte_middle = clearValue(this->color);
 
 	for (int_fast16_t x = section.topLeft.x(); x < section.bottomRight.x(); x++) {
 		size_t yb = looper.yb_top;
@@ -183,11 +183,11 @@ BufferMal<C, R>::drawBlind(const shape::Section& section)
 	}
 }
 
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 C
 BufferMal<C, R>::getBlind(const shape::Point& point) const
 {
-	return C(getByte(point) >> getYlshift(point.y()) & C::max);
+	return C(getByte(point) >> Pallete::getLShift(point.y()) & C::max);
 }
 
 } // namespace modm::graphic

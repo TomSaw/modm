@@ -22,7 +22,7 @@
 namespace modm::graphic
 {
 
-template<color::Color, Size>
+template<color::Color, shape::Size>
 class Buffer;
 
 /**
@@ -95,16 +95,16 @@ public:
 		return height;
 	}
 
-	Size
+	shape::Size
 	getCharSize(char c) const
 	{
 		return {getCharWidth(c), height};
 	}
 
-	Size
+	shape::Size
 	getStringSize(char *s) const
 	{
-		Size size = {0, height};
+		shape::Size size = {0, height};
 		while (*s) size.x() += getCharWidth(*s++) + vspace;
 
 		// size.x() -= vspace;
@@ -132,7 +132,7 @@ private:
 
 	static constexpr uint8_t offsetCharWidths = 8;
 
-	template<color::Color, Size>
+	template<color::Color, shape::Size>
 	friend class Buffer;
 };
 }  // namespace modm::graphic

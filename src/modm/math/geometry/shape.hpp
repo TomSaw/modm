@@ -10,6 +10,7 @@
 // ----------------------------------------------------------------------------
 
 #include "shape/point.hpp"
+#include "shape/size.hpp"
 #include "shape/line.hpp"
 #include "shape/rectangle.hpp"
 #include "shape/circle.hpp"

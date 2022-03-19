@@ -101,10 +101,6 @@ private:
 		rotr_top = ((topLeft.y() * C::Digits) & (digits - 1)) - C::Digits;
 	}
 
-	int
-	getYlshift(int16_t y) const
-	{ return (y * C::Digits) % digits; }
-
 	// Image properties
 	shape::Section section;
 	size_t col_size;

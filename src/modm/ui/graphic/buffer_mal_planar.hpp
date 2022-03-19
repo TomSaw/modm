@@ -26,7 +26,7 @@ namespace modm::graphic
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic
  */
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 class BufferMal<C, R> : public BufferInterface<C>, public Canvas<C, R>
 {
 public:
@@ -107,7 +107,7 @@ protected:
 		return buffer[point.y()][point.x()];
 	}
 
-	template<class, Size>
+	template<class, shape::Size>
 	friend class BufferMal;
 };
 }  // namespace modm

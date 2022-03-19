@@ -1,5 +1,8 @@
 #pragma once
+
 #include <modm/ui/color/concepts.hpp>
+#include <modm/ui/color/gray.hpp>
+#include <modm/math/geometry/shape/point.hpp>
 
 namespace modm::color {
 	/**

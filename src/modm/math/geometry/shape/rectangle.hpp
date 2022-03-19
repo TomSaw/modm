@@ -12,6 +12,7 @@
 #pragma once
 
 #include "point.hpp"
+#include "size.hpp"
 
 namespace modm::shape
 {
@@ -20,6 +21,7 @@ class Rectangle
 {
 public:
 	Point origin;
+	// TODO use Size
 	Point size;
 
 	constexpr Rectangle() = default;

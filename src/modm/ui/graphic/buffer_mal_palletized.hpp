@@ -14,6 +14,7 @@
 
 #include <limits>
 #include <modm/ui/color/gray.hpp>
+#include <modm/math/utils/integer_pallete.hpp>
 
 namespace modm::graphic
 {
@@ -27,11 +28,12 @@ namespace modm::graphic
  * @author		Thomas Sommer
  * @ingroup		modm_ui_graphic
  */
-template<color::ColorPalletized C, Size R>
+template<color::ColorPalletized C, shape::Size R>
 class BufferMal<C, R> : public BufferInterface<C>, public Canvas<C, R>
 {
 public:
-	using TPallete = C::TPallete;
+	using T = C::T;
+	using Pallete = math::Pallete<T, C::Digits>;
 
 	BufferMal() = default;
 
@@ -47,21 +49,16 @@ public:
 	}
 
 protected:
-	// TODO check if it works with uint16_t and uint32_t
-	static constexpr int digitsPallete = std::numeric_limits<TPallete>::digits;
-	static constexpr TPallete allBits = std::numeric_limits<TPallete>::max();
-
-	static constexpr int ppb = digitsPallete / C::Digits;
-	static constexpr std::size_t RY = (R.height() + digitsPallete - 1) / ppb;
+	static constexpr std::size_t RY = (R.height() + Pallete::digits - 1) / Pallete::elements;
 
 	union {
-		TPallete buffer[RY][R.width()];
+		T buffer[RY][R.width()];
 		// algorithms dislike 2 dimensional arrays
-		TPallete buffer_1d[RY * R.width()];
+		T buffer_1d[RY * R.width()];
 	};
 
-	TPallete clearValue(C color = 0) const {
-		return color::GrayT<TPallete>(color).value();
+	T clearValue(C color = 0) const {
+		return color::GrayT<T>(color).value();
 	}
 
 	/**
@@ -97,21 +94,13 @@ protected:
 	C getBlind(const shape::Point& point) const;
 
 private:
-	static std::size_t
-	getY(int_fast16_t y)
-	{ return y / ppb; }
-
-	static int
-	getYlshift(int_fast16_t y)
-	{ return (y * C::Digits) & (digitsPallete - 1); } // x & (digitsPallete - 1) coresponds x % digitsPallete with support for negative int
-
-	TPallete&
+	T&
 	getByte(const shape::Point& point)
-	{ return buffer[getY(point.y())][point.x()]; }
+	{ return buffer[Pallete::getOffset(point.y())][point.x()]; }
 
-	TPallete
+	T
 	getByte(const shape::Point& point) const
-	{ return buffer[getY(point.y())][point.x()]; }
+	{ return buffer[Pallete::getOffset(point.y())][point.x()]; }
 
 	/**
 	 * @brief 	Calculates a ton of constants for
@@ -119,34 +108,38 @@ private:
 	 */
 	struct Looper {
 		const std::size_t yb_top, yb_bot;
+
 		const int lshift_top, lshift_bot;
-		const TPallete keepmask_top, keepmask_bot;
+
+		const T keepmask_top, keepmask_bot;
 
 		// Maybe this is the beginning of a general service-class
 		// including the // Top End, Middle part, Bottom end code-blocks in various methods of BufferMal<C, R>
 		Looper(const shape::Section section) :
-			yb_top(getY(section.topLeft.y())),
-			yb_bot(getY(section.bottomRight.y() - 1)),
-			lshift_top(getYlshift(section.topLeft.y())),
-			lshift_bot(getYlshift(section.bottomRight.y()) ? getYlshift(section.bottomRight.y()) : digitsPallete),
-			keepmask_top(~(allBits << lshift_top)),
-			keepmask_bot(yb_top == yb_bot ? keepmask_top | allBits << lshift_bot : allBits << lshift_bot)
+			yb_top(Pallete::getOffset(section.topLeft.y())),
+			yb_bot(Pallete::getOffset(section.bottomRight.y() - 1)),
+			lshift_top(Pallete::getLShift(section.topLeft.y())),
+			lshift_bot(Pallete::getLShift(section.bottomRight.y()) ? Pallete::getLShift(section.bottomRight.y()) : Pallete::digits),
+
+			keepmask_top(~(Pallete::bitmask << lshift_top)),
+			keepmask_bot(yb_top == yb_bot ? keepmask_top | Pallete::bitmask << lshift_bot : Pallete::bitmask << lshift_bot)
 		{}
 
 		Looper(const shape::VLine vline) :
-			yb_top(getY(vline.start.y())),
-			yb_bot(getY(vline.end_y - 1)),
-			lshift_top(getYlshift(vline.start.y())),
-			lshift_bot(getYlshift(vline.end_y) ? getYlshift(vline.end_y) : digitsPallete),
-			keepmask_top(~(allBits << lshift_top)),
-			keepmask_bot(yb_top == yb_bot ? keepmask_top | allBits << lshift_bot : allBits << lshift_bot)
+			yb_top(Pallete::getOffset(vline.start.y())),
+			yb_bot(Pallete::getOffset(vline.end_y - 1)),
+			lshift_top(Pallete::getLShift(vline.start.y())),
+			lshift_bot(Pallete::getLShift(vline.end_y) ? Pallete::getLShift(vline.end_y) : Pallete::digits),
+
+			keepmask_top(~(Pallete::bitmask << lshift_top)),
+			keepmask_bot(yb_top == yb_bot ? keepmask_top | Pallete::bitmask << lshift_bot : Pallete::bitmask << lshift_bot)
 		{}
 	};
 
 	template<color::Color CO, template<typename> class Accessor>
-	TPallete
+	T
 	palletizeByte(ImageAccessor<CO, Accessor>& accessor, int lshift, const int lshift_max) {
-		TPallete byte(0);
+		T byte(0);
 
 		while(lshift < lshift_max) {
 			if constexpr (color::ColorPalletized<CO>) {
@@ -161,7 +154,7 @@ private:
 		return byte;
 	}
 
-	template<class, Size>
+	template<class, shape::Size>
 	friend class BufferMal;
 };
 }  // namespace modm

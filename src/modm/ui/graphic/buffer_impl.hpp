@@ -14,7 +14,7 @@
 
 namespace modm::graphic {
 
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 C
 Buffer<C, R>::get(const shape::Point& point) const
 {
@@ -22,7 +22,7 @@ Buffer<C, R>::get(const shape::Point& point) const
 	return this->pointIntersects(point) ? this->getBlind(point) : C(0);
 };
 
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 void
 Buffer<C, R>::clear(ColorType color)
 {
@@ -31,7 +31,7 @@ Buffer<C, R>::clear(ColorType color)
 	cursor = {0, 0};
 }
 
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 void
 Buffer<C, R>::invert()
 {
@@ -40,7 +40,7 @@ Buffer<C, R>::invert()
 }
 
 
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 void
 Buffer<C, R>::operator<<=(const std::size_t shift)
 {
@@ -58,7 +58,7 @@ Buffer<C, R>::operator<<=(const std::size_t shift)
 	}
 }
 
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 void
 Buffer<C, R>::operator>>=(const std::size_t shift)
 {
@@ -76,7 +76,7 @@ Buffer<C, R>::operator>>=(const std::size_t shift)
 	}
 }
 
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 void
 Buffer<C, R>::writeChar(char character)
 {
@@ -96,7 +96,7 @@ Buffer<C, R>::writeChar(char character)
 	if (not font->charExists(character))
 		return;
 
-	const Size charSize = font->getCharSize(character);
+	const shape::Size charSize = font->getCharSize(character);
 
 	if (cursor_autowrap and cursor.x() > R.width() - charSize.x())
 		wrap_cursor();

@@ -55,7 +55,7 @@ public:
 		initialize(placement);
 	}
 
-	ImageAccessor(const C* addr, Size size, shape::Point placement)
+	ImageAccessor(const C* addr, shape::Size size, shape::Point placement)
 		: Accessor<const C>(addr), section(placement, placement + size), col_size(size.x())
 	{ initialize(placement); }
 

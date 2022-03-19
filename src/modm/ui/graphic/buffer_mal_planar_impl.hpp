@@ -13,14 +13,14 @@
 
 namespace modm::graphic {
 
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::Point& point)
 {
 	buffer[point.y()][point.x()] = this->color;
 }
 
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 void
 // TODO make const HLine ... but benchmark with const and
 BufferMal<C, R>::drawBlind(const shape::HLine& hline)
@@ -28,7 +28,7 @@ BufferMal<C, R>::drawBlind(const shape::HLine& hline)
 	std::fill(&buffer[hline.start.y()][hline.start.x()], &buffer[hline.start.y()][hline.end_x], this->color);
 }
 
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::VLine& vline)
 {
@@ -40,7 +40,7 @@ BufferMal<C, R>::drawBlind(const shape::VLine& vline)
 	}
 }
 
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 void
 BufferMal<C, R>::drawBlind(const shape::Section& section)
 {
@@ -52,7 +52,7 @@ BufferMal<C, R>::drawBlind(const shape::Section& section)
 	}
 }
 
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 template<color::Color CO, template<typename> class Accessor>
 void
 BufferMal<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
@@ -79,7 +79,7 @@ BufferMal<C, R>::writeImage(ImageAccessor<CO, Accessor> accessor)
 	}
 }
 
-template<color::ColorPlanar C, Size R>
+template<color::ColorPlanar C, shape::Size R>
 template<template<typename> class Accessor>
 void
 BufferMal<C, R>::writeImage(ImageAccessor<C, Accessor> accessor)

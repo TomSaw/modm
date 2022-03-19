@@ -1,6 +1,6 @@
 // OPTIMIZE BufferMal<Monochrome, R> for speed
 
-template<Size R>
+template<shape::Size R>
 template<template<typename> class Accessor>
 void
 BufferMal<Monochrome, R>::writeImage(ImageAccessor<C, Accessor> accessor, shape::Point placement)

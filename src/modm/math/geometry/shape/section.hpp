@@ -11,9 +11,11 @@
 
 #pragma once
 
-#include "circle.hpp"
 #include "point.hpp"
+#include "size.hpp"
+
 #include "rectangle.hpp"
+#include "circle.hpp"
 
 namespace modm::shape
 {
@@ -26,11 +28,20 @@ class Section
 {
 public:
 	Point topLeft, bottomRight;
+	
+	// TODO use Size
+	Point size;
 
 	constexpr Section() = default;
 
-	constexpr Section(Point topLeft, Point bottomRight) : topLeft(topLeft), bottomRight(bottomRight)
-	{}
+	constexpr Section(Point topLeft, Point bottomRight)
+		: topLeft(topLeft), bottomRight(bottomRight), size({bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()})
+	{
+		#ifdef MODM_DEBUG_BUILD
+		modm_assert(bottomRight.x() > topLeft.x(), "shape.section", "Negative width is forbidden", bottomRight.x() - topLeft.x());
+		modm_assert(bottomRight.y() > topLeft.y(), "shape.section", "Negative height is forbidden", bottomRight.y() - topLeft.y());
+		#endif
+	}
 
 	// Conversion constructors
 	constexpr Section(Rectangle rectangle)
@@ -54,20 +65,20 @@ public:
 		return {topLeft.x(), bottomRight.y()};
 	}
 
+	constexpr Point
+	getSize() const
+	{ return size; }
+
 	constexpr uint16_t
 	getWidth() const
-	{ return bottomRight.x() - topLeft.x(); }
+	{ return size.x(); }
 
 	constexpr uint16_t
 	getHeight() const
-	{ return bottomRight.y() - topLeft.y(); }
-
-	constexpr Point
-	getSize() const
-	{ return {getWidth(), getHeight()}; }
+	{ return size.y(); }
 
 	constexpr uint32_t
 	getPixels() const
-	{ return getWidth() * getHeight(); }
+	{ return size.x() * size.y(); }
 };
 }  // namespace modm::shape

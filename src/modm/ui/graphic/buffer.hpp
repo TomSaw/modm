@@ -40,7 +40,7 @@ namespace modm::graphic
 {
 
 #if __has_include(<modm/io/iostream.hpp>)
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 class Buffer : public BufferMal<C, R>, public IOStream
 {
 public:
@@ -48,14 +48,14 @@ public:
 		: IOStream(writer), writer(this), font(nullptr)
 	{}
 #else
-template<color::Color C, Size R>
+template<color::Color C, shape::Size R>
 class Buffer : public BufferMal<C, R>
 {
 public:
 #endif
 
 	using ColorType = C;
-	static constexpr graphic::Size Resolution = R;
+	static constexpr shape::Size Resolution = R;
 
 	/// Same Color and Size: use std::copy or DMA
 	constexpr Buffer(const Buffer &other)
@@ -117,7 +117,7 @@ public:
 	}
 
 	/// Different color and size: Use writeImage cause handles Intersection
-	template<color::Color CO, Size RO>
+	template<color::Color CO, shape::Size RO>
 	constexpr Buffer(const Buffer<CO, RO> &other) : IOStream(writer), writer(this)
 	{
 		this->colormap = other.colormap;
@@ -176,15 +176,15 @@ public:
 	const void* virtualBuffer() const final
 	{ return reinterpret_cast<const void*>(this->buffer); }
 
-	Size virtualSize() const final
+	shape::Size virtualSize() const final
 	{ return R; }
 
-	std::tuple<Size, const void*>
+	std::tuple<shape::Size, const void*>
 	getSizeAndBuffer() const final
 	{ return std::make_tuple(R, reinterpret_cast<const void*>(this->buffer)); }
 
 private:
-	template<color::Color, Size>
+	template<color::Color, shape::Size>
 	friend class Buffer;
 
 #if __has_include(<modm/io/iostream.hpp>)

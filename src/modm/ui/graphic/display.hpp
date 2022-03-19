@@ -59,7 +59,7 @@ Orientation : uint8_t
 // TODO Replace <.., bool CanPortrait> with <.., Orientation Supported>
 // so constexpr and runtime getWidth() / getHeight() can be enabled more cleverly
 // May inherit on modm::Matrix<..> or provide a conversion constructor for modm::Matrix<..>
-template <color::Color C, Size R, bool CanPortrait>
+template <color::Color C, shape::Size R, bool CanPortrait>
 class Display : virtual public Canvas<C, R>
 {
 public:
@@ -74,7 +74,7 @@ public:
 	getHeight() const override
 	{ return (orientation & Orientation(OrientationFlags::Portrait)) ? R.width() : R.height(); }
 
-	Size
+	shape::Size
 	getSize() const override
 	{ return (orientation & Orientation(OrientationFlags::Portrait)) ? R.swapped() : R; }
 
@@ -88,7 +88,7 @@ protected:
 };
 
 // Same like Display<C, R, true> but doesn't overwrite getWidth() and getHeight()
-template <color::Color C, Size R>
+template <color::Color C, shape::Size R>
 class Display<C, R, false> : virtual public Canvas<C, R>
 {
 public:

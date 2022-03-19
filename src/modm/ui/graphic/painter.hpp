@@ -52,7 +52,7 @@ public:
 	void draw(shape::Circle circle, Style style = Style::Outline);
 	void draw(shape::Ellipse ellipse, Style style = Style::Outline);
 
-	template<color::Color CO, Size RO>
+	template<color::Color CO, shape::Size RO>
 	LocalPainter& operator=(const Buffer<CO, RO> &other)
 	{
 		GB::template operator=(other);

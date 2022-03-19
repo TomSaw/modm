@@ -26,7 +26,7 @@ namespace modm::graphic
  * @ingroup		modm_ui_graphic
  */
 // IMPLEMENT buffer_mal_palletized_mono_impl
-/* template<color::Monochrome C, Size R>
+/* template<color::Monochrome C, shape::Size R>
 class BufferMal<C, R> : public BufferInterface<C>, public Canvas<C, R>
 {
 
