@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *

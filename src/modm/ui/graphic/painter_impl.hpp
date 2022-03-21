@@ -7,7 +7,7 @@
  * Copyright (c) 2014, Daniel Krebs
  * Copyright (c) 2016, Antal Szabó
  * Copyright (c) 2017, Christopher Durand
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *

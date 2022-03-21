@@ -38,14 +38,18 @@ public:
 		: topLeft(topLeft), bottomRight(bottomRight), size({bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()})
 	{
 		#ifdef MODM_DEBUG_BUILD
-		modm_assert(bottomRight.x() > topLeft.x(), "shape.section", "Negative width is forbidden", bottomRight.x() - topLeft.x());
-		modm_assert(bottomRight.y() > topLeft.y(), "shape.section", "Negative height is forbidden", bottomRight.y() - topLeft.y());
+		modm_assert(bottomRight.x() >= topLeft.x(), "shape.section", "Width must be positive", bottomRight.x() - topLeft.x());
+		modm_assert(bottomRight.y() >= topLeft.y(), "shape.section", "Height must be positive", bottomRight.y() - topLeft.y());
 		#endif
 	}
 
+	constexpr Section(Size size)
+		: topLeft({0, 0}), bottomRight(size), size(size)
+	{}
+
 	// Conversion constructors
 	constexpr Section(Rectangle rectangle)
-		: topLeft(rectangle.origin), bottomRight(rectangle.origin + rectangle.size)
+		: topLeft(rectangle.origin), bottomRight(rectangle.origin + rectangle.size), size(rectangle.size)
 	{}
 
 /* 	constexpr Section(Circle circle)

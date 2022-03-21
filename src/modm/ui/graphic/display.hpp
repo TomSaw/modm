@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Thomas Sommer
+ * Copyright (c) 2022, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -32,7 +32,7 @@ OrientationFlags : uint8_t
 	Portrait = Bit0,
 	TopDown = Bit1
 };
-// TODO implemenet modm typesafe registers for ssd1306 and ili9431
+// TODO implement modm typesafe registers for ssd1306 and ili9431
 // MODM_FLAGS8(OrientationFlags);
 
 enum
