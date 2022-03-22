@@ -87,11 +87,10 @@ public:
 	struct channel_accessor {
 		TS &value_;
 
-		void
-		operator= (const TC new_value)
+		void operator= (const TC new_value)
 		{ value_ = (value_ & ~(TC::max << Shift)) | new_value.value() << Shift; }
 
-		const TC value() const { return (value_ >> Shift) & TC::max; }
+		TC value() const { return (value_ >> Shift) & TC::max; }
 	};
 
 	// accessors
@@ -189,7 +188,7 @@ public:
 	}
 
 private:
-	T value_;
+	T value_{0};
 };
 
 using Rgb565 = RgbStacked<5,6,5>;
