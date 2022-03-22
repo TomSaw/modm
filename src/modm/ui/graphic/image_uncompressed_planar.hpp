@@ -37,12 +37,12 @@ public:
 		friend class Image;
 
 	public:
-		class ColumnIteratorUnmutable
+		class ColumnIteratorSentinel
 		{
 		protected:
 			C const *data;
 
-			ColumnIteratorUnmutable(C const *data)
+			ColumnIteratorSentinel(C const *data)
 				: data(data)
 			{}
 
@@ -51,17 +51,17 @@ public:
 		public:
 
 			bool
-			operator==(const ColumnIteratorUnmutable& other) const
+			operator==(const ColumnIteratorSentinel& other) const
 			{ return data == other.data; }
 		};
 
-		class ColumnIterator : public ColumnIteratorUnmutable
+		class ColumnIterator : public ColumnIteratorSentinel
 		{
 			const std::size_t colIncr;
 			const uint16_t rows;
 
 			ColumnIterator(C const *data, const std::size_t colIncr, const uint16_t rows)
-				: ColumnIteratorUnmutable(data), colIncr(colIncr), rows(rows)
+				: ColumnIteratorSentinel(data), colIncr(colIncr), rows(rows)
 			{}
 
 			friend class Iterable;
@@ -83,15 +83,16 @@ public:
 		{ return ColumnIterator(data, colIncr, clipping.getHeight()); }
 
 		auto end()
-		{ return ColumnIteratorUnmutable(data + clipping.getWidth() * colIncr); }
+		{ return ColumnIteratorSentinel(data + clipping.getWidth() * colIncr); }
 
 		// IMPLEMENT reverse iterators for mirroring
+		// @see std::make_reverse_iterator
 		#if 0
 		auto rbegin()
 		{ return ColumnIterator<true>(data + clipping.getWidth() * colIncr, size.height(), clipping.getHeight()); }
 
 		auto rend()
-		{ return ColumnIteratorUnmutable(data, size.height(), clipping.getHeight()); }
+		{ return ColumnIteratorSentinel(data, size.height(), clipping.getHeight()); }
 		#endif
 	};
 

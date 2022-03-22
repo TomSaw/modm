@@ -89,29 +89,29 @@ public:
 	
 	public:
 
-		class ColumnIteratorUnmutable
+		class ColumnIteratorSentinel
 		{
 		protected:
 			T const *data;
 
-			ColumnIteratorUnmutable(T const *data) : data(data)
+			ColumnIteratorSentinel(T const *data) : data(data)
 			{}
 
 			friend Iterable;
 
 		public:
 			bool
-			operator==(const ColumnIteratorUnmutable &other) const
+			operator==(const ColumnIteratorSentinel &other) const
 			{ return data == other.data; }
 		};
 
-		class ColumnIterator : public ColumnIteratorUnmutable
+		class ColumnIterator : public ColumnIteratorSentinel
 		{
 			const Meta& meta;
 
 			// Only modm::graphic::Image can construct Iterators
 			ColumnIterator(T const *data, const Meta& meta)
-				: ColumnIteratorUnmutable(data),
+				: ColumnIteratorSentinel(data),
 				meta(meta)
 			{}
 			
@@ -141,11 +141,11 @@ public:
 				 * 			Used when target memory is of different ColorType.
 				 * 
 				 */
-				class RowIteratorUnmutable {
+				class RowIteratorSentinel {
 				protected:
 					uint16_t row;
 
-					RowIteratorUnmutable(uint16_t row)
+					RowIteratorSentinel(uint16_t row)
 						: row(row)
 					{}
 
@@ -154,7 +154,7 @@ public:
 				public:
 					
 					bool
-					operator==(const RowIteratorUnmutable& other) const
+					operator==(const RowIteratorSentinel& other) const
 					{
 						// Need >= because RowIteratorPallete::operator++ overshots
 						// FIXME Is order sensitive :/
@@ -163,14 +163,14 @@ public:
 					}
 				};
 
-				class RowIterator : public RowIteratorUnmutable
+				class RowIterator : public RowIteratorSentinel
 				{
 					T const *data;
 					T pallete;
 
 					// TODO initial rotate is missing
 					RowIterator(uint16_t row, T const *data, int shift_top)
-						: RowIteratorUnmutable(row),
+						: RowIteratorSentinel(row),
 						data(data)
 						// pallete(*data >> shift_top)
 					{
@@ -220,14 +220,14 @@ public:
 				{ return RowIterator(meta.row_begin, data, meta.shift_top); }
 
 				auto end() const
-				{ return RowIteratorUnmutable(meta.row_end); }
+				{ return RowIteratorSentinel(meta.row_end); }
 
 				/**
 				 * @brief 	Pallete Iterator splits the Pallete max once.
 				 * 			Used when the target memory is of same palletized ColorType.
 				 * 
 				 */
-				class RowIteratorPallete : public RowIteratorUnmutable
+				class RowIteratorPallete : public RowIteratorSentinel
 				{
 					T const *data;
 					
@@ -237,7 +237,7 @@ public:
 					T temp;
 
 					RowIteratorPallete(uint16_t row, T const *data, int shift_top, int shift_bot)
-						: RowIteratorUnmutable(row),
+						: RowIteratorSentinel(row),
 						data(data),
 						shift_top(shift_top),
 						shift_bot(shift_bot),
@@ -287,7 +287,7 @@ public:
 		{ return ColumnIterator(data, meta); }
 
 		auto end() const
-		{ return ColumnIteratorUnmutable(data_end); }
+		{ return ColumnIteratorSentinel(data_end); }
 
 		// TODO implement for mirroring
 		// ColumnIterator rbegin() {

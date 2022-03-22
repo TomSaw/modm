@@ -150,15 +150,6 @@ private:
 
 	template<int, int, int>
 	friend class Hsv;
-
-	template<ColorHsv C>
-	friend IOStream&
-	operator<<(IOStream&, const C&);
-
-	// Human friendly output:
-	// Hue in deg, Sat in pct, Value in pct
-	template<ColorHsv C>
-	void ostream_human_friendly(IOStream& os, const C&);
 };
 
 template<std::unsigned_integral T>
@@ -180,6 +171,8 @@ operator<<(IOStream& os, const C& hsv)
 	return os;
 }
 
+// Human friendly output:
+// Hue in deg, Sat in pct, Value in pct
 /// @ingroup modm_ui_color
 template<ColorHsv C>
 void ostream_human_friendly(IOStream& os, const C& hsv) {

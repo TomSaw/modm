@@ -219,10 +219,6 @@ private:
 
 	template<int, int, int>
 	friend class Rgb;
-
-	template<ColorRgb C>
-	friend IOStream&
-	operator<<(IOStream&, const C&);
 };
 
 template<std::unsigned_integral U>

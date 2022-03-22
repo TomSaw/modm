@@ -90,19 +90,19 @@ public:
 			counter = -gap;
 		}
 
-		class ColumnIteratorUnmutable
+		class ColumnIteratorSentinel
 		{
 		protected:
 			uint16_t col;
 
-			ColumnIteratorUnmutable(uint16_t col)
+			ColumnIteratorSentinel(uint16_t col)
 				: col(col) {}
 
 			friend Iterable;
 
 		public:
 			bool
-			operator==(const ColumnIteratorUnmutable& other) const
+			operator==(const ColumnIteratorSentinel& other) const
 			{
 				return col == other.col;
 			}
@@ -110,12 +110,12 @@ public:
 
 
 		template <bool ColumnIteratorReverse = false>
-		class ColumnIterator : public ColumnIteratorUnmutable
+		class ColumnIterator : public ColumnIteratorSentinel
 		{
 			Iterable& image;
 
 			ColumnIterator(uint16_t col, Iterable& image)
-				: ColumnIteratorUnmutable(col), image(image)
+				: ColumnIteratorSentinel(col), image(image)
 			{}
 
 			friend class Iterable;
@@ -128,29 +128,29 @@ public:
 			public:
 				Row(Iterable& image) : image(image) {}
 
-				class RowIteratorUnmutable
+				class RowIteratorSentinel
 				{
 				protected:
 					uint16_t row;
 
-					RowIteratorUnmutable(uint16_t row): row(row) {}
+					RowIteratorSentinel(uint16_t row): row(row) {}
 					friend ColumnIterator;
 
 				public:
 					bool
-					operator==(const RowIteratorUnmutable& other) const
+					operator==(const RowIteratorSentinel& other) const
 					{
 						return row == other.row;
 					}
 				};
 
 				template <bool RowIteratorReverse = false>
-				class RowIterator : public RowIteratorUnmutable
+				class RowIterator : public RowIteratorSentinel
 				{
 					Iterable& image;
 
 					RowIterator(uint16_t row, Iterable& image)
-						: RowIteratorUnmutable(row), image(image)
+						: RowIteratorSentinel(row), image(image)
 					{}
 					friend ColumnIterator;
 
@@ -174,7 +174,7 @@ public:
 				{ return RowIterator(image.clipping.topLeft.y(), image); }
 
 				auto end() const
-				{ return RowIteratorUnmutable(image.clipping.bottomRight.y()); }
+				{ return RowIteratorSentinel(image.clipping.bottomRight.y()); }
 			};
 
 			void
@@ -196,13 +196,13 @@ public:
 
 		auto begin() { return ColumnIterator(clipping.topLeft.x(), *this); }
 
-		auto end() { return ColumnIteratorUnmutable(clipping.bottomRight.x()); }
+		auto end() { return ColumnIteratorSentinel(clipping.bottomRight.x()); }
 
 		#if 0
 		// TODO support std::views::reverse
 		auto rbegin() { return ColumnIterator<true>(clipping.bottomRight.x(), *this); }
 
-		auto rend() { return ColumnIteratorUnmutable(clipping.topLeft.x()); }
+		auto rend() { return ColumnIteratorSentinel(clipping.topLeft.x()); }
 		#endif
 	};
 

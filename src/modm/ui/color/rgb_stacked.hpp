@@ -84,17 +84,14 @@ public:
 	 * @ingroup			modm_ui_color
 	 */
 	template<std::unsigned_integral TS, ColorGray TC, int Shift>
-	class ChannelAccessor {
+	struct channel_accessor {
 		TS &value_;
 
-		ChannelAccessor(TS &value) : value_(value) {};
-		friend class RgbStacked;
+		void
+		operator= (const TC new_value)
+		{ value_ = (value_ & ~(TC::max << Shift)) | new_value.value() << Shift; }
 
-		public:
-			void operator= (const TC new_value)
-			{ value_ = (value_ & ~(TC::max << Shift)) | new_value.value() << Shift; }
-
-			const TC value() const { return (value_ >> Shift) & TC::max; }
+		const TC value() const { return (value_ >> Shift) & TC::max; }
 	};
 
 	// accessors
@@ -104,10 +101,11 @@ public:
 	const GreenType green() const { return value_ >> DB & GreenType::max;}
 	const BlueType blue() const { return value_ & BlueType::max; }
 
-	ChannelAccessor<T, RedType, DG + DB> red() { return {value_}; }
-	ChannelAccessor<T, GreenType, DB> green() { return {value_}; }
-	ChannelAccessor<T, BlueType, 0> blue() { return {value_}; }
+	auto red() { return channel_accessor<T, RedType, DG + DB>{value_}; }
+	auto green() { return channel_accessor<T, GreenType, DB>{value_}; }
+	auto blue() { return channel_accessor<T, BlueType, 0>{value_}; }
 
+	// assignment
 	void operator=(const RgbStacked other) {
 		value_ = other.value_;
 	}
@@ -192,10 +190,6 @@ public:
 
 private:
 	T value_;
-
-	template<ColorRgbStacked C>
-	friend IOStream&
-	operator<<(IOStream&, const C&);
 };
 
 using Rgb565 = RgbStacked<5,6,5>;
