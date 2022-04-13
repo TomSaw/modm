@@ -54,7 +54,7 @@ public:
 	{}
 
 	template<class C>
-	requires ColorRgb<C> || ColorRgbStacked<C>
+	requires ColorRgb<C> || ColorRgbPallete<C>
 	constexpr Rgb(const C& other)
 		: red_(other.red()), green_(other.green()), blue_(other.blue())
 	{}
@@ -76,19 +76,19 @@ public:
 		using WideWideType = modm::WideType<WideType>;
 		static_assert(!std::is_same_v<WideType, WideWideType>, "C::T too big");
 
-		const T hue = CalcType(Gray<C::HueType::Digits>(hsv.hue().value())).value();
+		const T hue = CalcType(Gray<C::HueType::digits>(hsv.hue().value())).value();
 		const T saturation = CalcType(hsv.saturation()).value();
 		const T value = CalcType(hsv.value()).value();
 
 		const WideType vs = value * saturation;
 		const WideType h6 = 6 * hue;
 
-		T i = h6 >> CalcType::Digits;
-		WideType f = ((i | 1) << CalcType::Digits) - h6;
+		T i = h6 >> CalcType::digits;
+		WideType f = ((i | 1) << CalcType::digits) - h6;
 		if (i & 1) f = -f;
 
-		CalcType p(((value << CalcType::Digits) - vs) >> CalcType::Digits);
-		CalcType u(((WideWideType(value) << 2 * CalcType::Digits) - WideWideType(vs) * f) >> 2 * CalcType::Digits);
+		CalcType p(((value << CalcType::digits) - vs) >> CalcType::digits);
+		CalcType u(((WideWideType(value) << 2 * CalcType::digits) - WideWideType(vs) * f) >> 2 * CalcType::digits);
 
 		switch (i)
 		{
@@ -210,6 +210,11 @@ public:
 		red_.invert();
 		green_.invert();
 		blue_.invert();
+	}
+
+	static const char* label() {
+		static const char label[] = "Rgb";
+		return label;
 	}
 
 private:

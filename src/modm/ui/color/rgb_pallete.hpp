@@ -19,7 +19,7 @@ namespace modm::color {
  * 					Requires less space than unstacked rgb types. Calculations without dedicated graphics
  * 					acceleration hardware are very inefficient.
  * 					If theres no dedicated graphics acceleration but lots of RAM, using modm::Rgb<> for
- * 					calculations and afterwards conversion to modm::RgbStacked<> may be an option.
+ * 					calculations and afterwards conversion to modm::RgbPallete<> may be an option.
  *
  * @tparam DR 		Digits for red channel
  * @tparam DG 		Digits for green channel
@@ -30,7 +30,7 @@ namespace modm::color {
  */
 template <int DR, int DG, int DB>
 requires (DR > 0) && (DG > 0) && (DB > 0)
-class RgbStacked
+class RgbPallete
 {
 public:
 	using RedType = Gray<DR>;
@@ -39,38 +39,38 @@ public:
 
 	using T = uint_t<DR + DG + DB>::least;
 
-	constexpr RgbStacked() = default;
+	constexpr RgbPallete() = default;
 
-	constexpr RgbStacked(T value)
+	constexpr RgbPallete(T value)
 		: value_(value)
 	{}
 
-	constexpr RgbStacked(RedType red, GreenType green, BlueType blue)
+	constexpr RgbPallete(RedType red, GreenType green, BlueType blue)
 		: value_(red.value() << (DG + DB) | green.value() << DB | blue.value())
 	{}
 
-	constexpr RgbStacked(const RgbStacked &rgbstacked)
+	constexpr RgbPallete(const RgbPallete &rgbstacked)
 		: value_(rgbstacked.value_)
 	{}
 
 	template<ColorGray C>
-	constexpr RgbStacked(const C &gray)
-		: RgbStacked(Rgb<C::Digits>(gray))
+	constexpr RgbPallete(const C &gray)
+		: RgbPallete(Rgb<C::digits>(gray))
 	{}
 
 	template<ColorRgb C>
-	constexpr RgbStacked(const C &rgb)
-		: RgbStacked(rgb.red(), rgb.green(), rgb.blue())
+	constexpr RgbPallete(const C &rgb)
+		: RgbPallete(rgb.red(), rgb.green(), rgb.blue())
 	{}
 
-	template<ColorRgbStacked C>
-	constexpr RgbStacked(const C &rgstacked)
-		: RgbStacked(rgstacked.red(), rgstacked.green(), rgstacked.blue())
+	template<ColorRgbPallete C>
+	constexpr RgbPallete(const C &rgstacked)
+		: RgbPallete(rgstacked.red(), rgstacked.green(), rgstacked.blue())
 	{}
 
 	template<ColorHsv C>
-	constexpr RgbStacked(const C &hsv)
-		: RgbStacked(Rgb<5,6,5>(hsv))
+	constexpr RgbPallete(const C &hsv)
+		: RgbPallete(Rgb<5,6,5>(hsv))
 	{}
 
 	/**
@@ -105,11 +105,11 @@ public:
 	auto blue() { return channel_accessor<T, BlueType, 0>{value_}; }
 
 	// assignment
-	void operator=(const RgbStacked other) {
+	void operator=(const RgbPallete other) {
 		value_ = other.value_;
 	}
 
-	RgbStacked& operator+=(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete& operator+=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() + rgb.red(),
 			green().value() + rgb.green(),
@@ -118,7 +118,7 @@ public:
 		return *this;
 	}
 
-	RgbStacked& operator-=(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete& operator-=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() - rgb.red(),
 			green().value() - rgb.green(),
@@ -127,7 +127,7 @@ public:
 		return *this;
 	}
 
-	RgbStacked& operator*=(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete& operator*=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() * rgb.red(),
 			green().value() * rgb.green(),
@@ -136,7 +136,7 @@ public:
 		return *this;
 	}
 
-	RgbStacked& operator/=(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete& operator/=(const Rgb<DR, DG, DB>& rgb) {
 		operator=({
 			red().value() * rgb.red(),
 			green().value() * rgb.green(),
@@ -145,7 +145,7 @@ public:
 		return *this;
 	}
 
-	RgbStacked operator+(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete operator+(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() + rgb.red(),
 			green().value() + rgb.green(),
@@ -153,7 +153,7 @@ public:
 		};
 	}
 
-	RgbStacked operator-(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete operator-(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() - rgb.red(),
 			green().value() - rgb.green(),
@@ -161,7 +161,7 @@ public:
 		};
 	}
 
-	RgbStacked operator*(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete operator*(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() * rgb.red(),
 			green().value() * rgb.green(),
@@ -169,7 +169,7 @@ public:
 		};
 	}
 
-	RgbStacked operator/(const Rgb<DR, DG, DB>& rgb) {
+	RgbPallete operator/(const Rgb<DR, DG, DB>& rgb) {
 		return {
 			red().value() / rgb.red(),
 			green().value() / rgb.green(),
@@ -179,7 +179,7 @@ public:
 
 	// Equality
 	constexpr bool
-	operator==(const RgbStacked& other) const = default;
+	operator==(const RgbPallete& other) const = default;
 
 	// Remaining comparison operators are server by color::Rgb<D> and implicit type conversion
 
@@ -187,17 +187,22 @@ public:
 		value_ ^= bitmask<DR + DG + DB>();
 	}
 
+	static const char* label() {
+		static const char label[] = "RgbPallete";
+		return label;
+	}
+
 private:
 	T value_{0};
 };
 
-using Rgb565 = RgbStacked<5,6,5>;
-using Rgb666 = RgbStacked<6,6,6>;
+using Rgb565 = RgbPallete<5,6,5>;
+using Rgb666 = RgbPallete<6,6,6>;
 
 #if __has_include(<modm/io/iostream.hpp>)
 #include <modm/io/iostream.hpp>
 
-template<ColorRgbStacked C>
+template<ColorRgbPallete C>
 IOStream&
 operator<<(IOStream& os, const C& rgb)
 {

@@ -36,7 +36,7 @@ class Rgb;
 
 template<int DR, int DG, int DB>
 requires (DR > 0) && (DG > 0) && (DB > 0)
-class RgbStacked;
+class RgbPallete;
 
 template <int DH, int DS, int DV>
 requires (DH > 0) && (DS > 0) && (DV > 0)
@@ -62,7 +62,7 @@ template<class C>
 concept ColorRgb = is_instance<C, Rgb>::value;
 
 template<class C>
-concept ColorRgbStacked = is_instance<C, RgbStacked>::value;
+concept ColorRgbPallete = is_instance<C, RgbPallete>::value;
 
 template<class C>
 concept ColorHsv = is_instance<C, Hsv>::value;
@@ -71,7 +71,7 @@ concept ColorHsv = is_instance<C, Hsv>::value;
  * @brief 	Concept to ident any colortype instance
  */
 template<class C>
-concept Color = ColorGray<C> || ColorRgb<C> || ColorHsv<C> || ColorRgbStacked<C>; // conjunction
+concept Color = ColorGray<C> || ColorRgb<C> || ColorHsv<C> || ColorRgbPallete<C>; // conjunction
 // concept Color = std::convertible_to<C, Rgb<8,8,8> >; // more tolerant alternative: convertability
 
 }

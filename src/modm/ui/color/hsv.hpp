@@ -97,9 +97,9 @@ public:
 		saturation_ = max ? diff / max * maxValue : 0;
 	}
 
-	template<ColorRgbStacked C>
+	template<ColorRgbPallete C>
  	constexpr Hsv(const C& rgbstacked)
-	 	: Hsv(Rgb<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
+	 	: Hsv(Rgb<C::RedType::digits, C::GreenType::digits, C::BlueType::digits>(rgbstacked))
 	{}
 
 	// accesors
@@ -143,6 +143,11 @@ public:
 	void invert()
 	{ hue_.invert(); }
 
+	static const char* label() {
+		static const char label[] = "Hsv";
+		return label;
+	}
+
 private:
 	HueType hue_{0};
 	SaturationType saturation_{0};
@@ -167,7 +172,7 @@ template<ColorHsv C>
 IOStream&
 operator<<(IOStream& os, const C& hsv)
 {
-	os << hsv.hue().value() << "\t" << hsv.saturation().value() << "\t" << hsv.value().value();
+	os << hsv.hue().value() << "\t" << hsv.saturation() << "\t" << hsv.value();
 	return os;
 }
 

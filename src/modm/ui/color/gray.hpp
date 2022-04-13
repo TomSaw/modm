@@ -59,9 +59,9 @@ public:
 		) >> 13)
 	{}
 
-	template<ColorRgbStacked C>
+	template<ColorRgbPallete C>
  	constexpr Gray(const C& rgbstacked)
-	 	: Gray(Rgb<C::RedType::Digits, C::GreenType::Digits, C::BlueType::Digits>(rgbstacked))
+	 	: Gray(Rgb<C::RedType::digits, C::GreenType::digits, C::BlueType::digits>(rgbstacked))
 	{}
 
 	// However, using hsv.value() feels natural
@@ -210,6 +210,11 @@ public:
 	bool
 	isSaturated() const
 	{ return this->value_ == this->max; }
+
+	static const char* label() {
+		static const char label[] = "Gray";
+		return label;
+	}
 
 private:
 	template<int>

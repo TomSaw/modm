@@ -31,11 +31,13 @@ template<int D>
 requires (D > 0)
 class ProportionalUnsigned {
 public:
-	static constexpr int Digits = D;
+	static constexpr int digits = D;
 
 	using T = uint_t<D>::least;
+	static constexpr T bitmask = ::modm::bitmask<D>();
+
 	static constexpr T min = 0;
-	static constexpr T max = bitmask<D>();
+	static constexpr T max = bitmask;
 
 	constexpr ProportionalUnsigned() = default;
 
@@ -67,8 +69,8 @@ public:
 	requires (E == 1)
 	constexpr ProportionalUnsigned(const ProportionalUnsigned<1> &other) : value_(other.value_ & 1){}
 
-	constexpr T value() const
-	{ return value_; }
+	constexpr T value() const { return value_; }
+	constexpr T& value() { return value_; }
 
 	bool operator<=>(const ProportionalUnsigned& other) const = default;
 
