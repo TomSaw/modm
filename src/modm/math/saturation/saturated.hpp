@@ -225,7 +225,19 @@ public:
 	requires std::integral<std::remove_reference_t<U>>
 	Saturated&
 	operator*=(const Saturated<U>& other)
-	{ return this->operator*=(other.value_); }
+	{
+		return this->operator*=(other.value_);
+	}
+
+	template<typename U>
+	requires std::unsigned_integral<std::remove_reference_t<U>>
+	Saturated&
+	operator/=(const U& scale)
+	{
+		value_ /= scale;
+
+		return *this;
+	}
 
 	// operator+, operator-, operator*
 	template<typename U>

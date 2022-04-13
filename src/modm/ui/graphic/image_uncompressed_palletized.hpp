@@ -68,7 +68,7 @@ public:
 		T const *data_end;
 
 	private:
-		Iterable(T const *data, shape::Size size, shape::Section clipping)
+		Iterable(T const *data, Size size, shape::Section clipping)
 			: data(data + Pallete::getOffset(clipping.topLeft.y() + clipping.topLeft.x() * size.height())),
 			meta(
 				Pallete::getOffset(size.height()), // TODO MemoryLayout

@@ -57,7 +57,7 @@ class Vector : public std::array<T, N>
 	template<std::size_t K>
 	constexpr void assign()
 	{
-		static_assert(K == N, "Total number of components passed to constuctor must be equal to N of Vector!");
+		static_assert(K == N, "Number of components passed to constuctor != N of Vector!");
 	};
 
 	template<std::size_t K, typename U, class... Args>

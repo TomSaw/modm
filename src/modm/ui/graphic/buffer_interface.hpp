@@ -12,8 +12,7 @@
 
 #include <tuple>
 #include <modm/ui/color/concepts.hpp>
-#include <modm/math/geometry/shape/point.hpp>
-#include "canvas.hpp"
+#include <modm/math/geometry/size.hpp>
 
 namespace modm::graphic
 {
@@ -24,7 +23,7 @@ namespace modm::graphic
  * @tparam C 	ColorType of the Interface.
  * 				A consumer of BufferInterface (other Buffers or Displays) variate their methods
  * 				over C cause is critical for performance.
- * 				shape::Size and the actual address of the Buffer is decoupled: It's cheap enough using a virtual call.
+ * 				Size and the actual address of the Buffer is decoupled: It's cheap enough using a virtual call.
  */
 
 template<color::Color C>
@@ -32,14 +31,14 @@ class BufferInterface
 {
 public:
 	// OPTIMIZE Maybe returned with one call using std::tuple
-	virtual shape::Size
+	virtual Size
 	virtualSize() const = 0;
 
 	virtual const void*
 	virtualBuffer() const = 0;
 
-	virtual std::tuple<shape::Size, const void*>
-	getSizeAndBuffer() const = 0;
+	// virtual std::tuple<Size, const void*>
+	// getSizeAndBuffer() const = 0;
 protected:
 	BufferInterface() = default;
 };

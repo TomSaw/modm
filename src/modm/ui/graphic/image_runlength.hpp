@@ -47,7 +47,7 @@ public:
 		CounterType counter;
 		C color;
 
-		Iterable(CounterType const *data, shape::Size size, shape::Section clipping, C color)
+		Iterable(CounterType const *data, Size size, shape::Section clipping, C color)
 			: data(data),
 			clipping(clipping),
 			counter(*data),

@@ -8,12 +8,46 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
+#pragma once
 
-#include "shape/point.hpp"
-#include "shape/size.hpp"
-#include "shape/line.hpp"
-#include "shape/rectangle.hpp"
-#include "shape/circle.hpp"
-#include "shape/ellipse.hpp"
+#include "point.hpp"
 
-#include "shape/section.hpp"
+namespace modm::shape {
+	
+	using scalar_t = int16_t;
+	using radius_t = uint16_t;
+
+	struct Line {
+		const Point delta;
+	};
+
+	struct HLine {
+		const scalar_t delta;
+	};
+
+	struct VLine {
+		const scalar_t delta;
+	};
+
+	struct DLine {
+		const scalar_t delta;
+		const int dir;
+	};
+	
+	struct Rectangle {
+		const Point delta;
+	};
+
+	struct Circle {
+		const radius_t radius;
+	};
+
+	struct Ellipse {
+		const radius_t radius;
+		const radius_t radius_2;
+	};
+
+	// struct Bow {
+	// 	const radius_t radius;
+	// };
+}

@@ -22,7 +22,7 @@
 namespace modm::graphic
 {
 
-template<color::Color, shape::Size>
+template<color::Color, Size>
 class Buffer;
 
 /**
@@ -95,16 +95,16 @@ public:
 		return height;
 	}
 
-	shape::Size
+	Size
 	getCharSize(char c) const
 	{
 		return {getCharWidth(c), height};
 	}
 
-	shape::Size
+	Size
 	getStringSize(char *s) const
 	{
-		shape::Size size = {0, height};
+		Size size = {0, height};
 		while (*s) size.x() += getCharWidth(*s++) + vspace;
 
 		// size.x() -= vspace;
@@ -112,7 +112,7 @@ public:
 	}
 
 	ImageAccessor<color::Monochrome, modm::accessor::Flash>
-	getImageAccessor(char c, shape::Point placement) {
+	getImageAccessor(char c, Point placement) {
 		const std::size_t position = offsetCharWidths + c - first;
 		const uint8_t usedRows = (height + 7) / 8;  // round up
 
@@ -132,7 +132,7 @@ private:
 
 	static constexpr uint8_t offsetCharWidths = 8;
 
-	template<color::Color, shape::Size>
+	template<color::Color, Size>
 	friend class Buffer;
 };
 }  // namespace modm::graphic

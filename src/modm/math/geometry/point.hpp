@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include <modm/math/geometry/vector.hpp>
+#include "vector.hpp"
 
-namespace modm::shape
+namespace modm
 {
 
 class Point : public Vector<int16_t, 2>

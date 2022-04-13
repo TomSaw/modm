@@ -12,7 +12,7 @@
 
 #include "color/gray.hpp"
 #include "color/rgb.hpp"
+#include "color/rgb_pallete.hpp"
 #include "color/hsv.hpp"
 
 #include "color/rgb_html.hpp"
-#include "color/rgb_stacked.hpp"

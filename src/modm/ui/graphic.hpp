@@ -7,14 +7,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+
+#include <modm/math/geometry/shape.hpp>
 #include "color.hpp"
 #include "font.hpp"
 
+
 #include "graphic/buffer.hpp"
-#include "graphic/display.hpp"
-#include "graphic/image.hpp"
+// #include "graphic/image.hpp"
+// #include "graphic/drawings.hpp"
 
-#include "graphic/painter.hpp"
-#include "graphic/painter_remote.hpp"
-
+#include "graphic/colorindex.hpp"
 #include "graphic/pattern.hpp"

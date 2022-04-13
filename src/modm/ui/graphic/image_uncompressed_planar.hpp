@@ -28,7 +28,7 @@ public:
 
 		const shape::Section clipping;
 		
-		Iterable(C const *data, shape::Size size, shape::Section clipping)
+		Iterable(C const *data, Size size, shape::Section clipping)
 			: data(data + clipping.topLeft.y() + clipping.topLeft.x() * size.height()),
 			colIncr(size.height()),
 			clipping(clipping)

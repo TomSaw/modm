@@ -11,7 +11,7 @@
 #pragma once
 
 #include <modm/ui/graphic/concepts.hpp>
-#include <modm/math/geometry/shape/size.hpp>
+#include <modm/math/geometry/size.hpp>
 #include <modm/math/geometry/shape/section.hpp>
 
 namespace modm::graphic
@@ -29,9 +29,9 @@ protected:
 	T const *data;
 
 public:
-	const shape::Size size;
+	const Size size;
 
-	ImageBase(T const *data, shape::Size size)
+	ImageBase(T const *data, Size size)
 		: data(data), size(size)
 	{}
 };
@@ -49,8 +49,38 @@ class Image;
 
 }  // namespace modm::graphic
 
+
+#include <modm/ui/color/gray.hpp>
+#include <modm/io/iostream.hpp>
+
+// TODO need Image concept
+template <class Image>
+modm::IOStream &
+operator<<(modm::IOStream &os, Image& image)
+{
+	/// Print header
+	os << "Width: " << image.size.width() << "px\t";
+	os << "Height: " << image.size.height() << "px\t";
+	os << "Encoder: " << "TODO" << '\t';
+	os << "Accessor: " << "TODO" << modm::endl;
+
+	using Color = modm::color::Gray<2>;
+			
+	// const char shades[Color::max + 1] = {' ', '.', 'o', 'O'};
+	const char* shades[Color::max + 1] = {"░", "▒", "▓", "█"};
+
+	
+	for(auto column : image.iterable()) {
+		for(auto pixel : column) {
+			// TODO Simple Color via IOStreams color feature
+			os << shades[Color(pixel).value()];
+		}
+		os << modm::endl;
+	}
+
+	return os;
+}
+
 #include "image_uncompressed_planar.hpp"
 #include "image_uncompressed_palletized.hpp"
 #include "image_runlength.hpp"
-
-#include "image_ostream.hpp"
