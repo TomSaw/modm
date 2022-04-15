@@ -33,10 +33,19 @@ class Sh1106 : public Ssd1306<I2cMaster, H>
 {
 public:
 	using ColorType = color::Monochrome;
-	using Buffer = graphic::Buffer<ColorType, {128, H}>;
+	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Dimension::Col>;
+	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, Row>;
+	using Buffer = graphic::Buffer<MemoryDefinition, {128, H}>;
 
 	Sh1106(uint8_t address = 0x3C) : Ssd1306<I2cMaster, H>(address) {}
 
+	// Caution: placement.y() rounds to multiples of 8
+	template<graphic::GraphicBuffer B>
+	requires std::is_same<typename B::MemoryDefinition, MemoryDefinition>::value
+	modm::ResumableResult<bool>
+	write(B& buffer, Point placement = {0, 0});
+
+	#if 0
     // TODO Abstract these write(...) cause is common to all I2c Displays!
 	// Write BufferInterface
 	modm::ResumableResult<bool>
@@ -46,12 +55,13 @@ public:
 	}
 
 	// Write Flash Image
-	modm::ResumableResult<bool>
+ 	modm::ResumableResult<bool>
 	write(const uint8_t *addr, shape::Point placement = {0, 0}) {
 		RF_BEGIN();
 		// TODO Support other than ColorType
 		RF_END_RETURN_CALL(writeImage(graphic::ImageAccessor<ColorType, modm::accessor::Flash>(addr, placement)));
 	}
+	#endif
 
 protected:
 	modm::ResumableResult<bool>
@@ -60,17 +70,17 @@ protected:
 	modm::ResumableResult<bool>
 	updateClipping() final;
 
+	#if 0
 	// Write monochrome Image
 	// Caution: placement.y() rounds to multiples of 8
-	template<template<typename> class Accessor>
+ 	template<template<typename> class Accessor>
 	modm::ResumableResult<bool>
 	writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor);
+	#endif
 
 	// Static variables for Resumable Functions
-	size_t yd; // vertical index in display (page)
-	size_t yd_start; // first vertical index in display
-	size_t yd_end; // last vertical index in display
-	size_t yb; // vertical position in buffer
+	size_t col, col_first, col_last; // display column
+	size_t col_buffer; // buffer column
 };
 
 }  // namespace modm

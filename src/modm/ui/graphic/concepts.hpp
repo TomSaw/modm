@@ -39,8 +39,6 @@ namespace modm::color {
 namespace modm::graphic
 {
 
-
-// DEPRICATED
 template<class B>
 concept GraphicBuffer = color::Color<typename B::ColorType>;
 // TODO check B for existence of Size

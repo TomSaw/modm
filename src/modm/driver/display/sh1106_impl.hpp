@@ -12,9 +12,11 @@
 #pragma once
 #include "sh1106.hpp"
 
+namespace modm {
+
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Sh1106<I2cMaster, H>::initializeMemoryMode()
+ResumableResult<bool>
+Sh1106<I2cMaster, H>::initializeMemoryMode()
 {
 	RF_BEGIN();
 	// Default on Power-up - can be omitted
@@ -24,8 +26,8 @@ modm::Sh1106<I2cMaster, H>::initializeMemoryMode()
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Sh1106<I2cMaster, H>::updateClipping()
+ResumableResult<bool>
+Sh1106<I2cMaster, H>::updateClipping()
 {
 	RF_BEGIN();
 
@@ -35,16 +37,51 @@ modm::Sh1106<I2cMaster, H>::updateClipping()
 	this->commandBuffer[1] =
 		ssd1306::AdressingCommands::LowerColumnStartAddress | ((this->clipping.topLeft.x() + 2) & 0x0F);
 
-	yd_start = this->clipping.topLeft.y() / 8;
-	yd_end = (this->clipping.bottomRight.y() / 8) - 1;
+	col_first = this->clipping.topLeft.y() / 8;
+	col_last = (this->clipping.bottomRight.y() / 8) - 1;
 
 	RF_END_RETURN(true);
 }
 
 template<class I2cMaster, uint16_t H>
+template<graphic::GraphicBuffer B>
+requires std::is_same<typename B::MemoryDefinition, typename Sh1106<I2cMaster, H>::MemoryDefinition>::value
+ResumableResult<bool>
+Sh1106<I2cMaster, H>::write(B& buffer, Point placement) {
+	RF_BEGIN();
+	// this->clipping = this->getIntersection(accessor.getSection());
+	this->clipping = {{0, 0}, {128, H}};
+
+	// if (this->pointIntersects(this->clipping.bottomRight - Point(1, 1)))
+	// {
+		RF_CALL(updateClipping());
+
+		this->transaction_success = true;
+		col_buffer = 0;
+
+		for (col = col_first; col <= col_last; col++)
+		{
+			this->commandBuffer[2] = ssd1306::AdressingCommands::PageStartAddress | col;
+			this->transaction_success &= RF_CALL(this->writeCommands(3));
+
+			// TODO pass buffer.colspan(col_buffer++)
+			RF_WAIT_UNTIL(this->transaction.configureDisplayWrite(buffer.rowspan(col_buffer++)));
+			RF_WAIT_UNTIL(this->startTransaction());
+			RF_WAIT_WHILE(this->isTransactionRunning());
+			this->transaction_success &= this->wasTransactionSuccessful();
+		};
+	// } else {
+	// 	MODM_LOG_ERROR << "buffer exceeds display border in " << __FUNCTION__ << endl;
+	// 	this->transaction_success = false;
+	// }
+	RF_END_RETURN(this->transaction_success);
+}
+
+#if 0
+template<class I2cMaster, uint16_t H>
 template<template<typename> class Accessor>
-modm::ResumableResult<bool>
-modm::Sh1106<I2cMaster, H>::writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor) {
+ResumableResult<bool>
+Sh1106<I2cMaster, H>::writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor) {
 	RF_BEGIN();
 	this->clipping = this->getIntersection(accessor.getSection());
 
@@ -53,21 +90,24 @@ modm::Sh1106<I2cMaster, H>::writeImage(graphic::ImageAccessor<ColorType, Accesso
 		RF_CALL(updateClipping());
 
 		this->transaction_success = true;
-		yb = 0;
+		col_buffer = 0;
 
-		for (yd = yd_start; yd <= yd_end; yd++)
+		for (col = col_first; col <= col_last; col++)
 		{
-			this->commandBuffer[2] = ssd1306::AdressingCommands::PageStartAddress | yd;
+			this->commandBuffer[2] = ssd1306::AdressingCommands::PageStartAddress | col;
 			this->transaction_success &= RF_CALL(this->writeCommands(3));
 
-			RF_WAIT_UNTIL(this->transaction.configureDisplayWrite(accessor.getPointer() + (this->clipping.getWidth() * yb++), this->clipping.getWidth()));
+			RF_WAIT_UNTIL(this->transaction.configureDisplayWrite(accessor.getPointer() + (this->clipping.getWidth() * col_buffer++), this->clipping.getWidth()));
 			RF_WAIT_UNTIL(this->startTransaction());
 			RF_WAIT_WHILE(this->isTransactionRunning());
 			this->transaction_success &= this->wasTransactionSuccessful();
 		};
 	} else {
-		MODM_LOG_ERROR << "buffer exceeds display border in " << __FUNCTION__ << modm::endl;
+		MODM_LOG_ERROR << "buffer exceeds display border in " << __FUNCTION__ << endl;
 		this->transaction_success = false;
 	}
 	RF_END_RETURN(this->transaction_success);
 }
+#endif
+
+} // namespace modm

@@ -28,9 +28,11 @@ class Buffer<BMD, R>
 	BMD::Major>
 {
 public:
+	using MemoryDefinition = BMD;
 	using PalleteType = BMD::PalleteType;
 	using ColorType = PalleteType::ColorType;
 	using CursorType = Cursor<PalleteType, BMD::Major, (BMD::Major == Row) ? R.width() : R.height()>;
+	static constexpr Size size = R;
 
 private:
 	using array2dT = array2d<typename BMD::PalleteType,
@@ -133,6 +135,7 @@ public:
 		auto end() { return iterator(length, span.begin()); }
 	};
 
+	#if 0
 	// TODO range-concept SpanType
 	template<class SpanType>
 	struct iterable_perpendicular {
@@ -195,6 +198,7 @@ public:
 		else // PalleteType::Dim == Row
 			return iterable_perpendicular{array2dT::colspan(row / PalleteType::size), row % PalleteType::size};
 	}
+	#endif
 
 	// accessor
 	auto operator[](Point point) {

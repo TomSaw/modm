@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <modm/math/geometry/shape.hpp>
@@ -17,12 +16,7 @@ template<class TC, ColorPencil CE, class FuncIter>
 void
 render(TC start, TC end, CE&& color_emitter, FuncIter iter = FuncIter())
 {
-	// Always iterate to positive per convention
-	if(start > end)
-		std::swap(start, end);
-
-	for(int i = 0; i < 6; ++i)
-	// while (start != end)
+	while (start != end)
 	{
 		start = color_emitter();
 		iter(start);
@@ -33,10 +27,7 @@ render(TC start, TC end, CE&& color_emitter, FuncIter iter = FuncIter())
 
 template<class TC, color::Color C, class FuncIter>
 void render(TC start, TC end, C color, FuncIter iter = FuncIter()) {
-	// Always iterate to positive per convention
-
-	// while (start != end)
-	for(int i = 0; i < 5; ++i)
+	while (start != end)
 	{
 		start = color;
 		iter(start);

@@ -25,6 +25,8 @@
 
 #include "ssd1306_defines.hpp"
 
+#include <span>
+
 namespace modm
 {
 
@@ -62,7 +64,7 @@ public:
 		Ssd1306_I2cWriteTransaction(uint8_t address);
 
 		bool
-		configureDisplayWrite(const uint8_t *buffer, std::size_t size);
+		configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Col>> data);
 
 	protected:
 		virtual Writing
@@ -86,23 +88,28 @@ public:
  * Driver for SSD1306 based OLED-displays using I2C.
  * This display is only rated to be driven with 400kHz, which limits
  * the frame rate to about 40Hz.
- *
+ *b
  * @author	Niklas Hauser
  * @author	Thomas Sommer
  * @ingroup	modm_driver_ssd1306
  */
 template<class I2cMaster, uint16_t H = 64>
 class Ssd1306 : public ssd1306,
-				public graphic::Display<color::Monochrome, graphic::Size(128, H), false>,
+				public graphic::Display<{128, H}>,
 				public I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>
 {
 	static_assert((H == 64) or (H == 32), "Display height must be either 32 or 64 pixel!");
 public:
 	using ColorType = color::Monochrome;
-	using Buffer = graphic::Buffer<ColorType, {128, H}>;
+	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Dimension::Col>;
+	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, Row>;
+	// Alternative supported MemoryDefinition:
+	// TODO implement write() for this
+	// using MemoryDefinition2 = graphic::BufferMemoryDefinition<PalleteType, Col>;
+	using Buffer = graphic::Buffer<MemoryDefinition, {128, H}>;
 
 	Ssd1306(uint8_t address = 0x3C)
-		: graphic::Display<ColorType, {128, H}, false>(true), I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
+		: I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
 	{}
 
 	/// Pings the display
@@ -159,6 +166,13 @@ public:
 		return writeCommands(1);
 	}
 
+	// Caution: placement.y() rounds to multiples of 8
+	template<graphic::GraphicBuffer B>
+	requires std::is_same<typename B::MemoryDefinition, MemoryDefinition>::value
+	modm::ResumableResult<bool>
+	write(B& buffer, Point placement = {0, 0});
+
+	#if 0
     // TODO Abstract these write(...) cause is common to all I2c Displays!
 	// Write BufferInterface
 	// Caution: placement.y() rounds to multiples of 8
@@ -174,6 +188,7 @@ public:
 		RF_BEGIN();
 		RF_END_RETURN_CALL(writeImage(graphic::ImageAccessor<ColorType, modm::accessor::Flash>(addr, placement)));
 	}
+	#endif
 
 	// Clear whole screen with color
 	modm::ResumableResult<bool>
@@ -183,10 +198,12 @@ protected:
 	virtual modm::ResumableResult<bool>
 	updateClipping();
 
+	#if 0
 	// Write monochrome Image
 	template<template<typename> class Accessor>
 	modm::ResumableResult<bool>
-	writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor);
+	writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor); */
+	#endif
 
 	modm::ResumableResult<bool>
 	writeCommands(std::size_t length);

@@ -13,8 +13,6 @@
 #include <concepts>
 #include <limits>
 
-#include <debug.hpp>
-
 #include <modm/math/utils/integer_traits.hpp>
 namespace modm
 {

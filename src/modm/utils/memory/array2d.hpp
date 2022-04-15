@@ -101,7 +101,7 @@ namespace modm
 		template<class DmaChannel>
 		array2d(array2d& other) {
 			// TODO
-			MODM_LOG_ERROR << "DMA copy constructor not implemented";
+			// MODM_LOG_ERROR << "DMA copy constructor not implemented";
 		}
 
 		/// assignment operators
@@ -115,7 +115,7 @@ namespace modm
 		template<typename U, Dimension E>
 		constexpr array2d& operator=(array2d<U, Rows, Cols, D> &other) requires (D != E) {
 			// TODO Iterate over column and rows
-			MODM_LOG_ERROR << "assigning from flipped Major Dimension not implemented";
+			// MODM_LOG_ERROR << "assigning from flipped Major Dimension not implemented";
 			return *this;
 		}
 
@@ -123,7 +123,7 @@ namespace modm
 		array2d& operator=(array2d& other) {
 			if(this == &other) return *this;
 			// TODO
-			MODM_LOG_ERROR << "DMA copy assignment not implemented";
+			// MODM_LOG_ERROR << "DMA copy assignment not implemented";
 			return *this;
 		}
 
@@ -174,13 +174,13 @@ namespace modm
 
 		constexpr auto columns(std::size_t first_row, std::size_t last_row) {
 			// TODO return iteratable over column
-			MODM_LOG_ERROR << "Not implemented";
+			// MODM_LOG_ERROR << "Not implemented";
 			return nullptr;
 		}
 
 		constexpr auto rows(std::size_t first_row, std::size_t last_row) {
 			// TODO return iteratable over row
-			MODM_LOG_ERROR << "Not implemented";
+			// MODM_LOG_ERROR << "Not implemented";
 			return nullptr;
 		}
 	};

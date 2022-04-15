@@ -19,9 +19,9 @@ modm::ssd1306::Ssd1306_I2cWriteTransaction::Ssd1306_I2cWriteTransaction(uint8_t 
 {}
 
 bool
-modm::ssd1306::Ssd1306_I2cWriteTransaction::configureDisplayWrite(const uint8_t *buffer, std::size_t size)
+modm::ssd1306::Ssd1306_I2cWriteTransaction::configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Col>> data)
 {
-	if (I2cWriteTransaction::configureWrite(buffer, size))
+	if (I2cWriteTransaction::configureWrite((uint8_t*)(data.data()), data.size()))
 	{
 		transfer_type = Transfer::DATA_BURST;
 		return true;

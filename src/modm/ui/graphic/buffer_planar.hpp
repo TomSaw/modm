@@ -23,8 +23,10 @@ class Buffer<BMD, R> : public array2d<typename BMD::ColorType, R.width(), R.heig
 	using array2dT = array2d<typename BMD::ColorType, R.width(), R.height(), BMD::Major>;
 
 public:
+	using MemoryDefinition = BMD;
 	using ColorType = BMD::ColorType;
 	using CursorType = Cursor<ColorType, BMD::Major, (BMD::Major == Row) ? R.width() : R.height()>;
+	static constexpr Size size = R;
 
 	// constructors
 	using array2dT::array2d;

@@ -12,9 +12,11 @@
 #pragma once
 #include "ssd1306.hpp"
 
+namespace modm {
+
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::initialize()
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::initialize()
 {
 	RF_BEGIN();
 	transaction_success = true;
@@ -62,8 +64,8 @@ modm::Ssd1306<I2cMaster, H>::initialize()
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::initializeMemoryMode()
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::initializeMemoryMode()
 {
 	RF_BEGIN();
 	commandBuffer[0] = AdressingCommands::MemoryMode;
@@ -72,8 +74,8 @@ modm::Ssd1306<I2cMaster, H>::initializeMemoryMode()
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::setOrientation(graphic::Orientation orientation)
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::setOrientation(graphic::Orientation orientation)
 {
 	RF_BEGIN();
 
@@ -98,8 +100,8 @@ modm::Ssd1306<I2cMaster, H>::setOrientation(graphic::Orientation orientation)
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::set(Toggle toggle, bool state) {
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::set(Toggle toggle, bool state) {
 	RF_BEGIN();
 
 	commandBuffer[0] = uint8_t(toggle) | uint8_t(state);
@@ -108,8 +110,8 @@ modm::Ssd1306<I2cMaster, H>::set(Toggle toggle, bool state) {
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::configureScroll(uint8_t placement, uint8_t size,
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::configureScroll(uint8_t placement, uint8_t size,
 												  ScrollDirection direction, ScrollStep steps)
 {
 	RF_BEGIN();
@@ -135,8 +137,8 @@ modm::Ssd1306<I2cMaster, H>::configureScroll(uint8_t placement, uint8_t size,
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::writeCommands(std::size_t length)
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::writeCommands(std::size_t length)
 {
 	RF_BEGIN();
 
@@ -148,8 +150,8 @@ modm::Ssd1306<I2cMaster, H>::writeCommands(std::size_t length)
 }
 
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::updateClipping()
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::updateClipping()
 {
 	RF_BEGIN();
 
@@ -163,18 +165,45 @@ modm::Ssd1306<I2cMaster, H>::updateClipping()
 	RF_END_RETURN_CALL(writeCommands(6));
 }
 
-#include <modm/debug/logger.hpp>
+template<class I2cMaster, uint16_t H>
+template<graphic::GraphicBuffer B>
+requires std::is_same<typename B::MemoryDefinition, typename Ssd1306<I2cMaster, H>::MemoryDefinition>::value
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::write(B& buffer, Point placement) {
+	RF_BEGIN();
 
+	// this->clipping = this->getIntersection(accessor.getSection());
+	this->clipping = {{0, 0}, {128, H}};
+
+
+	/* if(!this->pointIntersects(this->clipping.bottomRight - shape::Point(1, 1))) {
+		// TODO modm_assert
+		MODM_LOG_ERROR << "buffer exceeds display border in " << __FUNCTION__ << endl;
+		RF_RETURN(false);
+	} */
+
+	RF_CALL(updateClipping());
+
+	// FIXME Integrate this->clipping results
+	RF_WAIT_UNTIL(this->transaction.configureDisplayWrite(buffer.span()));
+
+	this->startTransaction();
+	RF_WAIT_WHILE(this->isTransactionRunning());
+
+	RF_END_RETURN(this->wasTransactionSuccessful());
+}
+
+#if 0
 template<class I2cMaster, uint16_t H>
 template<template<typename> class Accessor>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor) {
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::writeImage(graphic::ImageAccessor<ColorType, Accessor> accessor) {
 	RF_BEGIN();
 
 	this->clipping = this->getIntersection(accessor.getSection());
 
 	if(!this->pointIntersects(this->clipping.bottomRight - shape::Point(1, 1))) {
-		MODM_LOG_ERROR << "buffer exceeds display border in " << __FUNCTION__ << modm::endl;
+		MODM_LOG_ERROR << "buffer exceeds display border in " << __FUNCTION__ << endl;
 		RF_RETURN(false);
 	}
 
@@ -188,11 +217,13 @@ modm::Ssd1306<I2cMaster, H>::writeImage(graphic::ImageAccessor<ColorType, Access
 
 	RF_END_RETURN(this->wasTransactionSuccessful());
 }
+#endif
 
+#if 0
 // FIXME Make this work
 template<class I2cMaster, uint16_t H>
-modm::ResumableResult<bool>
-modm::Ssd1306<I2cMaster, H>::clear(ColorType color)
+ResumableResult<bool>
+Ssd1306<I2cMaster, H>::clear(ColorType color)
 {
 	// OPTIMIZE Make this impossible fast through use of DMA
 	// See https://github.com/modm-io/modm/issues/666
@@ -217,3 +248,6 @@ modm::Ssd1306<I2cMaster, H>::clear(ColorType color)
 
 	RF_END_RETURN(true);
 }
+#endif
+
+} // namespace modm

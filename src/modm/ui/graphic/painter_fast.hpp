@@ -24,6 +24,23 @@ private:
 
 	ColorType color{color::html::White};
 
+	template<modm::Dimension D>
+	void ortholine(uint16_t delta) {
+		using ColorEmitter = ColorType;
+
+		// TODO crop bounds
+		CursorType start = buffer(position);
+		CursorType end = start.template axis<D>() + delta;
+
+		if(start > end)
+			std::swap(start, end);
+		
+		render<CursorType, ColorEmitter, detail::iterOrtho<D>>(
+			start, end,
+			std::forward<ColorEmitter>(color)
+		);
+	}
+
 public:
 	PainterFast(TB& buffer, Point position)
 		: buffer(buffer), position(position)
@@ -36,7 +53,7 @@ public:
 	}
 
 	/// Draw Points
-	void operator=(ColorType c) {
+	void operator=(ColorType color) {
 		buffer(position) = color;
 		// Experimental subpixels
 		// this->x() + 1 = this->x() - 1 = this->y() + 1 = this->y() - 1 = color / 2U;
@@ -50,36 +67,12 @@ public:
 	
 	/// Draw Lines
 	PainterFast& operator=(shape::HLine hline) {
-		using ColorEmitter = ColorType;
-
-		// TODO crop bounds
-		CursorType start = buffer(position);
-		CursorType end = start.x() + hline.delta;
-
-		if(start > end) // alternative: (dline.delta(hline.delta))
-			std::swap(start, end);
-		
-		render<CursorType, ColorEmitter, detail::iterOrtho<modm::Dimension::Row>>(
-			start, end,
-			std::forward<ColorEmitter>(color)
-		);
+		ortholine<modm::Dimension::Row>(hline.delta);
 		return *this;
 	}
 
 	PainterFast& operator=(shape::VLine vline) {
-		using ColorEmitter = ColorType;
-		
-		// TODO crop bounds
-		CursorType start = buffer(position);
-		CursorType end = start.y() + vline.delta;
-	
-		if(start > end) // alternative: (dline.delta(hline.delta))
-			std::swap(start, end);
-		
-		render<CursorType, ColorEmitter, detail::iterOrtho<modm::Dimension::Col>>(
-			start, end,
-			std::forward<ColorEmitter>(color)
-		);
+		ortholine<modm::Dimension::Col>(vline.delta);
 		return *this;
 	}
 
@@ -106,8 +99,6 @@ public:
 
 	PainterFast& operator=(shape::Line line) {
 		using ColorEmitter = ColorType;
-		
-		// TODO crop bounds
 
 		if(line.delta.y() == 0) {
 			operator=(shape::HLine(line.delta.x()));
@@ -116,6 +107,8 @@ public:
 		{
 			operator=(shape::VLine(line.delta.y()));
 		}
+		
+		// TODO crop bounds
 
 		CursorType start = buffer(position);
 		CursorType end = buffer(position + line.delta);
@@ -190,19 +183,19 @@ public:
 	/// Draw Shapes
 	PainterFast& operator=(shape::Rectangle rectangle) {
 		// TODO crop bounds
-		MODM_LOG_INFO << "TODO operator<<(shape::Rectangle rectangle)" << modm::endl;
+		// MODM_LOG_INFO << "TODO operator<<(shape::Rectangle rectangle)" << modm::endl;
 		return *this;
 	}
 
 	PainterFast& operator=(shape::Circle circle) {
 		// TODO crop bounds
-		MODM_LOG_INFO << "TODO operator<<(shape::Circle circle)" << modm::endl;
+		// MODM_LOG_INFO << "TODO operator<<(shape::Circle circle)" << modm::endl;
 		return *this;
 	}
 
 	PainterFast& operator<<(char* string) {
 		// TODO crop bounds
-		MODM_LOG_INFO << "TODO operator<<(char* string)" << modm::endl;
+		// MODM_LOG_INFO << "TODO operator<<(char* string)" << modm::endl;
 		// position += char-width + char-gap
 		return *this;
 	}
