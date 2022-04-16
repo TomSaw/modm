@@ -10,18 +10,10 @@
 // ----------------------------------------------------------------------------
 #pragma once
 
-#include "point.hpp"
-// #include "shape/section.hpp"
-namespace modm {
-	/**
-	 * @brief  	Redefinition of Point as Size adds typesafety
-	 */
+#include "vector.hpp"
+#include "dimension.hpp"
 
-	// TODO Think of inheriting Vector<uint16_t, 2> instead of Point, using uint16_t instead of int16_t.
-	// + Size components are always positive.
-	// - Artihmetic pperations between Point and Size may have a drawback because of type conversion.
-	// TODO Requires some simple benchmarks to figure out.
-	// class Size : public Vector<uint16_t, 2>
+namespace modm {
 	class Size : public modm::Vector<uint16_t, 2>
 	{
 	public:
@@ -39,6 +31,14 @@ namespace modm {
 
 		constexpr uint16_t height() const { return this->operator[](1); }
 		constexpr uint16_t& height() { return this->operator[](1); }
+
+		template<Dimension D>
+		constexpr uint16_t length() const 
+		{ return this->operator[](D); }
+
+		template<Dimension D>
+		constexpr uint16_t& length()
+		{ return this->operator[](D); }
 		
 		// Needs redefinition because return type has to be Size
 		constexpr Size swapped() const {

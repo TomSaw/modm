@@ -12,9 +12,10 @@
 
 #include <array>
 #include <ranges>
-
 #include <span>
+
 #include "strided_span.hpp"
+#include <modm/math/geometry/dimension.hpp>
 
 namespace modm
 {
@@ -39,25 +40,19 @@ namespace modm
 	 * @see				https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays
 	 * 
 	 */
-	enum Dimension {Row, Col};
-
-	template<Dimension D>
-	struct DimensionFlip{
-		static constexpr Dimension value = (D == Dimension::Row) ? Dimension::Col : Dimension::Row;
-	};
 
 	template<typename T, std::size_t Rows, std::size_t Cols, Dimension D>
 	class array2d
 	{
-		std::array<std::array<T, (D == Col) ? Cols : Rows>, (D == Col) ? Rows : Cols> data_;
+		std::array<std::array<T, (D == Y) ? Cols : Rows>, (D == Y) ? Rows : Cols> data_;
 
 	public:
 		static constexpr std::tuple sizes{Rows, Cols};
 		static constexpr int size = Rows * Cols;
-		static constexpr std::ptrdiff_t minorFreq = (D == Row) ? Rows : Cols;
+		static constexpr std::ptrdiff_t minorFreq = (D == X) ? Rows : Cols;
 
-		using RowSpanType = std::conditional_t<D == Row, std::span<T>, modm::strided_span<T, minorFreq>>;
-		using ColSpanType = std::conditional_t<D == Col, std::span<T>, modm::strided_span<T, minorFreq>>;
+		using RowSpanType = std::conditional_t<D == X, std::span<T>, modm::strided_span<T, minorFreq>>;
+		using ColSpanType = std::conditional_t<D == Y, std::span<T>, modm::strided_span<T, minorFreq>>;
 
 		/// constructors
 		constexpr array2d() = default;
@@ -72,7 +67,7 @@ namespace modm
 
 		template<typename U, Dimension E>
 		constexpr array2d(const array2d<U, Rows, Cols, E>& other)
-		requires (D != E && D == Row)
+		requires (D != E && D == X)
 		{
 			auto begin = span().begin();
 			std::size_t row = 0;
@@ -86,7 +81,7 @@ namespace modm
 
 		template<typename U, Dimension E>
 		constexpr array2d(array2d<U, Rows, Cols, E>& other)
-		requires (D != E && D == Col)
+		requires (D != E && D == Y)
 		{
 			auto begin = span().begin();
 			std::size_t col = 0;
@@ -134,9 +129,9 @@ namespace modm
 		constexpr T&
 		at(std::size_t row, std::size_t col)
 		{
-			if constexpr(D == Row)
+			if constexpr(D == X)
 				return data_.at(col).at(row);
-			else // D == Col
+			else // D == Y
 				return data_.at(row).at(col);
 		}
 
@@ -144,9 +139,9 @@ namespace modm
 		constexpr T
 		at(std::size_t row, std::size_t col) const
 		{
-			if constexpr(D == Row)
+			if constexpr(D == X)
 				return data_.at(col).at(row);
-			else // D == Col
+			else // D == Y
 				return data_.at(row).at(col);
 		}
 
@@ -162,14 +157,14 @@ namespace modm
 		colspan(std::size_t row)
 		{
 			T* begin = &at(row, 0);
-			return ColSpanType(begin, (D == Col) ? Cols : size);
+			return ColSpanType(begin, (D == Y) ? Cols : size);
 		}
 
 		constexpr auto
 		rowspan(std::size_t col)
 		{
 			T* begin = &at(0, col);
-			return RowSpanType(begin, (D == Row) ? Rows : size);
+			return RowSpanType(begin, (D == X) ? Rows : size);
 		}
 
 		constexpr auto columns(std::size_t first_row, std::size_t last_row) {

@@ -18,7 +18,7 @@
 namespace modm::graphic {
 	
 	/// Specialisation of modm::pallete to use for 'palletes of Color' in graphic Buffers.
-	template<color::ColorPalletized C, std::unsigned_integral TP, Dimension D = Row>
+	template<color::ColorPalletized C, std::unsigned_integral TP, Dimension D = X>
 	class ColorPallete : public pallete<TP, C::digits, C> {
 	public:
 		static constexpr Dimension Dim = D;
@@ -27,6 +27,8 @@ namespace modm::graphic {
 
 		// constructor
 		using pallete<TP, C::digits, C>::pallete;
+
+		void invert() { this->value_ ^= this->bitmask_pallete; }
 	};
 
 	/**
@@ -39,14 +41,13 @@ namespace modm::graphic {
 	 * @tparam D 	Major Dimension for 2d-array container
 	 */
 
-	template<class T, Dimension D = Row>
+	template<class T, Dimension D = X>
 	struct BufferMemoryDefinition;
 
 	template<color::ColorPlanar C, Dimension D>
 	struct BufferMemoryDefinition<C, D> {
 		using ColorType = C;
 		static constexpr Dimension Major = D;
-		static constexpr Dimension Minor = D == Row ? Col : Row;
 	};
 
 	template<class CP, Dimension D>
@@ -55,19 +56,12 @@ namespace modm::graphic {
 	{
 		using PalleteType = CP;
 		using ColorType = CP::ColorType;
-
 		static constexpr Dimension Major = D;
-		static constexpr Dimension Minor = Major == Row ? Col : Row;
 
 		/// Helper for array size calculation
 		static consteval std::size_t
 		arrSize(uint16_t length)
 		{ return (length + CP::size - 1) / CP::size; };
-
-		/// Helper for array index calculation
-/* 		static std::size_t
-		arrEnd(uint16_t offset) const
-		{ return offset + 1 / CP::size; } */
 	};
 
 	template<class BMD>

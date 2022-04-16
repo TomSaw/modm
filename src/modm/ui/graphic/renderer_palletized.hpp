@@ -1,5 +1,5 @@
 void drawBlind(const shape::HLine& hline) {
-	if constexpr (PalleteType::Dim == Row) {
+	if constexpr (PalleteType::Dim == X) {
 		// Draw pallete-wise
 		auto span = array2dT::rowspan(hline.start.y());
 		auto iter = span.begin() + hline.start.x() / PalleteType::size;
@@ -23,7 +23,7 @@ void drawBlind(const shape::HLine& hline) {
 		temp>>= PalleteType::size - (hline.end_x % PalleteType::size);
 		*iter = temp;
 	}
-	else // PalleteType::Dim == Col
+	else // PalleteType::Dim == Y
 	{
 		// OPTIMIZE implement subspan for iterable_colinear / iterable_perpendicular ?
 		auto span = rowspan(hline.start.y());
@@ -33,7 +33,7 @@ void drawBlind(const shape::HLine& hline) {
 }
 
 void drawBlind(const shape::VLine& vline) {
-	if constexpr (PalleteType::Dim == Col) {
+	if constexpr (PalleteType::Dim == Y) {
 		// Draw pallete-wise
 		auto span = array2dT::colspan(vline.start.x());
 		auto iter = span.begin() + vline.start.y() / PalleteType::size;
@@ -57,7 +57,7 @@ void drawBlind(const shape::VLine& vline) {
 		temp>>= PalleteType::size - (vline.end_y % PalleteType::size);
 		*iter = temp;
 	}
-	else // PalleteType::Dim == Row
+	else // PalleteType::Dim == X
 	{
 		// OPTIMIZE implement subspan for iterable_colinear / iterable_perpendicular ?
 		auto span = colspan(vline.start.x());

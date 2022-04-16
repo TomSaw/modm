@@ -21,36 +21,33 @@ namespace modm::graphic {
  */
 template<BufMemDef BMD, Size R>
 requires color::ColorPalletized<typename BMD::ColorType>
-class Buffer<BMD, R>
+class BufferBase<BMD, R>
 	: public array2d<typename BMD::PalleteType,
-	BMD::PalleteType::Dim == Col ? R.width() : BMD::arrSize(R.width()),
-	BMD::PalleteType::Dim == Row ? R.height() : BMD::arrSize(R.height()),
+	BMD::PalleteType::Dim == Y ? R.width() : BMD::arrSize(R.width()),
+	BMD::PalleteType::Dim == X ? R.height() : BMD::arrSize(R.height()),
 	BMD::Major>
 {
 public:
-	using MemoryDefinition = BMD;
 	using PalleteType = BMD::PalleteType;
 	using ColorType = PalleteType::ColorType;
-	using CursorType = Cursor<PalleteType, BMD::Major, (BMD::Major == Row) ? R.width() : R.height()>;
-	static constexpr Size size = R;
+	using CursorType = Cursor<PalleteType, BMD::Major, (BMD::Major == X) ? R.width() : R.height()>;
 
-private:
-	using array2dT = array2d<typename BMD::PalleteType,
-		PalleteType::Dim == Col ? R.width() : BMD::arrSize(R.width()),
-		PalleteType::Dim == Row ? R.height() : BMD::arrSize(R.height()),
+protected:
+	using array2dT = array2d<PalleteType,
+		PalleteType::Dim == Y ? R.width() : BMD::arrSize(R.width()),
+		PalleteType::Dim == X ? R.height() : BMD::arrSize(R.height()),
 		BMD::Major>;
 	
-public:
 	// constructors
 	using array2dT::array2d;
+public:
 
 	// Neccessary because pallete::pallete(TE) is explicit
-	Buffer(ColorType color) : array2dT(PalleteType(color)) {}
-	void fill(ColorType color) { array2dT::fill(PalleteType(color)); };
+	BufferBase(PalleteType::ColorType color) : array2dT(PalleteType(color)) {}
+
+	void fill(PalleteType::ColorType color) { array2dT::fill(PalleteType(color)); };
 	void fill(PalleteType pallete) { array2dT::fill(pallete); };
 
-
-	// TODO range-concept SpanType
 	template<class SpanType>
 	struct iterable_colinear {
 		SpanType span;
@@ -135,7 +132,6 @@ public:
 		auto end() { return iterator(length, span.begin()); }
 	};
 
-	#if 0
 	// TODO range-concept SpanType
 	template<class SpanType>
 	struct iterable_perpendicular {
@@ -181,43 +177,20 @@ public:
 		auto end() { return iterator(span.end(), pallete_i); }
 	};
 
-	/// redefinition of rowspan
-	auto rowspan(std::size_t col)
+	auto xspan(std::size_t col)
 	{
-		if constexpr (PalleteType::Dim == Row)
+		if constexpr (PalleteType::Dim == X)
 			return iterable_colinear{array2dT::rowspan(col), R.width()};
-		else // PalleteType::Dim == Col
+		else // PalleteType::Dim == Y
 			return iterable_perpendicular{array2dT::rowspan(col / PalleteType::size), col % PalleteType::size};
 	}
 
-	/// redefinition of colspan
-	auto colspan(std::size_t row)
+	auto yspan(std::size_t row)
 	{
-		if constexpr (PalleteType::Dim == Col)
+		if constexpr (PalleteType::Dim == Y)
 			return iterable_colinear{array2dT::colspan(row), R.height()};
-		else // PalleteType::Dim == Row
+		else // PalleteType::Dim == X
 			return iterable_perpendicular{array2dT::colspan(row / PalleteType::size), row % PalleteType::size};
-	}
-	#endif
-
-	// accessor
-	auto operator[](Point point) {
-		return PainterFast<Buffer<BMD, R>>(*this, point);
-	}
-
-	// conversion Point -> Cursor
-	CursorType operator()(Point point)
-	{ return CursorType(this->data()) + point; }
-
-	// conversion Cursor -> Point
-	Point operator()(CursorType cursor) {
-		const std::size_t offset = cursor.ptr - this->data();
-
-		// TODO also translate cursor.pallete_i
-		if constexpr(BMD::Major == Row)
-			return Point(offset % this->minorFreq, offset / this->minorFreq);
-		else // (BMD::Major == Col)
-			return Point(offset / this->minorFreq, offset % this->minorFreq);
 	}
 };
 } // modm::graphic

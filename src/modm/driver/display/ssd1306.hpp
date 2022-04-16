@@ -64,7 +64,7 @@ public:
 		Ssd1306_I2cWriteTransaction(uint8_t address);
 
 		bool
-		configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Col>> data);
+		configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Y>> data);
 
 	protected:
 		virtual Writing
@@ -101,11 +101,11 @@ class Ssd1306 : public ssd1306,
 	static_assert((H == 64) or (H == 32), "Display height must be either 32 or 64 pixel!");
 public:
 	using ColorType = color::Monochrome;
-	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Dimension::Col>;
-	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, Row>;
+	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Y>;
+	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, X>;
 	// Alternative supported MemoryDefinition:
 	// TODO implement write() for this
-	// using MemoryDefinition2 = graphic::BufferMemoryDefinition<PalleteType, Col>;
+	// using MemoryDefinition2 = graphic::BufferMemoryDefinition<PalleteType, Y>;
 	using Buffer = graphic::Buffer<MemoryDefinition, {128, H}>;
 
 	Ssd1306(uint8_t address = 0x3C)

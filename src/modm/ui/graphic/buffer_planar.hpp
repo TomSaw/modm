@@ -18,68 +18,22 @@ namespace modm::graphic
 
 template<BufMemDef BMD, Size R>
 requires color::ColorPlanar<typename BMD::ColorType>
-class Buffer<BMD, R> : public array2d<typename BMD::ColorType, R.width(), R.height(), BMD::Major>
+class BufferBase<BMD, R> : public array2d<typename BMD::ColorType, R.width(), R.height(), BMD::Major>
 {
-	using array2dT = array2d<typename BMD::ColorType, R.width(), R.height(), BMD::Major>;
-
 public:
-	using MemoryDefinition = BMD;
-	using ColorType = BMD::ColorType;
-	using CursorType = Cursor<ColorType, BMD::Major, (BMD::Major == Row) ? R.width() : R.height()>;
-	static constexpr Size size = R;
+	using CursorType = Cursor<typename BMD::ColorType, BMD::Major, (BMD::Major == X) ? R.width() : R.height()>;
+
+protected:
+	using array2dT = array2d<typename BMD::ColorType, R.width(), R.height(), BMD::Major>;
 
 	// constructors
 	using array2dT::array2d;
 
-	// accessor
-	auto operator[](Point point) {
-		return PainterFast<Buffer<BMD, R>>(*this, point);
-	}
+public:
+	auto xspan(std::size_t col)
+	{ return array2dT::rowspan(col); }
 
-	// conversion Point -> Cursor
-	CursorType operator()(Point point)
-	{
-		return CursorType(this->data()) + point;
-	}
-
-	// conversion Cursor -> Point
-	Point operator()(CursorType cursor) {
-		const std::size_t offset = &cursor - this->data();
-
-		if constexpr(BMD::Major == Row)
-			return Point(offset % this->minorFreq, offset / this->minorFreq);
-		else // (BMD::Major == Col)
-			return Point(offset / this->minorFreq, offset % this->minorFreq);
-	}
-
-	int16_t getX(CursorType cursor) {
-		const std::size_t offset = &cursor - this->data();
-
-		if constexpr(BMD::Major == Row)
-			return offset % this->minorFreq;
-		else // (BMD::Major == Col)
-			return offset / this->minorFreq;
-	}
-
-	int16_t getY(CursorType cursor) {
-		const std::size_t offset = &cursor - this->data();
-
-		if constexpr(BMD::Major == Row)
-			return offset / this->minorFreq;
-		else // (BMD::Major == Col)
-			return offset % this->minorFreq;
-	}
-
-	#if 0
-	// #######################################
-	// Cheap Cursor-Buffer Predicates
-	
-	// Note: Palletized Cursor maybe inbound of memory but outbound of visible area
-	// This behaviour is intended and helps to accelerate some low lvl manipulations
-	bool contains(const CursorType& cursor)
-	{ 
-		return &cursor >= this->data() and &cursor < this->data() + this->size;
-	}
-	#endif
+	auto yspan(std::size_t col)
+	{ return array2dT::colspan(col); }
 };
 }  // namespace modm::graphic

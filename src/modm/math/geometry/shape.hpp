@@ -21,13 +21,14 @@ namespace modm::shape {
 		const Point delta;
 	};
 
-	struct HLine {
+	template<modm::Dimension D>
+	struct OLine {
 		const scalar_t delta;
 	};
 
-	struct VLine {
-		const scalar_t delta;
-	};
+	using HLine = OLine<modm::Dimension::X>;
+
+	using VLine = OLine<modm::Dimension::Y>;
 
 	struct DLine {
 		const scalar_t delta;

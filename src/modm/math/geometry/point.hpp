@@ -12,7 +12,7 @@
 #pragma once
 
 #include "vector.hpp"
-
+#include "dimension.hpp"
 namespace modm
 {
 
@@ -69,6 +69,14 @@ public:
 	// consteval Point(Vector<float, 2> pct, graphic::Buffer ref)
 	// 	: Point(pct, ref.getSize())
 	// {}
+
+	template<Dimension D>
+	constexpr int16_t comp() const 
+	{ return this->operator[](D); }
+
+	template<Dimension D>
+	constexpr int16_t& comp()
+	{ return this->operator[](D); }
 
 	constexpr Point swapped() const {
 		return {y(), x()};

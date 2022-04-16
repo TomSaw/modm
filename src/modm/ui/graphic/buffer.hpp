@@ -15,6 +15,7 @@
 #include "colorindex.hpp"
 
 #include "cursor.hpp"
+#include "view.hpp"
 #include "painter_fast.hpp"
 
 // #include "buffer_painter_fast.hpp"
@@ -22,8 +23,57 @@
 // #include "buffer_interface.hpp"
 
 namespace modm::graphic {
-	template<BufMemDef BMD, Size R>
-	class Buffer;
+
+template<BufMemDef BMD, Size R>
+class BufferBase;
+
+template<BufMemDef BMD, Size R>
+class Buffer : public BufferBase<BMD, R>
+{
+public:
+	using MemoryDefinition = BMD;
+	static constexpr Size size = R;
+	
+	using ColorType = BMD::ColorType;
+	using CursorType = BufferBase<BMD, R>::CursorType;
+	using ViewType = View<Buffer<BMD, R>>;
+
+	// TODO as template arg
+	using PainterType = PainterFast<Buffer<BMD, R>>;
+
+	// constructors
+	using BufferBase<BMD, R>::BufferBase;
+
+	// conversion Point -> Cursor
+	CursorType operator()(Point point)
+	{ return CursorType(this->data()) + point; }
+
+	// conversion Cursor -> Point
+	Point operator()(CursorType cursor) const
+	{ return cursor.getPoint(&cursor - this->data()); }
+
+	// TODO let's see, if getX() getY() is needed needed ...
+/* 	uint16_t getX(CursorType cursor) const
+	{ return cursor.getX(&cursor - this->data()); }
+
+	uint16_t getY(CursorType cursor) const
+	{ return cursor.getY(&cursor - this->data()); } */
+
+	// Create a View
+	auto operator[](Section section)
+	{ return ViewType(*this, section); }
+	
+	// Create a Painter
+	auto operator[](Point point)
+	{ return PainterType(*this, point); }
+
+
+	void invert()
+	{
+		std::for_each(this->span().begin(), this->span().end(), [](auto &value){value.invert();});
+	}
+};
+
 }
 
 #if __has_include(<modm/io/iostream.hpp>)
@@ -49,7 +99,9 @@ operator<<(modm::IOStream &os, modm::graphic::Buffer<BMD, R> &buffer)
 	// 	(char*)"█"
 	// };
 
-	modm::graphic::ColorIndex<char*, modm::color::Gray<3>> index = {
+	// TODO use this index for hosted ...
+	#if 0
+	const modm::graphic::ColorIndex<char*, modm::color::Gray<3>> index = {
 		(char*)" ",
 		(char*)"░",
 		(char*)"░",
@@ -59,11 +111,20 @@ operator<<(modm::IOStream &os, modm::graphic::Buffer<BMD, R> &buffer)
 		(char*)"▓",
 		(char*)"█"
 	};
+	#else
+	// ... and this for embedded applications.
+	const modm::graphic::ColorIndex<char, modm::color::Gray<2>> index = {
+		' ',
+		'.',
+		'o',
+		'O'
+	};
+	#endif
 	
 	// IMPLEMENT range based loop for columns?
  	for(uint16_t col = 0; col < R.height(); ++col) {
-		for(ColorType pixel : buffer.rowspan(col))
-			os << index[pixel] << index[pixel]; // Output 2 times so pixels look square
+		for(ColorType pixel : buffer.xspan(col))
+			os << index[pixel];
 		os << modm::endl;
 	}
 

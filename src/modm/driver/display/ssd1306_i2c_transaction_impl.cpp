@@ -19,7 +19,7 @@ modm::ssd1306::Ssd1306_I2cWriteTransaction::Ssd1306_I2cWriteTransaction(uint8_t 
 {}
 
 bool
-modm::ssd1306::Ssd1306_I2cWriteTransaction::configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Col>> data)
+modm::ssd1306::Ssd1306_I2cWriteTransaction::configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Y>> data)
 {
 	if (I2cWriteTransaction::configureWrite((uint8_t*)(data.data()), data.size()))
 	{

@@ -29,7 +29,7 @@ drawLine(CursorType start, CursorType end, auto& buffer, ColorEmitter&& ce)
 	if (remMajor == 0)
 	{
 		// Minor line
-		render<CursorType, ColorEmitter, detail::iterOrtho<modm::Dimension::Col>>(
+		render<CursorType, ColorEmitter, detail::iterOrtho<modm::Dimension::Y>>(
 			start, end,
 			std::forward<ColorEmitter>(ce)
 		);
@@ -37,12 +37,12 @@ drawLine(CursorType start, CursorType end, auto& buffer, ColorEmitter&& ce)
 	}
 
 	const diff_type diffMajor_end = (&end - buffer.data()) % buffer.minorFreq;
-	const int dir = remMajor > diffMajor_end ? -1 : 1;
+	const int8_t dir = remMajor > diffMajor_end ? -1 : 1;
 
 	if (remMajor == diff && dir == 1)
 	{
 		// Major line
-		render<CursorType, ColorEmitter, detail::iterOrtho<modm::Dimension::Row>>(
+		render<CursorType, ColorEmitter, detail::iterOrtho<modm::Dimension::X>>(
 			start, end,
 			std::forward<ColorEmitter>(ce)
 		);
@@ -54,7 +54,7 @@ drawLine(CursorType start, CursorType end, auto& buffer, ColorEmitter&& ce)
 
 	if (diffMinor == diffMajor) {
 		// Diagonal line
-		render<CursorType, ColorEmitter, detail::iterDiag<modm::Dimension::Row>>(
+		render<CursorType, ColorEmitter, detail::iterDiag<modm::Dimension::X>>(
 			start, end,
 			std::forward<ColorEmitter>(ce),
 			{dir}
@@ -64,13 +64,13 @@ drawLine(CursorType start, CursorType end, auto& buffer, ColorEmitter&& ce)
 
 	// Bresenham line
  	if(diffMajor > diffMinor)
-		render<CursorType, ColorEmitter, detail::iterBresenham<Dimension::Row>>(
+		render<CursorType, ColorEmitter, detail::iterBresenham<Dimension::X>>(
 			start, end,
 			std::forward<ColorEmitter>(ce),
 			{dir, diffMajor, diffMinor}
 		);
 	else
-		render<CursorType, ColorEmitter, detail::iterBresenham<Dimension::Col>>(
+		render<CursorType, ColorEmitter, detail::iterBresenham<Dimension::Y>>(
 			start, end,
 			std::forward<ColorEmitter>(ce),
 			{dir, diffMinor, diffMajor}

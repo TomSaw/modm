@@ -25,8 +25,7 @@ class ColorIndex {
 public:
 	// ColorIndex() = default;
 
-	// TODO assert list.size() == N
-	ColorIndex(std::initializer_list<ValueType> list)
+	consteval ColorIndex(const std::initializer_list<ValueType> list)
 	{
 		std::ranges::copy(list, std::begin(index));
 	};

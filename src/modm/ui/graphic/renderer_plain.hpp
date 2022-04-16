@@ -12,25 +12,42 @@ namespace modm::graphic
  * @brief 		Basic render strategy for basic lines
  * 				
  */
-template<class TC, ColorPencil CE, class FuncIter>
+template<class TC, ColorPencil CE, class... FuncIter>
 void
-render(TC start, TC end, CE&& color_emitter, FuncIter iter = FuncIter())
+render(TC start, TC end, CE&& color_emitter, FuncIter... iter)
 {
+	// if(start > end)
+	// 	std::swap(start, end);
+
 	while (start != end)
 	{
 		start = color_emitter();
-		iter(start);
+
+		(iter(start), ...);
 	};
 
 	start = color_emitter();
 }
 
-template<class TC, color::Color C, class FuncIter>
-void render(TC start, TC end, C color, FuncIter iter = FuncIter()) {
+template<class TC, color::Color C, class... FuncIter>
+void render(TC start, TC end, C color, FuncIter... iter)
+{
+	// if(start > end)
+	// 	std::swap(start, end);
+
+	/**
+	 * @brief 	This end condition is very fast and also very dangerous
+	 * 			If your drawing algorithm is buggy, start never reaches end and crashes
+	 *
+	 * 			For debugging, replace '''while (start != end)'''
+	 * 			with something like '''for(int i = 0; i < 20; i++)'''
+	 * 
+	 */
 	while (start != end)
 	{
 		start = color;
-		iter(start);
+
+		(iter(start), ...);
 	};
 
 	start = color;
@@ -39,49 +56,40 @@ void render(TC start, TC end, C color, FuncIter iter = FuncIter()) {
 namespace detail
 {
 // Line drawing iterators
-template<modm::Dimension D>
+template<modm::Dimension D, int Dir = 1>
 struct iterOrtho
 {
 	template<typename CursorType>
 	void
 	operator()(CursorType& cursor)
 	{
-		++cursor.template axis<D>();
+		if(Dir == 1)
+			++cursor.template axis<D>();
+		else
+			--cursor.template axis<D>();
 	}
 };
 
-template<modm::Dimension D>
-struct iterDiag
-{
-	const int dir;
-
-	template<typename CursorType>
-	void
-	operator()(CursorType& cursor)
-	{
-		cursor.template axis<D>() += dir;
-		++cursor.template axis<modm::DimensionFlip<D>::value>();
-	}
-};
-
-template<modm::Dimension D>
-struct iterBresenham : public iterDiag<D>
+template<modm::Dimension D, int Dir = 1>
+struct iterBresenham
 {
 public:
-	const uint16_t long_axis, short_axis;
-	std::ptrdiff_t error{long_axis / 2};
+	const Point m;
+	std::ptrdiff_t error{m.x() / 2};
 
 	template<typename CursorType>
 	void
 	operator()(CursorType& cursor)
 	{
-		++cursor.template axis<D>();
-
-		error += short_axis;
-		if (error >= long_axis)
+		error += m.y();
+		if (error >= m.x())
 		{
-			error -= long_axis;
-			cursor.template axis<modm::DimensionFlip<D>::value>() += this->dir;
+			error -= m.x();
+			
+			if(Dir == 1)
+				++cursor.template axis<D>();
+			else
+				--cursor.template axis<D>();
 		}
 	}
 };

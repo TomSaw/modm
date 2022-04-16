@@ -86,40 +86,41 @@ public:
 	static constexpr int digits = std::numeric_limits<TP>::digits;
 	static constexpr std::size_t size = digits / DigitsElement;
 	static constexpr TP bitmask_element = bitmask<DigitsElement>();
+	static constexpr TP bitmask_pallete = pallete(bitmask_element).value();
 	
 private:
 	// recursive fill
 	template <int I>
 	requires (I == 1)
-	TP rfill(TE element) requires (!has_value_method<TE>)
+	constexpr TP rfill(TE element) requires (!has_value_method<TE>)
 	{ return element; }
 
 	template <int I>
 	requires (I == 1)
-	TP rfill(TE element) requires has_value_method<TE>
+	constexpr TP rfill(TE element) requires has_value_method<TE>
 	{ return element.value(); }
 
 	template<int I> 
-	TP rfill(TE element) requires (!has_value_method<TE>)
+	constexpr TP rfill(TE element) requires (!has_value_method<TE>)
 	{ return rfill<I - 1>(element) << DigitsElement | TP(element); }
 
 	template<int I>
-	TP rfill(TE element) requires has_value_method<TE>
+	constexpr TP rfill(TE element) requires has_value_method<TE>
 	{ return rfill<I - 1>(element) << DigitsElement | TP(element.value()); }
 
 	// variadic push
-	TP vpush(auto element)
+	constexpr TP vpush(auto element)
 	{ return TE(element); }
 
-	TP vpush(auto element) requires has_value_method<TE>
+	constexpr TP vpush(auto element) requires has_value_method<TE>
 	{ return TE(element).value(); }
 
 	template<typename... Elements>
-	TP vpush(auto element, Elements... elements)
+	constexpr TP vpush(auto element, Elements... elements)
 	{ return vpush(elements...) << DigitsElement | TP(TE(element)); }
 
 	template<typename... Elements>
-	TP vpush(auto element, Elements... elements) requires has_value_method<TE>
+	constexpr TP vpush(auto element, Elements... elements) requires has_value_method<TE>
 	{ return vpush(elements...) << DigitsElement | TP(TE(element).value()); }
 
 public:
@@ -138,12 +139,12 @@ public:
  	template<typename... Elements>
 	constexpr explicit pallete(TE element, Elements... elements)
 	{
-		static_assert(sizeof...(Elements) < size, "Number of arguments passed does not fit into palette!");
+		static_assert(sizeof...(Elements) < size, "Number of arguments do not fit palette!");
 		value_ = vpush(element, elements...);
 	}
 
 
-	void fill(TE element)
+	constexpr void fill(TE element)
 	{ value_ = rfill<size>(element); }
 
 	// operators
@@ -205,12 +206,12 @@ public:
 	    using reference         = TP&;
 
 		reference value_;
-		std::size_t shift;
+		uint8_t shift;
 
 		void operator++() { shift += DigitsElement; }
 		void operator--() { shift -= DigitsElement; }
 
-		// post increment is inefficient and shouldn't be used: Don't implement!
+		// post increment is inefficient and shouldn't be used
 		// void operator++(int);
 		// void operator--(int);
 
@@ -231,14 +232,13 @@ public:
 	};
 
 	constexpr auto begin() { return iterator{value_, 0}; }
-
 	constexpr auto end() { return iterator{value_, digits}; }
 
-	// TODO pallete reverse iteration
+	// TODO pallete reverse iteration if any needed
 	// constexpr auto rbegin()
 	// constexpr auto rend()
 
-private:
+protected:
 	TP value_{0};
 };
 }  // namespace modm

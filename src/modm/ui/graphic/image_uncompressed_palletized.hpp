@@ -121,11 +121,11 @@ public:
 			void operator++()
 			{ this->data += meta.colIncr; }
 
-			class Row {
+			class X {
 				T const *data;
 				const Meta& meta;
 
-				Row(T const *data, const Meta& meta)
+				X(T const *data, const Meta& meta)
 					: data(data),
 					meta(meta)
 				{
@@ -149,7 +149,7 @@ public:
 						: row(row)
 					{}
 
-					friend Row;
+					friend X;
 
 				public:
 					
@@ -181,7 +181,7 @@ public:
 						else
 							pallete = *data >> (shift_top - C::Digits);
 					}
-					friend Row;
+					friend X;
 
 					bool palleteTransition() {
 						return this->row % Pallete::digits == 0;
@@ -244,7 +244,7 @@ public:
 						temp(*this->data)
 					{}
 
-					friend Row;
+					friend X;
 
 					void loadNext() {
 						this->pallete = temp >> shift_top;
@@ -278,7 +278,7 @@ public:
 			auto
 			operator*() const
 			{
-				return Row(this->data, meta);
+				return X(this->data, meta);
 			}
 
 		};

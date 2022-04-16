@@ -33,8 +33,8 @@ class Sh1106 : public Ssd1306<I2cMaster, H>
 {
 public:
 	using ColorType = color::Monochrome;
-	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Dimension::Col>;
-	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, Row>;
+	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Y>;
+	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, X>;
 	using Buffer = graphic::Buffer<MemoryDefinition, {128, H}>;
 
 	Sh1106(uint8_t address = 0x3C) : Ssd1306<I2cMaster, H>(address) {}

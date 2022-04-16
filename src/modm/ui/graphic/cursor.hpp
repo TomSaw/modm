@@ -32,7 +32,6 @@ public:
 	using CursorBuffer<T, BD, MajorLength>::operator=;
 
 	// accessors
-	
 	T* operator&() { return this->ptr; }
 	T* operator->() { return this->ptr; }
 
@@ -43,8 +42,8 @@ public:
 	template <Dimension D>
 	auto axis() { return typename CursorBuffer<T, BD, MajorLength>::mover<D>(*this); }
 	
-	auto x() { return typename CursorBuffer<T, BD, MajorLength>::mover<Row>(*this); }
-	auto y() { return typename CursorBuffer<T, BD, MajorLength>::mover<Col>(*this); }
+	auto x() { return typename CursorBuffer<T, BD, MajorLength>::mover<X>(*this); }
+	auto y() { return typename CursorBuffer<T, BD, MajorLength>::mover<Y>(*this); }
 
 	// 2D Translation
 	void operator+=(const Point& delta) {
@@ -81,9 +80,9 @@ public:
 	{
 		const int offset = ptr - rowspan.data();
 
-		if constexpr(BD == Row)
+		if constexpr(BD == X)
 			return offset >= 0 && offset < R.width();
-		else // BD == Col
+		else // BD == Y
 			return std::abs(offset) % MajorLength == 0;
 	}
 
@@ -91,14 +90,14 @@ public:
 	{
 		const int offset = ptr - colspan.data();
 
-		if constexpr(BD == Col)
+		if constexpr(BD == Y)
 			return offset >= 0 && offset < R.height();
-		else // BD == Row
+		else // BD == X
 			return std::abs(offset) % MajorLength == 0;
 	}
 
-	Buffer<Row>: Cursors are vertical to each other in cartesian space
-	Buffer<Col>: Cursors are horizontal to each other in cartesian space
+	Buffer<X>: Cursors are vertical to each other in cartesian space
+	Buffer<Y>: Cursors are horizontal to each other in cartesian space
 	bool minorColinear(const Cursor& other)
 	{
 		const diff_type diff = ptr - other.ptr;

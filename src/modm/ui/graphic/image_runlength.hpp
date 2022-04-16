@@ -121,12 +121,12 @@ public:
 			friend class Iterable;
 
 		public:
-			class Row
+			class X
 			{
 				Iterable& image;
 
 			public:
-				Row(Iterable& image) : image(image) {}
+				X(Iterable& image) : image(image) {}
 
 				class RowIteratorSentinel
 				{
@@ -187,7 +187,7 @@ public:
 			auto
 			operator*() const
 			{
-				return Row(image);
+				return X(image);
 			}
 
 			template<color::Color, Encoding>

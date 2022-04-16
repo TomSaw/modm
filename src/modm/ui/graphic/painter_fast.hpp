@@ -10,7 +10,7 @@
 namespace modm::graphic {
 
 /**
- * @brief 		Simple and fast Painter for Line, Rectangle, Circle, Ellipse
+ * @brief 		Simple fast Painter for Lines, Rectangle, Circle, Ellipse
  */
 template<class TB>
 class PainterFast {
@@ -18,28 +18,12 @@ public:
 	using ColorType = TB::ColorType;
 	using CursorType = TB::CursorType;
 
+	using ColorEmitter = ColorType;
+
+	Point position;
 private:
 	TB& buffer;
-	Point position;
-
 	ColorType color{color::html::White};
-
-	template<modm::Dimension D>
-	void ortholine(uint16_t delta) {
-		using ColorEmitter = ColorType;
-
-		// TODO crop bounds
-		CursorType start = buffer(position);
-		CursorType end = start.template axis<D>() + delta;
-
-		if(start > end)
-			std::swap(start, end);
-		
-		render<CursorType, ColorEmitter, detail::iterOrtho<D>>(
-			start, end,
-			std::forward<ColorEmitter>(color)
-		);
-	}
 
 public:
 	PainterFast(TB& buffer, Point position)
@@ -66,19 +50,21 @@ public:
 	}
 	
 	/// Draw Lines
-	PainterFast& operator=(shape::HLine hline) {
-		ortholine<modm::Dimension::Row>(hline.delta);
-		return *this;
-	}
+	template<modm::Dimension D>
+	PainterFast& operator=(shape::OLine<D> oline) {
+		CursorType start = buffer(position);
+		CursorType end = start.template axis<D>() + oline.delta;
 
-	PainterFast& operator=(shape::VLine vline) {
-		ortholine<modm::Dimension::Col>(vline.delta);
+		if(start > end)
+			std::swap(start, end);
+		
+		render<CursorType, ColorEmitter, detail::iterOrtho<D>>(
+			start, end, std::forward<ColorEmitter>(color), {}
+		);
 		return *this;
 	}
 
 	PainterFast& operator=(shape::DLine dline) {
-		using ColorEmitter = ColorType;
-		
 		const Point delta(dline.delta, std::signbit(dline.dir) ? -dline.delta : dline.delta);
 		// TODO crop bounds
 
@@ -88,18 +74,22 @@ public:
 		if(start > end)
 			std::swap(start, end);
 		
-		render<CursorType, ColorEmitter, detail::iterDiag<modm::Dimension::Row>>(
-			start, end,
-			std::forward<ColorEmitter>(color),
-			{dline.dir}
-		);
+		if (dline.dir == 1) {
+			render<CursorType, ColorEmitter, detail::iterOrtho<Y>, detail::iterOrtho<X, 1> >(
+				start, end, std::forward<ColorEmitter>(color)
+			);
+		}
+		else // (dline.dir == -1)
+		{
+			render<CursorType, ColorEmitter, detail::iterOrtho<Y>, detail::iterOrtho<X, -1>>(
+				start, end, std::forward<ColorEmitter>(color)
+			);
+		}
 
 		return *this;
 	}
 
 	PainterFast& operator=(shape::Line line) {
-		using ColorEmitter = ColorType;
-
 		if(line.delta.y() == 0) {
 			operator=(shape::HLine(line.delta.x()));
 		}
@@ -113,49 +103,89 @@ public:
 		CursorType start = buffer(position);
 		CursorType end = buffer(position + line.delta);
 
-		const uint16_t x_abs = std::abs(line.delta.x());
-		const uint16_t y_abs = std::abs(line.delta.y());
+		const Point delta_abs = {
+			std::abs(line.delta.x()),
+			std::abs(line.delta.y())
+		};
 		
-		int x_dir = std::signbit(line.delta.x()) ? -1 : 1;
-		int y_dir = std::signbit(line.delta.y()) ? -1 : 1;
+		Vector<int8_t, 2> dir = {
+			std::signbit(line.delta.x()) ? -1 : 1,
+			std::signbit(line.delta.y()) ? -1 : 1
+		};
 
-		// color = color::html::Gray;
+		/* if(delta_abs.x() < delta_abs.y()) {
+			// TODO draw diag
+		} */
 
-		if(x_abs < y_abs) {
-			if(y_dir == -1) {
-				x_dir *= -1;
+		// OPTIMIZE all these conditions :/ ... maybe have one big switch with instead?
+		if(delta_abs.x() > delta_abs.y()) {
+			if(dir.x() == -1) {
+				dir.y() *= -1;
 				std::swap(start, end);
 			}
 
-			render<CursorType, ColorEmitter, detail::iterBresenham<Dimension::Col>>(
-				start, end,
-				std::forward<ColorEmitter>(color),
-				{x_dir, y_abs, x_abs}
-			);
+			if(dir.y() == 1)
+				render<CursorType, ColorEmitter, detail::iterOrtho<X>, detail::iterBresenham<Y, 1>>(
+					start, end, std::forward<ColorEmitter>(color), {}, {delta_abs}
+				);
+			else
+				render<CursorType, ColorEmitter, detail::iterOrtho<X>, detail::iterBresenham<Y, -1>>(
+					start, end, std::forward<ColorEmitter>(color), {}, {delta_abs}
+				);
 		}
 		else
 		{
-			if(x_dir == -1) {
-				y_dir *= -1;
+			if(dir.y() == -1) {
+				dir.x() *= -1;
 				std::swap(start, end);
 			}
 
-			render<CursorType, ColorEmitter, detail::iterBresenham<Dimension::Row>>(
-				start, end,
-				std::forward<ColorEmitter>(color),
-				{y_dir, x_abs, y_abs}
-			);
+			if(dir.x() == 1)
+				render<CursorType, ColorEmitter, detail::iterOrtho<Y>, detail::iterBresenham<X, 1>>(
+					start, end, std::forward<ColorEmitter>(color), {}, {delta_abs.swapped()}
+				);
+			else
+				render<CursorType, ColorEmitter, detail::iterOrtho<Y>, detail::iterBresenham<X, -1>>(
+					start, end, std::forward<ColorEmitter>(color), {}, {delta_abs.swapped()}
+				);
 		}
 
-		// start = color::html::White;
-		// end = color::html::Black;
-		
 		return *this;
 	}
 
-	// using operator<< also translates position.
-	// Good for drawing polylines
-	// TODO needs testing
+	/// Draw Shapes
+	PainterFast& operator=(shape::Rectangle rectangle) {
+		// IMPLEMENT
+/* 		CursorType start = buffer(position);
+		CursorType end = buffer(position + rectangle.delta);
+
+		if(start > end) {
+			// End is on positive side of start in minor Dimension
+			CursorType start2 = start + 
+
+			render<CursorType, ColorEmitter, detail::iterOrtho<TB::Dim>>(
+				start, start.template axis<, std::forward<ColorEmitter>(color), {}
+			);
+		} else {
+
+		} */
+
+		return *this;
+	}
+
+	PainterFast& operator=(shape::Circle circle) {
+		// IMPLEMENT
+		return *this;
+	}
+
+	// using stream operator also translates painters position. Useful for polylines.
+	template<class Shape>
+	PainterFast& operator<<(Shape shape) {
+		operator=(shape);
+		position += shape.delta;
+		return *this;
+	}
+
 	PainterFast& operator<<(shape::HLine hline) {
 		operator=(hline);
 		position.x() += hline.delta;
@@ -165,31 +195,6 @@ public:
 	PainterFast& operator<<(shape::VLine vline) {
 		operator=(vline);
 		position.y() += vline.delta;
-		return *this;
-	}
-
-	PainterFast& operator<<(shape::DLine dline) {
-		operator=(dline);
-		position += dline.delta;
-		return *this;
-	}
-
-	PainterFast& operator<<(shape::Line line) {
-		operator=(line);
-		position += line.delta;
-		return *this;
-	}
-
-	/// Draw Shapes
-	PainterFast& operator=(shape::Rectangle rectangle) {
-		// TODO crop bounds
-		// MODM_LOG_INFO << "TODO operator<<(shape::Rectangle rectangle)" << modm::endl;
-		return *this;
-	}
-
-	PainterFast& operator=(shape::Circle circle) {
-		// TODO crop bounds
-		// MODM_LOG_INFO << "TODO operator<<(shape::Circle circle)" << modm::endl;
 		return *this;
 	}
 

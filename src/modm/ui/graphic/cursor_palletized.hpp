@@ -8,15 +8,19 @@ namespace modm::graphic {
 template<class TP, Dimension BD, std::size_t MajorLength>
 requires color::ColorPalletized<typename TP::ColorType>
 class CursorBuffer<TP, BD, MajorLength> {
+public:
+	using PalleteType = TP;
+	using ColorType = TP::ColorType;
+
 protected:
-	TP* ptr;
+	PalleteType* ptr;
 	int16_t pallete_i{0};
 
-	constexpr explicit CursorBuffer(TP* ptr)
+	constexpr explicit CursorBuffer(PalleteType* ptr)
 		: ptr(ptr)
 	{}
 
-	constexpr explicit CursorBuffer(TP* ptr, int16_t pallete_i)
+	constexpr explicit CursorBuffer(PalleteType* ptr, int16_t pallete_i)
 		: ptr(ptr), pallete_i(pallete_i)
 	{}
 
@@ -28,9 +32,6 @@ protected:
 	friend class Buffer;
 
 public:
-	using PalleteType = TP;
-	using ColorType = TP::ColorType;
-
 	ColorType operator=(ColorType color)
 	{
 		(*ptr)[pallete_i] = color;
@@ -55,7 +56,7 @@ public:
 
 	template <Dimension D>
 	struct mover {
-		TP*& ptr;
+		PalleteType*& ptr;
 		int16_t& pallete_i;
 
 		mover(CursorBuffer& cursor)
@@ -65,26 +66,26 @@ public:
 		static constexpr std::size_t Stride = (BD == D) ? 1 : (PalleteType::Dim == D) ? MajorLength : MajorLength / PalleteType::size;
 
 		void operator++() {
-			if constexpr (TP::Dim == D) {
+			if constexpr (PalleteType::Dim == D) {
 				if(++pallete_i >= int16_t(PalleteType::size)) {
 					ptr += Stride;
 					pallete_i = 0;
 				}
 			}
-			else // TP::Dim == Col
+			else // PalleteType::Dim == Y
 			{ 
 				ptr += Stride;
 			}
 		};
 
 		void operator--() {
-			if constexpr (TP::Dim == D) {
+			if constexpr (PalleteType::Dim == D) {
 				if(--pallete_i < 0) {
 					ptr -= Stride;
-					pallete_i = PalleteType::size;
+					pallete_i = PalleteType::size - 1;
 				}
 			}
-			else // TP::Dim == Col
+			else // PalleteType::Dim == Y
 			{ 
 				ptr -= Stride;
 			}
@@ -104,19 +105,21 @@ public:
 		}
 		
  		void operator+=(int n) {
-			 if constexpr (TP::Dim == D) {
+			 if constexpr (PalleteType::Dim == D) {
+				// FIXME Doesn't work for small values!!!
 				ptr += (n / int16_t(PalleteType::size)) * int16_t(Stride);
 				pallete_i += (n % int16_t(PalleteType::size));
 				normalizePallete();
 			}
-			else // TP::Dim == Col
-			{ 
+			else
+			{
 			 	ptr += n * Stride;
 			}
 		};
 
 		void operator-=(int n) {
-			if constexpr (TP::Dim == D) {
+			if constexpr (PalleteType::Dim == D) {
+				// FIXME Doesn't work for small values!!!
 				ptr -= (n / int16_t(PalleteType::size)) * int16_t(Stride);
 				pallete_i -= (n % int16_t(PalleteType::size));
 				normalizePallete();
@@ -146,17 +149,17 @@ public:
 	template<Dimension D>
 	auto axis_iterator()
 	{
-		if constexpr(BD == Row) {
-			if constexpr (PalleteType::Dim == Row)
+		if constexpr(BD == X) {
+			if constexpr (PalleteType::Dim == X)
 				return iterable_colinear<typename array2dT::RowSpanType, typename array2dT::RowIndexType>{array2dT::rowspan(col), R.width()};
-			else // PalleteType::Dim == Col
+			else // PalleteType::Dim == Y
 				return iterable_perpendicular<typename array2dT::RowSpanType>{array2dT::rowspan(col / PalleteType::size), col % PalleteType::size};
 		}
-		else // BD == Col
+		else // BD == Y
 		{
-			if constexpr (PalleteType::Dim == Col)
+			if constexpr (PalleteType::Dim == Y)
 				return iterable_colinear<typename array2dT::ColSpanType, typename array2dT::ColIndexType>{array2dT::colspan(row), R.height()};
-			else // PalleteType::Dim == Row
+			else // PalleteType::Dim == X
 				return iterable_perpendicular<typename array2dT::ColSpanType>{array2dT::colspan(row / PalleteType::size), row % PalleteType::size}
 		}
 	}

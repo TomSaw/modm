@@ -23,7 +23,6 @@ def build(env):
     env.outbasepath = "modm/src/modm/math"
     env.copy("tolerance.hpp")
 
-    # FIX Do not include "geometry/shape.hpp" and "geometry/shape/*.hpp"
     env.outbasepath = "modm/src/modm"
     headers = env.generated_local_files(filterfunc=lambda path: ".h" in path and not "_impl.h" in path)
     env.template("math.hpp.in", substitutions={"headers": sorted(headers)})

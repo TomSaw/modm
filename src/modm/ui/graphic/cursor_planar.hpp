@@ -18,6 +18,28 @@ protected:
 		: ptr(other.ptr)
 	{}
 
+	// Convert to cartesian coordinates
+	// from known offset to beginning of Buffer
+
+	// TODO let's see, if getX() getY() is needed ...
+	uint16_t getX(std::size_t offset) const {
+		if constexpr(BD == X)
+			return offset % MajorLength;
+		else // (BD == Y)
+			return offset / MajorLength;
+	}
+
+	uint16_t getY(std::size_t offset) const {
+		if constexpr(BD == X)
+			return offset / MajorLength;
+		else // (BD == Y)
+			return offset % MajorLength;
+	}
+
+	Point getPoint(std::size_t offset) const {
+		return Point(getX(offset), getY(offset));
+	}
+
 	template<BufMemDef BMD, Size R>
 	friend class Buffer;
 
