@@ -8,10 +8,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
 #pragma once
-#ifndef MODM_SH1106_HPP
-#define MODM_SH1106_HPP
 
 #include "ssd1306.hpp"
 
@@ -34,14 +31,14 @@ class Sh1106 : public Ssd1306<I2cMaster, H>
 public:
 	using ColorType = color::Monochrome;
 	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Y>;
-	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, X>;
-	using Buffer = graphic::Buffer<MemoryDefinition, {128, H}>;
+	using GddramType = graphic::GddramLayout<PalleteType, X>;
+	using Buffer = graphic::Buffer<GddramType, {128, H}>;
 
 	Sh1106(uint8_t address = 0x3C) : Ssd1306<I2cMaster, H>(address) {}
 
 	// Caution: placement.y() rounds to multiples of 8
 	template<graphic::GraphicBuffer B>
-	requires std::is_same<typename B::MemoryDefinition, MemoryDefinition>::value
+	requires std::is_same<typename B::GddramType, GddramType>::value
 	modm::ResumableResult<bool>
 	write(B& buffer, Point placement = {0, 0});
 
@@ -86,5 +83,3 @@ protected:
 }  // namespace modm
 
 #include "sh1106_impl.hpp"
-
-#endif // MODM_SH1106_HPP

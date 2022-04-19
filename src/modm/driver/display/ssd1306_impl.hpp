@@ -167,7 +167,7 @@ Ssd1306<I2cMaster, H>::updateClipping()
 
 template<class I2cMaster, uint16_t H>
 template<graphic::GraphicBuffer B>
-requires std::is_same<typename B::MemoryDefinition, typename Ssd1306<I2cMaster, H>::MemoryDefinition>::value
+requires std::is_same<typename B::GddramType, typename Ssd1306<I2cMaster, H>::GddramType>::value
 ResumableResult<bool>
 Ssd1306<I2cMaster, H>::write(B& buffer, Point placement) {
 	RF_BEGIN();

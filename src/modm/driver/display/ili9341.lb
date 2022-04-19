@@ -20,7 +20,7 @@ def prepare(module, options):
     module.depends(
         ":architecture:delay",
         ":architecture:spi.device",
-        ":ui:graphic")
+        ":graphic")
     return True
 
 

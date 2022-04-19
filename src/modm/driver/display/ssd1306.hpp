@@ -10,22 +10,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 // ----------------------------------------------------------------------------
-
 #pragma once
-#ifndef MODM_SSD1306_HPP
-#define MODM_SSD1306_HPP
+
+#include <span>
 
 #include <modm/architecture/interface/i2c_device.hpp>
 #include <modm/architecture/utils.hpp>
 #include <modm/processing/timer.hpp>
 
-#include <modm/ui/graphic/display.hpp>
-#include <modm/ui/graphic/buffer.hpp>
-#include <modm/ui/color/gray.hpp>
+#include <modm/graphic/display.hpp>
+#include <modm/graphic/buffer.hpp>
+#include <modm/graphic/color/gray.hpp>
 
 #include "ssd1306_defines.hpp"
 
-#include <span>
 
 namespace modm
 {
@@ -58,13 +56,15 @@ public:
 
 public:
 	/// @cond
-	class Ssd1306_I2cWriteTransaction : public modm::I2cWriteTransaction
+	class Ssd1306_I2cWriteTransaction : public I2cWriteTransaction
 	{
 	public:
 		Ssd1306_I2cWriteTransaction(uint8_t address);
 
+		using PalleteType = graphic::ColorPallete<color::Monochrome, uint8_t, Y>;
+
 		bool
-		configureDisplayWrite(std::span<modm::graphic::ColorPallete<modm::color::Monochrome, uint8_t, Dimension::Y>> data);
+		configureDisplayWrite(std::span<PalleteType> data);
 
 	protected:
 		virtual Writing
@@ -102,11 +102,10 @@ class Ssd1306 : public ssd1306,
 public:
 	using ColorType = color::Monochrome;
 	using PalleteType = graphic::ColorPallete<ColorType, uint8_t, Y>;
-	using MemoryDefinition = graphic::BufferMemoryDefinition<PalleteType, X>;
-	// Alternative supported MemoryDefinition:
-	// TODO implement write() for this
-	// using MemoryDefinition2 = graphic::BufferMemoryDefinition<PalleteType, Y>;
-	using Buffer = graphic::Buffer<MemoryDefinition, {128, H}>;
+	using GddramType = graphic::GddramLayout<PalleteType, X>;
+	// Alternative GddramLayout for Ssd1306. TODO requires specialised write()
+	// using MemoryDefinition2 = graphic::GddramLayout<PalleteType, Y>;
+	using Buffer = graphic::Buffer<GddramType, {128, H}>;
 
 	Ssd1306(uint8_t address = 0x3C)
 		: I2cDevice<I2cMaster, 3, ssd1306::Ssd1306_I2cWriteTransaction>(address)
@@ -168,7 +167,7 @@ public:
 
 	// Caution: placement.y() rounds to multiples of 8
 	template<graphic::GraphicBuffer B>
-	requires std::is_same<typename B::MemoryDefinition, MemoryDefinition>::value
+	requires std::is_same<typename B::GddramType, GddramType>::value
 	modm::ResumableResult<bool>
 	write(B& buffer, Point placement = {0, 0});
 
@@ -223,5 +222,3 @@ protected:
 }  // namespace modm
 
 #include "ssd1306_impl.hpp"
-
-#endif  // MODM_SSD1306_HPP

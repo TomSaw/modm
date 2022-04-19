@@ -17,7 +17,7 @@ def init(module):
 # User interface
 
 Interfacing with human users.
-Contains code for Graphics, Buttons, LEDs, Animations, Menu Structures.
+Contains code for Buttons, LEDs, Animations, Menu Structures.
 """
 
 def prepare(module, options):

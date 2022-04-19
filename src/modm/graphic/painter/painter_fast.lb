@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2022, Thomas Sommer
+#
+# This file is part of the modm project.
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# -----------------------------------------------------------------------------
+
+def init(module):
+    module.name = ":graphic:painter_fast"
+    module.description = """
+# Painter
+
+Manipulate Buffers in internal RAM.
+Draw Lines, Circles, Rectangles, Text etc.
+
+The size (width and height) of a graphics primitive always correspond
+to its mathematical model, ignoring the rendered width. As everything
+is drawn one pixel wide, the pixels will be rendered to the right and
+below the mathematically defined points.
+"""
+
+
+def prepare(module, options):
+    module.depends(
+        ":io",
+		":graphic:buffer",
+	)
+    return True
+
+
+def build(env):
+    env.outbasepath = "modm/src/modm/graphic/painter"
+    env.copy(".")
+    env.copy("../painter.hpp")

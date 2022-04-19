@@ -16,13 +16,10 @@
 #include <modm/architecture/interface/register.hpp>
 #include <modm/processing/resumable.hpp>
 
-#include <modm/ui/graphic/display.hpp>
-#include <modm/ui/graphic/buffer.hpp>
-#include <modm/ui/color/rgb_stacked.hpp>
-#include <modm/math/geometry/shape/point.hpp>
-#include <modm/math/geometry/shape/line.hpp>
-#include <modm/math/geometry/shape/section.hpp>
-#include <modm/ui/graphic/style.hpp>
+#include <modm/graphic/graphic.hpp>
+#include <modm/graphic/color/rgb_stacked.hpp>
+#include <modm/math/geometry/point.hpp>
+#include <modm/math/geometry/section.hpp>
 
 #include "ili9341_parallel.hpp"
 #include "ili9341_spi.hpp"
@@ -47,11 +44,14 @@ class Ili9341 : public Transport, public graphic::Display<color::Rgb565, {320, 2
 public:
 	using ColorType = color::Rgb565;
 
-	template<color::Color = ColorType>
-	using BufferLandscape = graphic::Buffer<ColorType, {320, 240}>;
-	
-	template<color::Color = ColorType>
-	using BufferPortrait = graphic::Buffer<ColorType, {240, 320}>;
+	template<typename Major = Row>
+	using GddramType = graphic::GddramLayout<ColorType, Major>;
+
+	static constexpr Size SizeLandscape = {320, 240};
+	static constexpr Size SizePortrait = {240, 320};
+
+	template<Size R = SizeLandscape, Dimension Major = Row>
+	using Buffer = graphic::Buffer<GddramType<D>, R>;
 
 	template<typename... Args>
 	Ili9341(Args &&...args)

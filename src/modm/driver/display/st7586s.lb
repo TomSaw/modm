@@ -18,7 +18,7 @@ def init(module):
 def prepare(module, options):
     module.depends(
         ":architecture:delay",
-        ":ui:display")
+        ":graphic")
     return True
 
 def build(env):

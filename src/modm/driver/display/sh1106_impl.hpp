@@ -45,7 +45,7 @@ Sh1106<I2cMaster, H>::updateClipping()
 
 template<class I2cMaster, uint16_t H>
 template<graphic::GraphicBuffer B>
-requires std::is_same<typename B::MemoryDefinition, typename Sh1106<I2cMaster, H>::MemoryDefinition>::value
+requires std::is_same<typename B::GddramType, typename Sh1106<I2cMaster, H>::GddramType>::value
 ResumableResult<bool>
 Sh1106<I2cMaster, H>::write(B& buffer, Point placement) {
 	RF_BEGIN();

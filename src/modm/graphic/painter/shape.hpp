@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2022, Thomas Sommer
+ *
+ * This file is part of the modm project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+// ----------------------------------------------------------------------------
+#pragma once
+
+#include <modm/math/geometry/point.hpp>
+
+// Shapes are POD types to keep them a.s.a.p.
+// TODO Fusion with shapes in modm/math/geometry ?
+namespace modm::shape {
+	
+	using scalar_t = int16_t;
+	using radius_t = uint16_t;
+
+	struct Line {
+		const Point delta;
+	};
+
+	// orthogonal line
+	template<modm::Dimension D>
+	struct OLine {
+		const scalar_t delta;
+	};
+
+	using HLine = OLine<modm::Dimension::X>;
+
+	using VLine = OLine<modm::Dimension::Y>;
+
+	// diagonal line
+	struct DLine {
+		const scalar_t delta;
+		const int dir;
+	};
+	
+	struct Rectangle {
+		const Point delta;
+	};
+
+	struct Circle {
+		const radius_t radius;
+	};
+
+	struct Ellipse {
+		const radius_t radius;
+		const radius_t radius_2;
+	};
+
+	// struct Bow {
+	// 	const radius_t radius;
+	// };
+}
