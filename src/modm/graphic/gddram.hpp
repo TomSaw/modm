@@ -40,7 +40,7 @@ namespace modm::graphic {
 	 * @brief 		Specialised modm::pallete for use in graphic Buffer
 	 * 
 	 */
-	template<ColorPalletized C, std::unsigned_integral TP, Dimension D = X>
+	template<ColorPalletized C, std::unsigned_integral TP, Dimension D>
 	class ColorPallete : public pallete<TP, C::digits, C> {
 	public:
 		static constexpr Dimension Dim = D;

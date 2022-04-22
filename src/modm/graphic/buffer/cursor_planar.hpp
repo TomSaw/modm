@@ -1,54 +1,52 @@
 #pragma once
 #include "cursor.hpp"
 
+#include "buffer.hpp"
+
 #include <cmath>
 #include <modm/utils/strided_span.hpp>
 
-namespace modm::graphic {
+namespace modm::graphic::detail {
 
-template<ColorPlanar C, Dimension BD, std::size_t MajorLength>
-class CursorBuffer<C, BD, MajorLength> {
+template<ColorPlanar C, Dimension MD, std::size_t ML>
+class CursorBase<C, MD, ML> {
+public:
+	using ColorType = C;
+
 protected:
-	C* ptr;
+	ColorType* ptr;
 
-	constexpr explicit CursorBuffer(C* ptr)
+	constexpr explicit CursorBase(ColorType* ptr)
 		: ptr(ptr)
 	{}
 
-	constexpr CursorBuffer(const CursorBuffer& other)
+	constexpr CursorBase(const CursorBase& other)
 		: ptr(other.ptr)
 	{}
 
 	// Convert to cartesian coordinates
 	// from known offset to beginning of Buffer
 
-	// TODO let's see, if getX() getY() is needed ...
+	// TODO let's see, if access to components is useful at all...
 	uint16_t getX(std::size_t offset) const {
-		if constexpr(BD == X)
-			return offset % MajorLength;
-		else // (BD == Y)
-			return offset / MajorLength;
+		if constexpr(MD == X)
+			return offset % ML;
+		else // (MD == Y)
+			return offset / ML;
 	}
 
 	uint16_t getY(std::size_t offset) const {
-		if constexpr(BD == X)
-			return offset / MajorLength;
-		else // (BD == Y)
-			return offset % MajorLength;
+		if constexpr(MD == X)
+			return offset / ML;
+		else // (MD == Y)
+			return offset % ML;
 	}
 
 	Point getPoint(std::size_t offset) const {
 		return Point(getX(offset), getY(offset));
 	}
 
-	template<Gddram GDDRAM, Size R>
-	friend class Buffer;
-
 public:
-	using ColorType = C;
-
-	// operator C&() { return *this->ptr; }
-	// operator C() const { return *this->ptr; }
 
 	ColorType operator=(ColorType color)
 	{
@@ -57,27 +55,21 @@ public:
 	}
 
 	// comparison
-	auto operator<=>(const CursorBuffer& other) const = default;
+	auto operator<=>(const CursorBase& other) const = default;
 
-	// iterators
-
-	// cartesian translations
-	// FIXME Principal Design Issue:
-	// Exceeding MajorDim wraps Cursor to next minorDim, the information is permanently lost.
-	// Thus, Cursors are only reliable, when there's no wrapping.
-	// - That's true for drawing algorithms. (they're iterating)
-	// - Inbounds check and shape-trimming must happen in Point space!
-
-	/// Iterates the Cursor in 2D. Intentionally not named 'iterator' cause doesn't dereference.
+	// translators (iterators)
+	
+	/// iterator-like cartesion translation of the cursor in X or Y dimension
+	/// Apllied for hyperfast buffer manipulations like drawing Lines, Rectangles, ...
 	template <Dimension D>
-	struct mover {
+	struct translator {
 		ColorType*& ptr;
 
-		mover(CursorBuffer& cursor)
+		translator(CursorBase& cursor)
 			: ptr(cursor.ptr)
 		{}
 		
-		static constexpr std::size_t Stride = (BD == D) ? 1 : MajorLength;
+		static constexpr std::size_t Stride = (MD == D) ? 1 : ML;
 
 		void operator++() { ptr += Stride; };
 		void operator--() { ptr -= Stride; };
@@ -85,18 +77,18 @@ public:
 		void operator+=(int n) { ptr += n * Stride; };
 		void operator-=(int n) { ptr -= n * Stride; };
 
-		auto operator+(int n) { return Cursor<ColorType, BD, MajorLength>(ptr + n * Stride); }
-		auto operator-(int n) { return Cursor<ColorType, BD, MajorLength>(ptr - n * Stride); }
+		auto operator+(int n) { return Cursor<ColorType, MD, ML>(ptr + n * Stride); }
+		auto operator-(int n) { return Cursor<ColorType, MD, ML>(ptr - n * Stride); }
 	};
 
-	// Returns an iterator through this->ptr in Dimension D
+	// Returns an iterator going through this->ptr
 	template<Dimension D>
 	auto axis_iterator() {
-		if constexpr(BD == D)
+		if constexpr(MD == D)
 			return typename std::span<C>::iterator(ptr);
-		else
-			return typename modm::strided_span<C, MajorLength>::iterator(ptr);
+		else // (MD == Flip<D>::value)
+			return typename modm::strided_span<C, ML>::iterator(ptr);
 	}
-}; // CursorBuffer
+}; // CursorBase
 
 } // namespace modm::graphic;

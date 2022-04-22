@@ -13,7 +13,7 @@
 
 #include <modm/utils/array2d.hpp>
 
-namespace modm::graphic {
+namespace modm::graphic::detail {
 
 /**
  * @brief 		Palletized Buffer ads combines the iteration logic of modm::array2d and modm::pallete

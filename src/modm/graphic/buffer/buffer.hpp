@@ -26,25 +26,28 @@
 
 namespace modm::graphic {
 
+namespace detail
+{
 template<Gddram GDDRAM, Size R>
 class BufferBase;
+}
 
 template<Gddram GDDRAM, Size R>
-class Buffer : public BufferBase<GDDRAM, R>
+class Buffer : public detail::BufferBase<GDDRAM, R>
 {
 public:
 	using GddramType = GDDRAM;
 	static constexpr Size size = R;
 	
 	using ColorType = GDDRAM::ColorType;
-	using CursorType = BufferBase<GDDRAM, R>::CursorType;
+	using CursorType = detail::BufferBase<GDDRAM, R>::CursorType;
 	using ViewType = View<Buffer<GDDRAM, R>>;
 
 	// TODO as template arg
 	using PainterType = PainterFast<Buffer<GDDRAM, R>>;
 
 	// constructors
-	using BufferBase<GDDRAM, R>::BufferBase;
+	using detail::BufferBase<GDDRAM, R>::BufferBase;
 
 	// conversion Point -> Cursor
 	CursorType operator()(Point point)

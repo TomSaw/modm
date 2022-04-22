@@ -13,9 +13,9 @@
 
 #include <bit>
 #include <modm/utils/array2d.hpp>
+#include <modm/utils/array2d_dma.hpp>
 
-namespace modm::graphic
-{
+namespace modm::graphic::detail {
 
 template<Gddram GDDRAM, Size R>
 requires ColorPlanar<typename GDDRAM::ColorType>

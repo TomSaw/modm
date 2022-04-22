@@ -129,7 +129,7 @@ modm::platform::SpiHal{{ id }}::write(uint8_t data)
 %% if "data-size" in features
 	*((__IO uint8_t *) &SPI{{ id}}->DR) = data;
 %% else
-	write(static_cast<uint16_t>(data));
+	SPI1->DR = static_cast<uint16_t>(data);
 %% endif
 
 }

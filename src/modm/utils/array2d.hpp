@@ -42,16 +42,18 @@ namespace modm
 	 * 
 	 * @tparam Major	Major dimension of the Memory Layout. This is especially important when the memory needs
 	 * 					DMA transmission to a pre-defined memory layout.
+	 * 
 	 * @see				https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays
+	 * @see				https://www.etlcpp.com/multi_array.html
 	 * 
 	 */
-
 	template<typename T, std::size_t Rows, std::size_t Cols, Dimension D>
 	class array2d
 	{
 		std::array<std::array<T, (D == Y) ? Cols : Rows>, (D == Y) ? Rows : Cols> data_;
 
 	public:
+		static constexpr Dimension Dim = D;
 		static constexpr std::tuple sizes{Rows, Cols};
 		static constexpr int size = Rows * Cols;
 		static constexpr std::ptrdiff_t minorFreq = (D == X) ? Rows : Cols;
@@ -118,51 +120,6 @@ namespace modm
 			// TODO Iterate over column and rows
 			// MODM_LOG_ERROR << "assigning from flipped Major Dimension not implemented";
 			return *this;
-		}
-
-	private:
-		static inline bool dmaCopyComplete{true};
-
-	public:	
-		template<class DmaChannel>
-		void initializeDmaChannel() {
-			using namespace modm::platform;
-
-			DmaChannel::configure(
-				DmaBase::DataTransferDirection::MemoryToMemory,
-				DmaBase::MemoryDataSize(0), // set below using configureDataSize()
-				DmaBase::PeripheralDataSize(0), // set below using configureDataSize()
-				DmaBase::MemoryIncrementMode::Increment,
-				DmaBase::PeripheralIncrementMode::Increment
-			);
-
-			// TODO add support for fundamental types
-			DmaChannel::template configureDataSize<typename T::ValueType>();
-
-			DmaChannel::setTransferCompleteIrqHandler(handleDmaComplete<DmaChannel>);
-			DmaChannel::enableInterruptVector();
-			DmaChannel::enableInterrupt(DmaBase::InterruptEnable::TransferComplete);
-		}
-
-		template<class DmaChannel>
-		// array2d& operator=(array2d& other) {
-		array2d& DmaCopy(array2d& other) {
-			if(this == &other or !dmaCopyComplete)
-				return *this;
-
-			dmaCopyComplete = false;
-			initializeDmaChannel<DmaChannel>();
-			DmaChannel::setMemoryAddress(uintptr_t(data()));
-			DmaChannel::setPeripheralAddress(uintptr_t(other.data()));
-			DmaChannel::setDataLength(size); // Caution! Max 65536
-			DmaChannel::start();
-
-			return *this;
-		}
-		template<class DmaChannel>
-		static void handleDmaComplete() {
-			dmaCopyComplete = true;
-			DmaChannel::stop();
 		}
 
 		constexpr void fill(T value)

@@ -178,7 +178,7 @@ public:
 	 *
 	 * @param tx_array	std::array with data to send
 	 */
-	template <std::ranges::forward_range C>
+	template <std::ranges::contiguous_range C>
 	static modm::ResumableResult<void>
 	transmit(const C &tx_arr)
 	{ return transmit(tx_arr.begin(), tx_arr.end()); };
@@ -189,14 +189,13 @@ public:
 	 * @param tx_arr	std::array with data to send
 	 * @param rx_arr	std::array for received data
 	 */
-	template <std::ranges::forward_range C>
+	template <std::ranges::contiguous_range C>
 	static modm::ResumableResult<void>
 	transmit(const C &tx_arr, C &rx_arr)
 	{ return transmit(tx_arr.begin(), tx_arr.end(), rx_arr.begin()); };
 
-// -- Backwards compatible API --------------------------------------------------------
+// -- Traditional API --------------------------------------------------------
 
-	// Backwards compatible API
 	static uint8_t
 	transferBlocking(const uint8_t data)
 	{ return RF_CALL_BLOCKING(transmit(data)); }

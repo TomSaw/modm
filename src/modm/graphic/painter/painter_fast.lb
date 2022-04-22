@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------
 
 def init(module):
-    module.name = ":graphic:painter_fast"
+    module.name = ":graphic:painter.fast"
     module.description = """
 # Painter
 

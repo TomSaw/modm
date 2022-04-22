@@ -1,35 +1,34 @@
 #pragma once
 #include "cursor.hpp"
 
+#include "buffer.hpp"
+
 #include <cmath>
 
-namespace modm::graphic {
+namespace modm::graphic::detail {
 
-template<class TP, Dimension BD, std::size_t MajorLength>
-requires ColorPalletized<typename TP::ColorType>
-class CursorBuffer<TP, BD, MajorLength> {
+template<class P, Dimension MD, std::size_t ML>
+requires ColorPalletized<typename P::ColorType>
+class CursorBase<P, MD, ML> {
 public:
-	using PalleteType = TP;
-	using ColorType = TP::ColorType;
+	using PalleteType = P;
+	using ColorType = P::ColorType;
 
 protected:
 	PalleteType* ptr;
 	int16_t pallete_i{0};
 
-	constexpr explicit CursorBuffer(PalleteType* ptr)
+	constexpr explicit CursorBase(PalleteType* ptr)
 		: ptr(ptr)
 	{}
 
-	constexpr explicit CursorBuffer(PalleteType* ptr, int16_t pallete_i)
+	constexpr explicit CursorBase(PalleteType* ptr, int16_t pallete_i)
 		: ptr(ptr), pallete_i(pallete_i)
 	{}
 
-	constexpr explicit CursorBuffer(const CursorBuffer& other)
+	constexpr explicit CursorBase(const CursorBase& other)
 		: ptr(other.ptr), pallete_i(other.pallete_i)
 	{}
-
-	template<Gddram GDDRAM, Size R>
-	friend class Buffer;
 
 public:
 	ColorType operator=(ColorType color)
@@ -39,31 +38,33 @@ public:
 	}
 
 	// comparison
-	// TODO Damn, these are expensive to evaluate.
-	// May need to iterate via start-end POINTS for cursor_palletized
-	bool operator==(const CursorBuffer& other) const {
+	bool operator==(const CursorBase& other) const {
 		return ptr == other.ptr && pallete_i == other.pallete_i;
 	}
 
-	bool operator>(const CursorBuffer& other) const {
+	bool operator>(const CursorBase& other) const {
 		return (ptr == other.ptr) ? pallete_i > other.pallete_i : ptr > other.ptr;
 	}
 
-	bool operator<(const CursorBuffer& other) const {
+	bool operator<(const CursorBase& other) const {
 		// TODO damn, this is very expensive to evaluate :O
 		return (ptr == other.ptr) ? pallete_i < other.pallete_i : ptr < other.ptr;
 	}
 
+	// translators (iterators)
+	
+	/// iterator-like cartesion translation of the cursor in X or Y dimension
+	/// Apllied for hyperfast buffer manipulations like drawing Lines, Rectangles, ...
 	template <Dimension D>
-	struct mover {
+	struct translator {
 		PalleteType*& ptr;
 		int16_t& pallete_i;
 
-		mover(CursorBuffer& cursor)
+		translator(CursorBase& cursor)
 			: ptr(cursor.ptr), pallete_i(cursor.pallete_i)
 		{}
 		
-		static constexpr std::size_t Stride = (BD == D) ? 1 : (PalleteType::Dim == D) ? MajorLength : MajorLength / PalleteType::size;
+		static constexpr std::size_t Stride = (MD == D) ? 1 : (PalleteType::Dim == D) ? ML : ML / PalleteType::size;
 
 		void operator++() {
 			if constexpr (PalleteType::Dim == D) {
@@ -91,7 +92,7 @@ public:
 			}
 		};
 
-		// OPTIMIZE there must a smarter, faster solution
+		// OPTIMIZE there must be a smarter, faster solution
 		void normalizePallete() {
 			if(pallete_i < 0) {
 				--ptr;
@@ -131,31 +132,33 @@ public:
 		};
 
 		auto operator+(int n) {
-			Cursor<PalleteType, BD, MajorLength> ret(ptr, pallete_i);
+			Cursor<PalleteType, MD, ML> ret(ptr, pallete_i);
 			ret.template axis<D>() += n;
 			return ret;
 
 		}
 
 		auto operator-(int n) {
-			Cursor<PalleteType, BD, MajorLength> ret(ptr, pallete_i);
+			Cursor<PalleteType, MD, ML> ret(ptr, pallete_i);
 			ret.template axis<D>() -= n;
 			return ret;
 		}
 	};
 
 	#if 0
-	// TODO this is horrible sketchy, delete or rewrite
+	// TODO this looks horrible.m Drop or rewrite
+
+	// Returns an iterator going through this->ptr
 	template<Dimension D>
 	auto axis_iterator()
 	{
-		if constexpr(BD == X) {
+		if constexpr(MD == X) {
 			if constexpr (PalleteType::Dim == X)
 				return iterable_colinear<typename array2dT::RowSpanType, typename array2dT::RowIndexType>{array2dT::rowspan(col), R.width()};
 			else // PalleteType::Dim == Y
 				return iterable_perpendicular<typename array2dT::RowSpanType>{array2dT::rowspan(col / PalleteType::size), col % PalleteType::size};
 		}
-		else // BD == Y
+		else // MD == Y
 		{
 			if constexpr (PalleteType::Dim == Y)
 				return iterable_colinear<typename array2dT::ColSpanType, typename array2dT::ColIndexType>{array2dT::colspan(row), R.height()};

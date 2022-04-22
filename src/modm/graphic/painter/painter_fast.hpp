@@ -20,12 +20,12 @@ public:
 
 	using ColorEmitter = ColorType;
 
-	Point position;
 private:
 	TB& buffer;
 	ColorType color{color::html::White};
 
 public:
+	Point position;
 	PainterFast(TB& buffer, Point position)
 		: buffer(buffer), position(position)
 	{}
