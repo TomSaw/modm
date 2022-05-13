@@ -52,72 +52,10 @@ public:
 	static void
 	initialize();
 
-	static uint8_t
-	transferBlocking(const uint8_t data)
-	{
-		return RF_CALL_BLOCKING(transmit<uint8_t>(data));
-	}
-
-	static uint16_t
-	transferBlocking16(const uint16_t data)
-	{
-		return RF_CALL_BLOCKING(transmit<uint16_t>(data));
-	}
-
 	static void
-	transferBlocking(const uint8_t *tx, uint16_t repeat)
-	{
-		RF_CALL_BLOCKING(transmit<uint8_t>(tx, repeat));
-	}
+	setDataSize(DataSize size);
 
-	static void
-	transferBlocking16(const uint16_t *tx, uint16_t repeat)
-	{
-		RF_CALL_BLOCKING(transmit<uint16_t>(tx, repeat));
-	}
-
-	static void
-	transferBlocking(const uint8_t *tx, uint8_t *rx, uint16_t length)
-	{
-		RF_CALL_BLOCKING(transmit<uint8_t>(tx, rx, length));
-	}
-
-	static void
-	transferBlocking16(const uint16_t *tx, uint16_t *rx, uint16_t length)
-	{
-		RF_CALL_BLOCKING(transmit<uint16_t>(tx, rx, length));
-	}
-
-	static modm::ResumableResult<uint8_t>
-	transfer(const uint8_t data) {
-		return transmit<uint8_t>(data);
-	}
-
-	static modm::ResumableResult<uint16_t>
-	transfer16(const uint16_t data) {
-		return transmit<uint16_t>(data);
-	}
-
-	static modm::ResumableResult<void>
-	transfer(const uint8_t *tx, const uint16_t repeat) {
-		return transmit<uint8_t>(tx, repeat);
-	}
-
-	static modm::ResumableResult<void>
-	transfer16(const uint16_t *tx, const uint16_t repeat) {
-		return transmit<uint16_t>(tx, repeat);
-	}
-
-	static modm::ResumableResult<void>
-	transfer(const uint8_t *tx, uint8_t *rx, const uint16_t length) {
-		return transmit<uint8_t>(tx, rx, length);
-	}
-
-	static modm::ResumableResult<void>
-	transfer16(const uint16_t *tx, uint16_t *rx, const uint16_t length) {
-		return transmit<uint16_t>(tx, rx, length);
-	}
-
+	/// C++20 style API
 	template <std::unsigned_integral T>
 	static modm::ResumableResult<T>
 	transmit(T data);
@@ -131,6 +69,74 @@ public:
 	template <std::unsigned_integral T>
 	static modm::ResumableResult<void>
 	transmit(const T *tx, T *rx, uint16_t length);
+
+	/// Traditional API
+	static uint8_t
+	transferBlocking(const uint8_t data)
+	{
+		return RF_CALL_BLOCKING(transmit(data));
+	}
+
+	static uint16_t
+	transferBlocking16(const uint16_t data)
+	{
+		return RF_CALL_BLOCKING(transmit(data));
+	}
+
+	static void
+	transferBlocking(const uint8_t *tx, uint16_t repeat)
+	{
+		RF_CALL_BLOCKING(transmit<uint8_t>(tx, repeat));
+	}
+
+	static void
+	transferBlocking16(const uint16_t *tx, uint16_t repeat)
+	{
+		RF_CALL_BLOCKING(transmit(tx, repeat));
+	}
+
+	static void
+	transferBlocking(const uint8_t *tx, uint8_t *rx, uint16_t length)
+	{
+		RF_CALL_BLOCKING(transmit(tx, rx, length));
+	}
+
+	static void
+	transferBlocking16(const uint16_t *tx, uint16_t *rx, uint16_t length)
+	{
+		RF_CALL_BLOCKING(transmit(tx, rx, length));
+	}
+
+	static modm::ResumableResult<uint8_t>
+	transfer(const uint8_t data) {
+		return transmit(data);
+	}
+
+	static modm::ResumableResult<uint16_t>
+	transfer16(const uint16_t data) {
+		return transmit(data);
+	}
+
+	static modm::ResumableResult<void>
+	transfer(const uint8_t *tx, const uint16_t repeat) {
+		return transmit(tx, repeat);
+	}
+
+	static modm::ResumableResult<void>
+	transfer16(const uint16_t *tx, const uint16_t repeat) {
+		return transmit(tx, repeat);
+	}
+
+	static modm::ResumableResult<void>
+	transfer(const uint8_t *tx, uint8_t *rx, const uint16_t length) {
+		return transmit(tx, rx, length);
+	}
+
+	static modm::ResumableResult<void>
+	transfer16(const uint16_t *tx, uint16_t *rx, const uint16_t length) {
+		return transmit(tx, rx, length);
+	}
+
 
 private:
 	static void

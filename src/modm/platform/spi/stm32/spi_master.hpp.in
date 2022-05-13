@@ -280,11 +280,11 @@ public:
 private:
 	template<typename T>
 	static void
-	setup_isr();
+	init_isr_handler();
 
 	template<typename T>
 	static void
-	setup_isr(const T* tx_first, const T* tx_last);
+	init_isr_handler(const T* tx_first, const T* tx_last);
 };
 } // namespace modm::platform
 

@@ -175,7 +175,7 @@ modm::platform::SpiHal{{ id }}::disableInterrupt(Interrupt_t interrupt)
 bool inline
 modm::platform::SpiHal{{ id }}::isInterruptEnabled(Interrupt_t interrupt)
 {
-	return SPI{{ id }}->CR2 | interrupt.value;
+	return SPI{{ id }}->CR2 & interrupt.value;
 }
 
 modm::platform::SpiHal{{ id }}::InterruptFlag_t inline

@@ -32,7 +32,7 @@ modm::platform::SpiMaster{{ id }}::transmit(T data)
 		tx.repeat = 0;
 		tx_end.repeat = 1;
 
-		setup_isr<T>();
+		init_isr_handler<T>();
 		return {modm::rf::Running};
 	}
 
@@ -56,7 +56,7 @@ modm::platform::SpiMaster{{ id }}::transmit(T data, std::size_t repeat)
 		tx.repeat = 0;
 		tx_end.repeat = repeat;
 
-		setup_isr<T>();
+		init_isr_handler<T>();
 		return {modm::rf::Running};
 	}
 
@@ -81,7 +81,7 @@ modm::platform::SpiMaster{{ id }}::transmit(const T *tx_first, const T *tx_last,
 		state.set(State::Idle);
 		state.reset(State::Repeat);
 
-		setup_isr<T>(tx_first, tx_last);
+		init_isr_handler<T>(tx_first, tx_last);
 		return {modm::rf::Running};
 	}
 
@@ -90,7 +90,7 @@ modm::platform::SpiMaster{{ id }}::transmit(const T *tx_first, const T *tx_last,
 }
 
 template <typename T>
-void modm::platform::SpiMaster{{ id }}::setup_isr()
+void modm::platform::SpiMaster{{ id }}::init_isr_handler()
 {
 	if constexpr (std::is_same<T, uint8_t>::value)
 	{
@@ -117,7 +117,7 @@ void modm::platform::SpiMaster{{ id }}::setup_isr()
 }
 
 template <typename T>
-void modm::platform::SpiMaster{{ id }}::setup_isr(const T *tx_first, const T *tx_last)
+void modm::platform::SpiMaster{{ id }}::init_isr_handler(const T *tx_first, const T *tx_last)
 {
 	if constexpr (std::is_same<T, uint8_t>::value)
 	{

@@ -50,6 +50,30 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::initialize()
 }
 
 template <class DmaChannelRx, class DmaChannelTx>
+void
+modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::setDataSize(DataSize size)
+{
+	switch(size) {
+		case DataSize::Bit8:
+			Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Byte);
+			Dma::RxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Byte);
+
+			Dma::TxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Byte);
+			Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Byte);
+			break;
+		case DataSize::Bit16:
+			Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::HalfWord);
+			Dma::RxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::HalfWord);
+
+			Dma::TxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::HalfWord);
+			Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::HalfWord);
+			break;
+	}
+	
+	SpiMaster{{ id }}::setDataSize(size);
+}
+
+template <class DmaChannelRx, class DmaChannelTx>
 template <std::unsigned_integral T>
 modm::ResumableResult<T>
 modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transmit(T data)
