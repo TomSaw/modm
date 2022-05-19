@@ -14,5 +14,6 @@
 #include "color/rgb.hpp"
 #include "color/rgb_pallete.hpp"
 #include "color/hsv.hpp"
+#include "color/plain.hpp"
 
 #include "color/rgb_html.hpp"
