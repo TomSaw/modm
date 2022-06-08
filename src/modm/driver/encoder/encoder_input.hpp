@@ -52,6 +52,11 @@ public:
 
 		Timer::applyAndReset();
 		Timer::start();
+
+		// wait until encoder position has settled
+		// TODO trial & error if this linear relation works
+		modm::delay(1us * filter);
+		// tare current position
 		last = Timer::getValue();
 	}
 
