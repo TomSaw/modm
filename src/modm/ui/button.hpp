@@ -11,43 +11,60 @@
  */
 // ----------------------------------------------------------------------------
 
-#ifndef MODM_BUTTON_HPP
-#define	MODM_BUTTON_HPP
+#pragma once
 
 #include <stdint.h>
 
 namespace modm
 {
-	/**
-	 * \brief	Simple Button
-	 *
-	 * \todo	Implementation is incomplete
-	 *
-	 * \ingroup	modm_ui_button
-	 * \author	Fabian Greif
-	 */
-	template <typename PIN>
-	class Button
+/**
+ * \brief	Simple Button
+ *
+ * \todo	Implementation is incomplete
+ *
+ * \ingroup	modm_ui_button
+ * \author	Fabian Greif
+ */
+template<typename PIN>
+class Button
+{
+public:
+	static bool
+	getState() const
 	{
-	public:
-		static bool
-		getState();
+		return (state & 0x01);
+	}
 
-		static bool
-		isPressed();
+	static bool
+	isPressed()
+	{
+		return false;
+	}
 
-		static bool
-		isReleased();
+	static bool
+	isReleased();
 
+	static void
+	update()
+	{
+		uint8_t i;
 
-		static void
-		update();
+		if (T::read())
+			i = 0;
+		else
+			i = 1;
 
-	private:
-		static uint8_t state;
-	};
-}
+		i = i ^ state;
+		i = i << 1 | 0xc0;
 
-#include "button_impl.hpp"
+		// FIXME
+		if (i == 0xef)
+			state ^= 0x01;
+		else
+			continue;
+	}
 
-#endif	// MODM_BUTTON_HPP
+private:
+	static uint8_t state;
+};
+}  // namespace modm
