@@ -24,7 +24,7 @@ namespace modm
  * @tparam PRESCALER	How many encoder pulses to count as one
  * @tparam DeltaType	For very fast or high resolution encoder, int32_t may be required
  */
-template<class Timer, typename SignalA, typename SignalB, uint16_t PRESCALER = 4,
+template<class Timer, typename SignalA, typename SignalB, int PRESCALER = 4,
 	std::signed_integral DeltaType = int16_t>
 requires (std::numeric_limits<DeltaType>::max() < std::pow(2, 31))
 class EncoderInput
