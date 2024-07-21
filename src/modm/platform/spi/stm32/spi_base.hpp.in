@@ -19,11 +19,10 @@
 #include "../device.hpp"
 #include <modm/architecture/interface/register.hpp>
 
-namespace modm
+namespace modm::platform
 {
-
-namespace platform
-{
+	template <typename T>
+	concept spi_data = std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t>;
 
 /**
  * Base class for the SPI classes
@@ -141,8 +140,6 @@ public:
 %% endif
 };
 
-} // namespace platform
-
-} // namespace modm
+} // namespace modm::platform
 
 #endif // MODM_STM32_SPI_BASE_HPP

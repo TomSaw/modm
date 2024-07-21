@@ -255,6 +255,32 @@ public:
 	}
 
 	/**
+	 * Set the memory datasize of the DMA channel
+	 *
+	 * @param[in] memoryDataSize Data size of memory
+	 */
+	static void
+	setMemoryDataSize(MemoryDataSize memoryDataSize)
+	{
+		DMA_Channel_TypeDef *Base = (DMA_Channel_TypeDef *) CHANNEL_BASE;
+		Base->CCR &= ~uint32_t(MemoryDataSize::All);
+		Base->CCR |= uint32_t(memoryDataSize);
+	}
+
+	/**
+	 * Set the peripheral datasize of the DMA channel
+	 *
+	 * @param[in] peripheralDataSize Data size of peripheral
+	 */
+	static void
+	setPeripheralDataSize(PeripheralDataSize peripheralDataSize)
+	{
+		DMA_Channel_TypeDef *Base = (DMA_Channel_TypeDef *) CHANNEL_BASE;
+		Base->CCR &= ~uint32_t(PeripheralDataSize::All);
+		Base->CCR |= uint32_t(peripheralDataSize);
+	}
+
+	/**
 	 * Enable/disable memory increment
 	 *
 	 * When enabled, the memory address is incremented by the size of the data
@@ -296,7 +322,7 @@ public:
 	 * Set length of data to transfer
 	 */
 	static void
-	setDataLength(std::size_t length)
+	setDataLength(uint16_t length)
 	{
 		DMA_Channel_TypeDef *Base = (DMA_Channel_TypeDef *) CHANNEL_BASE;
 %% if dmaType in ["stm32-channel-request", "stm32-channel", "stm32-mux"]

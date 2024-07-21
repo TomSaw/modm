@@ -14,11 +14,12 @@
  */
 // ----------------------------------------------------------------------------
 
-#include "spi_master_{{id}}.hpp"
 
-modm::ResumableResult<uint8_t>
-modm::platform::SpiMaster{{ id }}::transfer(uint8_t data)
+template<modm::platform::spi_data T>
+modm::ResumableResult<T>
+modm::platform::SpiMaster{{ id }}::transfer(T data)
 {
+	setDataSize(std::is_same_v<T, uint8_t> ? DataSize::Bit8 : DataSize::Bit16);
 %% if use_fiber
 	// wait for previous transfer to finish
 	while(!SpiHal{{ id }}::isTransmitRegisterEmpty())
@@ -67,15 +68,16 @@ modm::platform::SpiMaster{{ id }}::transfer(uint8_t data)
 %% endif
 }
 
+template<modm::platform::spi_data T>
 modm::ResumableResult<void>
 modm::platform::SpiMaster{{ id }}::transfer(
-		const uint8_t * tx, uint8_t * rx, std::size_t length)
+		const T * tx, T * rx, std::size_t length)
 {
 %% if use_fiber
 	for (std::size_t index = 0; index < length; index++)
 	{
 		// if tx == 0, we use a dummy byte 0x00 else we copy it from the array
-		auto result = transfer(tx ? tx[index] : 0);
+		auto result = transfer<T>(tx ? tx[index] : 0);
 		// if rx != 0, we copy the result into the array
 		if (rx) rx[index] = result;
 	}
@@ -105,7 +107,7 @@ modm::platform::SpiMaster{{ id }}::transfer(
 				// if tx == 0, we use a dummy byte 0x00
 				// else we copy it from the array
 				// call the resumable function
-				modm::ResumableResult<uint8_t> result = transfer(tx ? tx[index] : 0);
+				modm::ResumableResult<T> result = transfer<T>(tx ? tx[index] : 0);
 
 				// if the resumable function is still running, so are we
 				if (result.getState() > modm::rf::NestingError)

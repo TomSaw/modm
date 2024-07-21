@@ -56,23 +56,27 @@ public:
 	static void
 	initialize();
 
+	template <modm::platform::spi_data T>
 	static uint8_t
 	transferBlocking(uint8_t data)
 	{
-		return RF_CALL_BLOCKING(transfer(data));
+		return RF_CALL_BLOCKING(transfer<T>(data));
 	}
 
+	template <modm::platform::spi_data T>
 	static void
-	transferBlocking(const uint8_t *tx, uint8_t *rx, std::size_t length)
+	transferBlocking(const T *tx, T *rx, std::size_t length)
 	{
-		RF_CALL_BLOCKING(transfer(tx, rx, length));
+		RF_CALL_BLOCKING(transfer<T>(tx, rx, length));
 	}
 
-	static modm::ResumableResult<uint8_t>
-	transfer(uint8_t data);
+	template <modm::platform::spi_data T>
+	static modm::ResumableResult<T>
+	transfer(T data);
 
+	template <modm::platform::spi_data T>
 	static modm::ResumableResult<void>
-	transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
+	transfer(const T *tx, T *rx, std::size_t length);
 
 private:
 	static void

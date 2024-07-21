@@ -18,9 +18,9 @@ template <class SystemClock, modm::baudrate_t baudrate, modm::percent_t toleranc
 void
 modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::initialize()
 {
-	// Configure the DMA channels, then calls SpiMaster{{ id }}::initialzie().
+	// Configure the DMA channels, then calls SpiMaster1::initialize().
 	Dma::RxChannel::configure(DmaBase::DataTransferDirection::PeripheralToMemory,
-			DmaBase::MemoryDataSize::Byte, DmaBase::PeripheralDataSize::Byte,
+			DmaBase::MemoryDataSize::Bit8, DmaBase::PeripheralDataSize::Bit8,
 			DmaBase::MemoryIncrementMode::Increment, DmaBase::PeripheralIncrementMode::Fixed,
 			DmaBase::Priority::High);
 	Dma::RxChannel::setPeripheralAddress(SPI{{ id }}_BASE + 0x0c);
@@ -32,7 +32,7 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::initialize()
 	Dma::RxChannel::template setPeripheralRequest<Dma::RxRequest>();
 
 	Dma::TxChannel::configure(DmaBase::DataTransferDirection::MemoryToPeripheral,
-			DmaBase::MemoryDataSize::Byte, DmaBase::PeripheralDataSize::Byte,
+			DmaBase::MemoryDataSize::Bit8, DmaBase::PeripheralDataSize::Bit8,
 			DmaBase::MemoryIncrementMode::Increment, DmaBase::PeripheralIncrementMode::Fixed,
 			DmaBase::Priority::High);
 	Dma::TxChannel::setPeripheralAddress(SPI{{ id }}_BASE + 0x0c);
@@ -51,9 +51,11 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::initialize()
 }
 
 template <class DmaChannelRx, class DmaChannelTx>
-modm::ResumableResult<uint8_t>
-modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(uint8_t data)
+template <modm::platform::spi_data T>
+modm::ResumableResult<T>
+modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(T data)
 {
+	SpiMaster1::setDataSize(std::is_same_v<T, uint8_t> ? DataSize::Bit8 : DataSize::Bit16);
 %% if use_fiber
 	// disable DMA for single byte transfer
 	SpiHal{{ id }}::disableInterrupt(SpiBase::Interrupt::TxDmaEnable |
@@ -110,10 +112,13 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(uint
 }
 
 template <class DmaChannelRx, class DmaChannelTx>
+template <modm::platform::spi_data T>
 modm::ResumableResult<void>
-modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(
-		const uint8_t *tx, uint8_t *rx, std::size_t length)
-{
+modm::platform::SpiMaster1_Dma<DmaChannelRx, DmaChannelTx>::transfer(
+		const T *tx, T *rx, std::size_t length)
+{	
+	SpiHal1::setDataSize(std::is_same_v<T, uint8_t> ? DataSize::Bit8 : DataSize::Bit16);
+
 %% if use_fiber
 	dmaError = false;
 	SpiHal{{ id }}::enableInterrupt(
@@ -122,6 +127,15 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(
 	if (tx) {
 		Dma::TxChannel::setMemoryAddress(uint32_t(tx));
 		Dma::TxChannel::setMemoryIncrementMode(true);
+		if(std::is_same_v<T, uint8_t>) {
+			Dma::TxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit8);
+			Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit8);
+		}
+		else // std::is_same_v<T, uint16_t>!
+		{
+			Dma::TxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit16);
+			Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit16);
+		}
 	} else {
 		Dma::TxChannel::setMemoryAddress(uint32_t(&dmaDummy));
 		Dma::TxChannel::setMemoryIncrementMode(false);
@@ -129,6 +143,15 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(
 	if (rx) {
 		Dma::RxChannel::setMemoryAddress(uint32_t(rx));
 		Dma::RxChannel::setMemoryIncrementMode(true);
+		if(std::is_same_v<T, uint8_t>) {
+			Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit8);
+			Dma::RxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit8);
+		}
+		else // std::is_same_v<T, uint16_t>!
+		{
+			Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit16);
+			Dma::RxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit16);
+		}
 	} else {
 		Dma::RxChannel::setMemoryAddress(uint32_t(&dmaDummy));
 		Dma::RxChannel::setMemoryIncrementMode(false);
@@ -180,6 +203,15 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(
 		if (tx) {
 			Dma::TxChannel::setMemoryAddress(uint32_t(tx));
 			Dma::TxChannel::setMemoryIncrementMode(true);
+			if(std::is_same_v<T, uint8_t>) {
+				Dma::TxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit8);
+				Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit8);
+			}
+			else // std::is_same_v<T, uint16_t>!
+			{
+				Dma::TxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit16);
+				Dma::TxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit16);
+			}
 		} else {
 			Dma::TxChannel::setMemoryAddress(uint32_t(&dmaDummy));
 			Dma::TxChannel::setMemoryIncrementMode(false);
@@ -187,6 +219,15 @@ modm::platform::SpiMaster{{ id }}_Dma<DmaChannelRx, DmaChannelTx>::transfer(
 		if (rx) {
 			Dma::RxChannel::setMemoryAddress(uint32_t(rx));
 			Dma::RxChannel::setMemoryIncrementMode(true);
+			if(std::is_same_v<T, uint8_t>) {
+				Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit8);
+				Dma::RxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit8);
+			}
+			else // std::is_same_v<T, uint16_t>!
+			{
+				Dma::RxChannel::setMemoryDataSize(DmaBase::MemoryDataSize::Bit16);
+				Dma::RxChannel::setPeripheralDataSize(DmaBase::PeripheralDataSize::Bit16);
+			}
 		} else {
 			Dma::RxChannel::setMemoryAddress(uint32_t(&dmaDummy));
 			Dma::RxChannel::setMemoryIncrementMode(false);

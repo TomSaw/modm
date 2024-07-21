@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009-2011, Fabian Greif
- * Copyright (c) 2010, Martin Rosekeit
+ * Copyright (c) 2009-2012, Fabian Greif
+ * Copyright (c) 2009-2010, Martin Rosekeit
  * Copyright (c) 2011-2017, Niklas Hauser
- * Copyright (c) 2012, Georgi Grinshpun
+ * Copyright (c) 2010-2012, Georgi Grinshpun
  * Copyright (c) 2013, Kevin Läufer
  * Copyright (c) 2014, Sascha Schade
  * Copyright (c) 2022, Christopher Durand
+ * Copyright (c) 2024, Thomas Sommer
  *
  * This file is part of the modm project.
  *
@@ -24,12 +25,8 @@
 #include <modm/math/algorithm/prescaler.hpp>
 #include "spi_hal_{{ id }}.hpp"
 
-namespace modm
+namespace modm::platform
 {
-
-namespace platform
-{
-
 /**
  * Serial peripheral interface (SPI{{ id }}).
  *
@@ -124,28 +121,31 @@ public:
 		SpiHal{{ id }}::enableTransfer();
 	}
 
-	static uint8_t
-	transferBlocking(uint8_t data)
+	template <modm::platform::spi_data T>
+	static T
+	transferBlocking(T data)
 	{
-		return RF_CALL_BLOCKING(transfer(data));
+		return RF_CALL_BLOCKING(transfer<T>(data));
 	}
 
+	template<modm::platform::spi_data T>
 	static void
-	transferBlocking(const uint8_t *tx, uint8_t *rx, std::size_t length)
+	transferBlocking(const T *tx, T *rx, std::size_t length)
 	{
-		RF_CALL_BLOCKING(transfer(tx, rx, length));
+		RF_CALL_BLOCKING(transfer<T>(tx, rx, length));
 	}
 
+	template<modm::platform::spi_data T>
+	static modm::ResumableResult<T>
+	transfer(T data);
 
-	static modm::ResumableResult<uint8_t>
-	transfer(uint8_t data);
-
+	template<modm::platform::spi_data T>
 	static modm::ResumableResult<void>
-	transfer(const uint8_t *tx, uint8_t *rx, std::size_t length);
+	transfer(const T *tx, T *rx, std::size_t length);
 };
 
-} // namespace platform
+} // namespace modm::platform
 
-} // namespace modm
+#include "spi_master_{{ id }}_impl.hpp"
 
 #endif // MODM_STM32_SPI_MASTER{{ id }}_HPP
